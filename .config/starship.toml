@@ -1,0 +1,82 @@
+format = """
+$hostname\
+$directory\
+$git_branch\
+$git_commit\
+$git_status\
+$git_state\
+$env_var\
+$rust\
+$python\
+$nodejs\
+$c\
+$line_break\
+$jobs\
+$character\
+"""
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+[rust]
+style = 'red'
+format = '=> [$symbol($version)]($style)'
+
+[nodejs]
+style = 'green'
+format = '=> [$symbol($version)]($style)'
+
+[c]
+style = '149'
+format = '=> [$symbol($version)]($style)'
+
+[python]
+style = 'yellow'
+format = '=> [$symbol($version)]($style)'
+
+[env_var.VIMRUNTIME]
+style = '#5de4c7'
+format = 'via [nvim]($style) '
+
+[git_branch]
+style = '#89ddff'
+format = 'on [$symbol](#8da3bf)[$branch(:$remote_branch)]($style)'
+only_attached = true
+
+[git_commit]
+style = '#89ddff'
+
+[git_status]
+style = '#91b4d5'
+conflicted = '='
+ahead = '⇡'
+behind = '⇣'
+diverged = '⇕ $ahead_count$behind_count'
+up_to_date = ''
+untracked = '?'
+stashed = '\$'
+modified = '!'
+renamed = '»'
+deleted = '✘'
+format = '[$all_status$ahead_behind]($style) '
+
+[username]
+show_always = true
+style_user = '#5de4c7'
+style_root = 'red'
+
+[directory]
+truncation_length = 4
+style = '#5de4c7'
+
+[character]
+disabled = false
+success_symbol = "[->](green)"
+error_symbol = "[->](red)"
+
+[jobs]
+style = 'blue'
+disabled = false
+symbol_threshold = 0
+
+[line_break]
+disabled = false
