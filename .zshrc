@@ -55,7 +55,7 @@ bindkey '^ ' autosuggest-fetch
 td init
 
 # export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
-export VISUAL=nvim
+export VISUAL="nvim -b"
 export EDITOR=nvim
 
 export LS_COLORS=$LS_COLORS:'di=1;34:'
