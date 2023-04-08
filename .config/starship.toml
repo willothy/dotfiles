@@ -7,6 +7,7 @@ $git_status\
 $git_state\
 $env_var\
 $rust\
+$lua\
 $python\
 $nodejs\
 $c\
@@ -20,6 +21,11 @@ $character\
 [rust]
 style = 'red'
 format = '=> [$symbol($version)]($style)'
+
+[lua]
+style = 'blue'
+format = '=> [$symbol($version)]($style)'
+symbol = '󰢱 '
 
 [nodejs]
 style = 'green'
