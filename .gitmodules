@@ -1,0 +1,5 @@
+[submodule ".config/nvim"]
+	path = .config/nvim
+	url = git@github.com:willothy/nvim-config
+    update = merge
+	branch = main
