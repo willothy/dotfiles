@@ -5,25 +5,8 @@ export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/opt/cross/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 
-
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
-
-# _zsh_autosuggest_strategy_neosuggest() {
-# 	suggestion=$(neosuggest "$BUFFER")
-# }
-#
-# neosuggest-accept() {
-# 	zle autosuggest-accept
-# 	zle autosuggest-fetch
-# }
-#
-# zle -N neosuggest-accept 
-
-# ZSH_AUTOSUGGEST_IGNORE_WIDGETS+=neosuggest-accept
-
-# export ZSH_AUTOSUGGEST_STRATEGY=(completion)
-# export ZSH_AUTOSUGGEST_STRATEGY=(neosuggest completion history)
 
 eval "$(neosuggest init)"
 
