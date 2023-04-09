@@ -54,8 +54,8 @@ bindkey '^ ' autosuggest-fetch
 # Td todos
 td init
 
-# export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
-export VISUAL="nvim -b"
+export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
+# export VISUAL=nvim
 export EDITOR=nvim
 
 export LS_COLORS=$LS_COLORS:'di=1;34:'
@@ -67,8 +67,6 @@ alias ll='exa -l --icons'
 alias lla='exa -la --icons'
 
 alias gs='git status'
-
-
 
 alias py="python3.10"
 alias python3="python3.10"
@@ -83,8 +81,6 @@ alias v="nvim"
 alias vim="nvim"
 alias vi="nvim"
 alias nvcfg="nvim ~/.config/nvim/"
-#alias nvide="neovide --wsl"
-#alias nvidedev="neovide --wsl --cmd 'let g:dev=1'"
 
 alias cd='z'
 alias cat='bat'
