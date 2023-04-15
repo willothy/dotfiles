@@ -76,6 +76,8 @@ function nvimdev() {
     nvim --cmd "let g:dev=\"$1\"" ${@:2}
 }
 
+alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
+
 alias nv="nvim"
 alias v="nvim"
 alias vim="nvim"

@@ -39,7 +39,10 @@ local function setup(cfg)
 	--cfg.allow_square_glyphs_to_overflow_width = "WhenFollowedBySpace"
 	cfg.allow_square_glyphs_to_overflow_width = "Always"
 
-	config.window_background_opacity = 0.92
+	-- config.window_background_opacity = 0.92
+	config.window_background_gradient = {
+		colors = { "#26283f" },
+	}
 
 	config.window_decorations = "RESIZE"
 
@@ -54,7 +57,35 @@ local function setup(cfg)
 			mods = "CMD",
 			action = wezterm.action.ActivateTabRelative(1),
 		},
+		{
+			key = "q",
+			mods = "CMD",
+			action = wezterm.action.CloseCurrentTab({ confirm = true }),
+		},
+		{
+			key = "n",
+			mods = "CMD",
+			action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+		},
+		{
+			key = "d",
+			mods = "CMD",
+			action = wezterm.action.DetachDomain("CurrentPaneDomain"),
+		},
 	}
+end
+
+local function popup(title, message, opts)
+	opts = opts or {}
+	if not opts.timeout_ms then
+		opts.timeout_ms = 3000
+	end
+	local windows = wezterm.gui.gui_windows()
+	if #windows < 1 then
+		return
+	end
+	local window = windows[1]
+	window:toast_notification(title, message, opts.url or nil, opts.timeout_ms)
 end
 
 if wezterm.config_builder then
