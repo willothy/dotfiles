@@ -1,10 +1,8 @@
 [submodule ".config/nvim"]
 	path = .config/nvim
 	url = git@github.com:willothy/nvim-config
-    update = merge
 	branch = main
 [submodule ".config/awesome"]
 	path = .config/awesome
 	url = git@github.com:willothy/awesome-config.git
-    update = merge
-	branch = main
+	branch = old
