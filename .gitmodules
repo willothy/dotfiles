@@ -5,7 +5,7 @@
 [submodule ".config/awesome"]
 	path = .config/awesome
 	url = git@github.com:willothy/awesome-config.git
-	branch = old
+	branch = main
 [submodule "vendor/neovim"]
 	path = vendor/neovim
 	url = git@github.com:neovim/neovim
