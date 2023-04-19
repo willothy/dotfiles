@@ -17,10 +17,9 @@ local function setup(cfg)
 	cfg.animation_fps = 30
 	cfg.max_fps = 30
 	cfg.font = wezterm.font_with_fallback({
-		"Fira Code",
-		--"octicons",
-		--"FontAwesome",
+		-- "Noto Color Emoji",
 	})
+	-- cfg.font = "Fira Code"
 	cfg.font_size = 12.0
 
 	cfg.color_scheme = "tokyonight"
@@ -33,6 +32,11 @@ local function setup(cfg)
 	cfg.window_frame = {
 		font = wezterm.font({ family = "Fira Code", weight = "Bold" }),
 		font_size = 12.0,
+		border_left_width = "0.0cell",
+		border_right_width = "0.0cell",
+		border_bottom_height = "0.15cell",
+		border_bottom_color = "#1a1b26",
+		border_top_height = "0.1cell",
 	}
 
 	--cfg.dpi = 90
@@ -40,9 +44,9 @@ local function setup(cfg)
 	--cfg.allow_square_glyphs_to_overflow_width = "WhenFollowedBySpace"
 	cfg.allow_square_glyphs_to_overflow_width = "Always"
 
-	-- config.window_background_opacity = 0.92
-	config.window_background_gradient = {
-		colors = { "#26283f" },
+	config.colors = {
+		background = "#26283f",
+		-- cursor_bg = "#26283f",
 	}
 
 	config.window_decorations = "RESIZE"
@@ -304,7 +308,7 @@ local function get_process(tab)
 		})
 	else
 		return wezterm.format({
-			{ Text = string.format("%s", process_name) },
+			{ Text = string.format(" %s", process_name) },
 		})
 	end
 end
@@ -419,7 +423,7 @@ wezterm.on("update-right-status", function(window, pane)
 		then
 			icon_txt = nf.seti_lua
 			icon_col = palette.blue
-		elseif pwd == wezterm.home_dir .. "/" then
+		elseif pwd == wezterm.home_dir .. "/" or pwd == wezterm.home_dir then
 			-- icon = nf.seti_shell
 			-- icon = nf.mdi_home_circle
 			icon_txt = nf.mdi_lambda
@@ -448,12 +452,13 @@ wezterm.on("update-right-status", function(window, pane)
 		{ Text = wezterm.strftime(" %l:%M %p ") },
 		{ Foreground = { Color = icon_col } },
 		{ Text = icon_txt or "" },
-		{ Text = "  " },
+		{ Text = " " },
 	}))
 end)
 
 if wezterm.config_builder then
 	config = wezterm.config_builder()
+	config:set_strict_mode(false)
 	setup(config)
 end
 
