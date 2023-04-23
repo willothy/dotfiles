@@ -5,43 +5,53 @@ $git_branch\
 $git_commit\
 $git_status\
 $git_state\
-$env_var\
 $rust\
 $lua\
 $python\
 $nodejs\
 $c\
+${custom.sesh}\
 $line_break\
 $jobs\
 $character\
+"""
+
+right_format="""
 """
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
 [rust]
 style = 'red'
-format = '=> [$symbol($version)]($style)'
+format = '=> [$symbol($version)]($style) '
 
 [lua]
 style = 'blue'
-format = '=> [$symbol($version)]($style)'
+format = '=> [$symbol($version)]($style) '
 symbol = '󰢱 '
 
 [nodejs]
 style = 'green'
-format = '=> [$symbol($version)]($style)'
+format = '=> [$symbol($version)]($style) '
 
 [c]
 style = '149'
-format = '=> [$symbol($version)]($style)'
+format = '=> [$symbol($version)]($style) '
 
 [python]
 style = 'yellow'
-format = '=> [$symbol($version)]($style)'
+format = '=> [$symbol($version)]($style) '
 
-[env_var.VIMRUNTIME]
+[custom.vim]
 style = '#5de4c7'
-format = 'via [nvim]($style) '
+command = "echo 'nvim'"
+when = ''' test "$NVIM" != "" '''
+
+[custom.sesh]
+style = '#5de4c7'
+command = "echo $SESH_NAME"
+when = ''' test "$SESH_NAME" != "" '''
+format = '\(sesh [$output]($style)\)'
 
 [git_branch]
 style = '#89ddff'

@@ -87,5 +87,7 @@ alias nvcfg="nvim ~/.config/nvim/"
 alias cd='z'
 alias cat='bat'
 
+alias detach='sesh detach'
+
 alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 

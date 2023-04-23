@@ -14,8 +14,8 @@ local function setup(cfg)
 		"~",
 	}
 	cfg.default_cwd = "~" ]]
-	cfg.animation_fps = 30
-	cfg.max_fps = 30
+	cfg.animation_fps = 60
+	cfg.max_fps = 60
 	cfg.font = wezterm.font_with_fallback({
 		-- "Noto Color Emoji",
 	})
@@ -36,7 +36,7 @@ local function setup(cfg)
 		border_right_width = "0.0cell",
 		border_bottom_height = "0.15cell",
 		border_bottom_color = "#1a1b26",
-		border_top_height = "0.1cell",
+		border_top_height = "0.0cell",
 	}
 
 	--cfg.dpi = 90
@@ -44,14 +44,84 @@ local function setup(cfg)
 	--cfg.allow_square_glyphs_to_overflow_width = "WhenFollowedBySpace"
 	cfg.allow_square_glyphs_to_overflow_width = "Always"
 
+	-- config.window_background_opacity = 0.9
 	config.colors = {
 		background = "#26283f",
 		-- cursor_bg = "#26283f",
 	}
 
+	config.inactive_pane_hsb = {
+		saturation = 1.0,
+		brightness = 1.0,
+	}
+
 	config.window_decorations = "RESIZE"
 
+	-- Equivalent to POSIX basename(3)
+	-- Given "/foo/bar" returns "bar"
+	-- Given "c:\\foo\\bar" returns "bar"
+	local function basename(s)
+		return string.gsub(s, "(.*[/\\])(.*)", "%2")
+	end
+
+	local function is_vim(pane)
+		local process_name = basename(pane:get_foreground_process_name())
+		return process_name == "nvim" or process_name == "vim"
+	end
+
+	local direction_keys = {
+		-- Left = "h",
+		-- Down = "j",
+		-- Up = "k",
+		-- Right = "l",
+		-- reverse lookup
+		-- h = "Left",
+		-- j = "Down",
+		-- k = "Up",
+		-- l = "Right",
+		UpArrow = "Up",
+		DownArrow = "Down",
+		LeftArrow = "Left",
+		RightArrow = "Right",
+	}
+
+	local function split_nav(resize_or_move, key, mods)
+		return {
+			key = key,
+			mods = mods,
+			action = wezterm.action_callback(function(win, pane)
+				if is_vim(pane) then
+					-- pass the keys through to vim/nvim
+					win:perform_action({
+						SendKey = { key = key, mods = mods },
+					}, pane)
+				else
+					if resize_or_move == "resize" then
+						win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
+					else
+						win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
+					end
+				end
+			end),
+		}
+	end
+
+	-- cfg.disable_default_key_bindings = true
+	-- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
 	config.keys = {
+		split_nav("move", "UpArrow", "CTRL"),
+		split_nav("move", "DownArrow", "CTRL"),
+		split_nav("move", "LeftArrow", "CTRL"),
+		split_nav("move", "RightArrow", "CTRL"),
+		split_nav("resize", "UpArrow", "ALT"),
+		split_nav("resize", "DownArrow", "ALT"),
+		split_nav("resize", "LeftArrow", "ALT"),
+		split_nav("resize", "RightArrow", "ALT"),
+		{
+			key = "\\",
+			mods = "CTRL",
+			action = wezterm.action.DisableDefaultAssignment,
+		},
 		{
 			key = "[",
 			mods = "CMD",
