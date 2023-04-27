@@ -42,6 +42,9 @@ plugins=(
 export ZSH="$HOME/.oh-my-zsh"
 source $ZSH/oh-my-zsh.sh
 
+# xmodmap
+# xmodmap ~/.Xmodmap
+
 # Starship
 eval "$(starship init zsh)"
 
@@ -51,8 +54,13 @@ eval "$(zoxide init zsh)"
 bindkey '^I' neosuggest-accept
 bindkey '^ ' autosuggest-fetch
 
+# Atuin
+eval "$(atuin init zsh --disable-up-arrow)"
+
 # Td todos
 td init
+
+# Sesh wezterm integration using Usar Vars
 
 export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
 # export VISUAL=nvim
@@ -60,34 +68,67 @@ export EDITOR=nvim
 
 export LS_COLORS=$LS_COLORS:'di=1;34:'
 
+export TCLED=0
+
+function tcled() {
+	if test $TCLED -eq 1; then
+		TCLED=0
+	else
+		TCLED=1
+	fi;
+	echo "$TCLED" | sudo tee '/sys/class/leds/input28::capslock/brightness'
+}
+PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" `echo -n "$SESH_NAME" | base64`)$PROMPT"
+
 # handy aliases
-alias ls='exa --icons'
-alias la='exa -a --icons'
-alias ll='exa -l --icons'
-alias lla='exa -la --icons'
 
-alias gs='git status'
-
-alias py="python3.10"
-alias python3="python3.10"
-alias python="python3.10"
 
 function nvimdev() {
     nvim --cmd "let g:dev=\"$1\"" ${@:2}
 }
 
-alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
+# alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
 
+# Neovim
 alias nv="nvim"
 alias v="nvim"
 alias vim="nvim"
 alias vi="nvim"
 alias nvcfg="nvim ~/.config/nvim/"
 
+# Zoxide
 alias cd='z'
+
+# Cat / Bat
 alias cat='bat'
 
+# Sesh 
 alias detach='sesh detach'
+alias attach='sesh attach'
 
+# Ls / Exa
+alias ls='exa --icons'
+alias la='exa -a --icons'
+alias ll='exa -l --icons'
+alias lla='exa -la --icons'
+
+# Dotfiles
 alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+
+# Git
+alias gs='git status'
+alias gsp='git status --porcelain'
+alias ga='git add'
+alias glog='git log'
+alias commit='git commit'
+alias push='git push'
+alias pull='git pull'
+
+# Python
+alias py="python3.10"
+alias python3="python3.10"
+alias python="python3.10"
+
+# RIP
+#alias rm="rip"
 

@@ -14,11 +14,23 @@ local function setup(cfg)
 		"~",
 	}
 	cfg.default_cwd = "~" ]]
-	cfg.animation_fps = 60
-	cfg.max_fps = 60
+	cfg.animation_fps = 30
+	cfg.max_fps = 30
 	cfg.font = wezterm.font_with_fallback({
 		-- "Noto Color Emoji",
+		{
+			family = "Fira Code",
+			weight = "Regular",
+			assume_emoji_presentation = false,
+		},
+		{
+			family = "JetBrains Mono",
+			weight = "Regular",
+		},
 	})
+
+	cfg.default_prog = { "sesh", "attach", "tab", "--create" }
+
 	-- cfg.font = "Fira Code"
 	cfg.font_size = 12.0
 
@@ -32,14 +44,17 @@ local function setup(cfg)
 	cfg.window_frame = {
 		font = wezterm.font({ family = "Fira Code", weight = "Bold" }),
 		font_size = 12.0,
+		-- line_height = 1.5,
 		border_left_width = "0.0cell",
 		border_right_width = "0.0cell",
-		border_bottom_height = "0.15cell",
+		border_bottom_height = "0.10cell",
 		border_bottom_color = "#1a1b26",
 		border_top_height = "0.0cell",
 	}
 
-	--cfg.dpi = 90
+	-- cfg.tab_bar.font_size = 15.0
+
+	-- cfg.dpi = 96
 
 	--cfg.allow_square_glyphs_to_overflow_width = "WhenFollowedBySpace"
 	cfg.allow_square_glyphs_to_overflow_width = "Always"
@@ -56,6 +71,20 @@ local function setup(cfg)
 	}
 
 	config.window_decorations = "RESIZE"
+
+	cfg.window_padding = {
+		top = 5,
+		bottom = 1,
+		left = 10,
+		right = 10,
+	}
+
+	cfg.launch_menu = {
+		{
+			label = "Sesh: Select session",
+			args = { "sesh", "select" },
+		},
+	}
 
 	-- Equivalent to POSIX basename(3)
 	-- Given "/foo/bar" returns "bar"
@@ -141,11 +170,6 @@ local function setup(cfg)
 			key = "n",
 			mods = "CMD",
 			action = wezterm.action.SpawnTab("CurrentPaneDomain"),
-		},
-		{
-			key = "d",
-			mods = "CMD",
-			action = wezterm.action.DetachDomain("CurrentPaneDomain"),
 		},
 	}
 end
@@ -384,7 +408,7 @@ local function get_process(tab)
 end
 
 wezterm.on("open-uri", function(_window, _pane, uri)
-	wezterm.open_with(uri, "chromium")
+	wezterm.open_with(uri, "brave")
 end)
 
 wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, max_width)
@@ -519,12 +543,41 @@ wezterm.on("update-right-status", function(window, pane)
 	window:set_right_status(wezterm.format({
 		{ Attribute = { Intensity = "Bold" } },
 		{ Foreground = { Color = "#9196c2" } },
-		{ Text = wezterm.strftime(" %l:%M %p ") },
+		{
+			Text = (function()
+				local name = pane:get_user_vars().sesh_name
+				if name == nil or name == "" then
+					return ""
+				else
+					return string.format("%s %s ", name, "∘")
+				end
+			end)(),
+		},
+		{ Text = wezterm.strftime("%l:%M %p ") },
 		{ Foreground = { Color = icon_col } },
 		{ Text = icon_txt or "" },
 		{ Text = " " },
 	}))
 end)
+
+-- local success, stdout, _stderr = wezterm.run_child_process({ "sesh", "ls", "--json" })
+-- local sessions = wezterm.json_parse(stdout)
+-- local new_sessions = {}
+-- for _, v in ipairs(sessions) do
+-- 	table.insert(new_sessions, {
+-- 		brief = "Sesh: " .. v.name,
+-- 		icon = "mdi_lambda",
+-- 		action = wezterm.action.SpawnCommandInNewTab({
+-- 			args = { "sesh", "attach", v.name },
+-- 		}),
+-- 	})
+-- end
+-- wezterm.GLOBAL.sessions = new_sessions
+-- wezterm.GLOBAL.sessions = {}
+
+-- wezterm.on("augment-command-palette", function(window, _pane)
+-- 	return wezterm.GLOBAL.sessions
+-- end)
 
 if wezterm.config_builder then
 	config = wezterm.config_builder()
