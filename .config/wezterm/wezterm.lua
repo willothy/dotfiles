@@ -4,188 +4,9 @@ local act = wezterm.action
 
 local config = {}
 
-local function setup(cfg)
-	--cfg.default_cwd = "~"
-	cfg.animation_fps = 30
-	cfg.max_fps = 30
-	cfg.font = wezterm.font_with_fallback({
-		-- "Noto Color Emoji",
-		{
-			family = "Fira Code",
-			weight = "Regular",
-			assume_emoji_presentation = false,
-		},
-		{
-			family = "JetBrains Mono",
-			weight = "Regular",
-		},
-	})
-
-	cfg.default_prog = { "sesh", "attach", "tab", "--create" }
-
-	-- cfg.font = "Fira Code"
-	cfg.font_size = 12.0
-
-	cfg.color_scheme = "tokyonight"
-
-	cfg.enable_tab_bar = true
-	cfg.use_fancy_tab_bar = false
-	cfg.tab_bar_at_bottom = true
-	cfg.tab_max_width = 30
-
-	cfg.window_frame = {
-		font = wezterm.font({ family = "Fira Code", weight = "Bold" }),
-		font_size = 12.0,
-		border_left_width = "0.0cell",
-		border_right_width = "0.0cell",
-		border_bottom_height = "0.10cell",
-		border_bottom_color = "#1a1b26",
-		border_top_height = "0.0cell",
-	}
-
-	cfg.allow_square_glyphs_to_overflow_width = "Always"
-
-	-- config.window_background_opacity = 0.9
-	cfg.colors = {
-		background = "#26283f",
-		-- cursor_bg = "#26283f",
-	}
-
-	cfg.inactive_pane_hsb = {
-		saturation = 1.0,
-		brightness = 1.0,
-	}
-
-	cfg.window_decorations = "RESIZE"
-
-	cfg.window_padding = {
-		top = 5,
-		bottom = 1,
-		left = 10,
-		right = 10,
-	}
-
-	cfg.launch_menu = {
-		{
-			label = "Sesh: Select session",
-			args = { "sesh", "select" },
-		},
-	}
-
-	-- Equivalent to POSIX basename(3)
-	-- Given "/foo/bar" returns "bar"
-	-- Given "c:\\foo\\bar" returns "bar"
-	local function basename(s)
-		return string.gsub(s, "(.*[/\\])(.*)", "%2")
-	end
-
-	local function is_vim(window, pane)
-		local process_name = basename(pane:get_foreground_process_name())
-		window:toast_notification("wezterm", process_name, nil, 4000)
-		return process_name == "nvim" or process_name == "vim"
-	end
-
-	local direction_keys = {
-		-- Left = "h",
-		-- Down = "j",
-		-- Up = "k",
-		-- Right = "l",
-		-- reverse lookup
-		-- h = "Left",
-		-- j = "Down",
-		-- k = "Up",
-		-- l = "Right",
-		-- UpArrow = "Up",
-		-- DownArrow = "Down",
-		-- LeftArrow = "Left",
-		-- RightArrow = "Right",
-		-- Up = "UpArrow",
-		-- Down = "DownArrow",
-		-- Left = "LeftArrow",
-		-- Right = "RightArrow",
-	}
-
-	local function split_nav(resize_or_move, key, mods)
-		return {
-			key = key,
-			mods = mods,
-			action = wezterm.action_callback(function(win, pane)
-				if is_vim(win, pane) then
-					-- pass the keys through to vim/nvim
-					win:perform_action({
-						SendKey = { key = key, mods = mods },
-					}, pane)
-				else
-					if resize_or_move == "resize" then
-						win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
-					else
-						win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
-					end
-				end
-			end),
-		}
-	end
-
-	-- local function move(key)
-	-- 	return {
-	-- 		key = key,
-	-- 		mods = "CTRL",
-	-- 		action = wezterm.action_callback(function(window, pane)
-	-- 			if is_vim(window, pane)
-	-- 		end),
-	-- 	}
-	-- end
-
-	-- cfg.disable_default_key_bindings = true
-	-- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
-	config.keys = {
-		split_nav("move", "UpArrow", "CTRL"),
-		split_nav("move", "DownArrow", "CTRL"),
-		split_nav("move", "LeftArrow", "CTRL"),
-		split_nav("move", "RightArrow", "CTRL"),
-		split_nav("resize", "UpArrow", "ALT"),
-		split_nav("resize", "DownArrow", "ALT"),
-		split_nav("resize", "LeftArrow", "ALT"),
-		split_nav("resize", "RightArrow", "ALT"),
-		{
-			key = "\\",
-			mods = "CTRL",
-			action = wezterm.action.DisableDefaultAssignment,
-		},
-		{
-			key = "[",
-			mods = "CMD",
-			action = wezterm.action.ActivateTabRelative(-1),
-		},
-		{
-			key = "]",
-			mods = "CMD",
-			action = wezterm.action.ActivateTabRelative(1),
-		},
-		{
-			key = "q",
-			mods = "CMD",
-			action = wezterm.action.CloseCurrentTab({ confirm = true }),
-		},
-		{
-			key = "n",
-			mods = "CMD",
-			action = wezterm.action.SpawnTab("CurrentPaneDomain"),
-		},
-	}
-end
-
-local function _popup(title, message, opts)
-	opts = opts or {}
-	if not opts.timeout_ms then
-		opts.timeout_ms = 3000
-	end
-	local windows = wezterm.gui.gui_windows()
-	if #windows < 1 then
-		return
-	end
-	local window = windows[1]
-	window:toast_notification(title, message, opts.url or "https://github.com/", opts.timeout_ms)
+if wezterm.config_builder then
+	config = wezterm.config_builder()
+	config:set_strict_mode(false)
 end
 
 local process_icons = {
@@ -392,11 +213,15 @@ local function get_current_working_dir(tab, max)
 	return pwd
 end
 
+local function get_proc_title(pane)
+	return (pane.title or pane:get_foreground_process_name()):gsub("^%s+", ""):gsub("%s+$", "")
+end
+
 local function get_process(tab)
 	-- local shell = os.getenv("SHELL") or "bash"
 	-- local process_name = string.gsub(tab.active_pane.foreground_process_name, "(.*[/\\])(.*)", "%2")
 	-- local process_name = tab.active_pane.title --string.gsub(tab.active_pane.title, "(.*[/\\])(.*)", "%2")
-	local title = (tab.active_pane.title or tab.active_pane.foreground_process_name):gsub("^%s+", ""):gsub("%s+$", "")
+	local title = get_proc_title(tab.active_pane)
 
 	if process_icons[title] ~= nil then
 		return wezterm.format({
@@ -409,6 +234,178 @@ local function get_process(tab)
 			{ Text = string.format(" %s", title) },
 		})
 	end
+end
+
+--config.default_cwd = "~"
+config.animation_fps = 30
+config.max_fps = 30
+config.font = wezterm.font_with_fallback({
+	-- "Noto Color Emoji",
+	{
+		family = "Fira Code",
+		weight = "Regular",
+		assume_emoji_presentation = false,
+	},
+	{
+		family = "JetBrains Mono",
+		weight = "Regular",
+	},
+})
+
+config.default_prog = { "sesh", "attach", "tab", "--create" }
+
+-- config.font = "Fira Code"
+config.font_size = 12.0
+
+config.color_scheme = "tokyonight"
+
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = false
+config.tab_bar_at_bottom = true
+config.tab_max_width = 30
+
+config.window_frame = {
+	font = wezterm.font({ family = "Fira Code", weight = "Bold" }),
+	font_size = 12.0,
+	border_left_width = "0.0cell",
+	border_right_width = "0.0cell",
+	border_bottom_height = "0.10cell",
+	border_bottom_color = "#1a1b26",
+	border_top_height = "0.0cell",
+}
+
+config.allow_square_glyphs_to_overflow_width = "Always"
+
+-- config.window_background_opacity = 0.9
+config.colors = {
+	background = "#26283f",
+	-- cursor_bg = "#26283f",
+}
+
+config.inactive_pane_hsb = {
+	saturation = 1.0,
+	brightness = 1.0,
+}
+
+config.window_decorations = "RESIZE"
+
+config.window_padding = {
+	top = 5,
+	bottom = 1,
+	left = 10,
+	right = 10,
+}
+
+config.launch_menu = {
+	{
+		label = "Sesh: Select session",
+		args = { "sesh", "select" },
+	},
+}
+
+-- Equivalent to POSIX basename(3)
+-- Given "/foo/bar" returns "bar"
+-- Given "c:\\foo\\bar" returns "bar"
+local function basename(s)
+	return string.gsub(s, "(.*[/\\])(.*)", "%2")
+end
+
+local function is_vim(window, pane)
+	local process_name = string.lower(pane:get_title())
+	return process_name == "nvim" or process_name == "vim"
+end
+
+local direction_keys = {
+	-- Left = "h",
+	-- Down = "j",
+	-- Up = "k",
+	-- Right = "l",
+	-- reverse lookup
+	-- h = "Left",
+	-- j = "Down",
+	-- k = "Up",
+	-- l = "Right",
+	UpArrow = "Up",
+	DownArrow = "Down",
+	LeftArrow = "Left",
+	RightArrow = "Right",
+	-- Up = "UpArrow",
+	-- Down = "DownArrow",
+	-- Left = "LeftArrow",
+	-- Right = "RightArrow",
+}
+
+local function split_nav(resize_or_move, key, mods)
+	return {
+		key = key,
+		mods = mods,
+		action = wezterm.action_callback(function(win, pane)
+			if is_vim(win, pane) then
+				-- pass the keys through to vim/nvim
+				win:perform_action({
+					SendKey = { key = key, mods = mods },
+				}, pane)
+			else
+				if resize_or_move == "resize" then
+					win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
+				else
+					local k = direction_keys[key]
+					win:perform_action({ ActivatePaneDirection = k }, pane)
+				end
+			end
+		end),
+	}
+end
+
+-- config.disable_default_key_bindings = true
+-- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
+config.keys = {
+	split_nav("move", "UpArrow", "CTRL"),
+	split_nav("move", "DownArrow", "CTRL"),
+	split_nav("move", "LeftArrow", "CTRL"),
+	split_nav("move", "RightArrow", "CTRL"),
+	split_nav("resize", "UpArrow", "ALT"),
+	split_nav("resize", "DownArrow", "ALT"),
+	split_nav("resize", "LeftArrow", "ALT"),
+	split_nav("resize", "RightArrow", "ALT"),
+	{
+		key = "\\",
+		mods = "CTRL",
+		action = wezterm.action.DisableDefaultAssignment,
+	},
+	{
+		key = "[",
+		mods = "CMD",
+		action = wezterm.action.ActivateTabRelative(-1),
+	},
+	{
+		key = "]",
+		mods = "CMD",
+		action = wezterm.action.ActivateTabRelative(1),
+	},
+	{
+		key = "q",
+		mods = "CMD",
+		action = wezterm.action.CloseCurrentTab({ confirm = true }),
+	},
+	{
+		key = "n",
+		mods = "CMD",
+		action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+	},
+}
+
+local function _popup(title, message, opts)
+	opts = opts or {}
+	if not opts.timeout_ms then
+		opts.timeout_ms = 3000
+	end
+	local windows = wezterm.gui.gui_windows()
+	if #windows < 1 then
+		return
+	end
+	local window = windows[1]
+	window:toast_notification(title, message, opts.url or "https://github.com/", opts.timeout_ms)
 end
 
 wezterm.on("open-uri", function(_window, _pane, uri)
@@ -583,11 +580,5 @@ wezterm.on("augment-command-palette", function(_window, _pane)
 		},
 	}
 end)
-
-if wezterm.config_builder then
-	config = wezterm.config_builder()
-	config:set_strict_mode(false)
-	setup(config)
-end
 
 return config
