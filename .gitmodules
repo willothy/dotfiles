@@ -14,3 +14,6 @@
 	path = vendor/awesome
 	url = git@github.com:awesomeWM/awesome.git
 	branch = master
+[submodule "vendor/wezterm"]
+	path = vendor/wezterm
+	url = git@github.com:wez/wezterm.git

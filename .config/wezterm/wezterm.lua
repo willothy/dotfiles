@@ -1,19 +1,11 @@
 local wezterm = require("wezterm")
 local nf = wezterm.nerdfonts
+local act = wezterm.action
 
 local config = {}
 
 local function setup(cfg)
-	--[[ cfg.default_prog = {
-		"wsl.exe",
-		"-d",
-		distro,
-		"-u",
-		user,
-		"--cd",
-		"~",
-	}
-	cfg.default_cwd = "~" ]]
+	--cfg.default_cwd = "~"
 	cfg.animation_fps = 30
 	cfg.max_fps = 30
 	cfg.font = wezterm.font_with_fallback({
@@ -44,7 +36,6 @@ local function setup(cfg)
 	cfg.window_frame = {
 		font = wezterm.font({ family = "Fira Code", weight = "Bold" }),
 		font_size = 12.0,
-		-- line_height = 1.5,
 		border_left_width = "0.0cell",
 		border_right_width = "0.0cell",
 		border_bottom_height = "0.10cell",
@@ -52,25 +43,20 @@ local function setup(cfg)
 		border_top_height = "0.0cell",
 	}
 
-	-- cfg.tab_bar.font_size = 15.0
-
-	-- cfg.dpi = 96
-
-	--cfg.allow_square_glyphs_to_overflow_width = "WhenFollowedBySpace"
 	cfg.allow_square_glyphs_to_overflow_width = "Always"
 
 	-- config.window_background_opacity = 0.9
-	config.colors = {
+	cfg.colors = {
 		background = "#26283f",
 		-- cursor_bg = "#26283f",
 	}
 
-	config.inactive_pane_hsb = {
+	cfg.inactive_pane_hsb = {
 		saturation = 1.0,
 		brightness = 1.0,
 	}
 
-	config.window_decorations = "RESIZE"
+	cfg.window_decorations = "RESIZE"
 
 	cfg.window_padding = {
 		top = 5,
@@ -93,8 +79,9 @@ local function setup(cfg)
 		return string.gsub(s, "(.*[/\\])(.*)", "%2")
 	end
 
-	local function is_vim(pane)
+	local function is_vim(window, pane)
 		local process_name = basename(pane:get_foreground_process_name())
+		window:toast_notification("wezterm", process_name, nil, 4000)
 		return process_name == "nvim" or process_name == "vim"
 	end
 
@@ -108,10 +95,14 @@ local function setup(cfg)
 		-- j = "Down",
 		-- k = "Up",
 		-- l = "Right",
-		UpArrow = "Up",
-		DownArrow = "Down",
-		LeftArrow = "Left",
-		RightArrow = "Right",
+		-- UpArrow = "Up",
+		-- DownArrow = "Down",
+		-- LeftArrow = "Left",
+		-- RightArrow = "Right",
+		-- Up = "UpArrow",
+		-- Down = "DownArrow",
+		-- Left = "LeftArrow",
+		-- Right = "RightArrow",
 	}
 
 	local function split_nav(resize_or_move, key, mods)
@@ -119,7 +110,7 @@ local function setup(cfg)
 			key = key,
 			mods = mods,
 			action = wezterm.action_callback(function(win, pane)
-				if is_vim(pane) then
+				if is_vim(win, pane) then
 					-- pass the keys through to vim/nvim
 					win:perform_action({
 						SendKey = { key = key, mods = mods },
@@ -134,6 +125,16 @@ local function setup(cfg)
 			end),
 		}
 	end
+
+	-- local function move(key)
+	-- 	return {
+	-- 		key = key,
+	-- 		mods = "CTRL",
+	-- 		action = wezterm.action_callback(function(window, pane)
+	-- 			if is_vim(window, pane)
+	-- 		end),
+	-- 	}
+	-- end
 
 	-- cfg.disable_default_key_bindings = true
 	-- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
@@ -392,17 +393,20 @@ local function get_current_working_dir(tab, max)
 end
 
 local function get_process(tab)
-	local process_name = string.gsub(tab.active_pane.foreground_process_name, "(.*[/\\])(.*)", "%2")
+	-- local shell = os.getenv("SHELL") or "bash"
+	-- local process_name = string.gsub(tab.active_pane.foreground_process_name, "(.*[/\\])(.*)", "%2")
+	-- local process_name = tab.active_pane.title --string.gsub(tab.active_pane.title, "(.*[/\\])(.*)", "%2")
+	local title = (tab.active_pane.title or tab.active_pane.foreground_process_name):gsub("^%s+", ""):gsub("%s+$", "")
 
-	if process_icons[process_name] ~= nil then
+	if process_icons[title] ~= nil then
 		return wezterm.format({
 			{ Text = " " },
-			process_icons[process_name],
+			process_icons[title],
 			{ Text = " " },
 		})
 	else
 		return wezterm.format({
-			{ Text = string.format(" %s", process_name) },
+			{ Text = string.format(" %s", title) },
 		})
 	end
 end
@@ -506,7 +510,6 @@ wezterm.on("update-right-status", function(window, pane)
 			icon_col = palette.peach
 		elseif
 			exists(pwd .. "/init.lua")
-			-- or exists(pwd .. "/lua/")
 			or find(entries, function(v)
 					if string.sub(v, -4, -1) == ".lua" then
 						return true
@@ -560,24 +563,26 @@ wezterm.on("update-right-status", function(window, pane)
 	}))
 end)
 
--- local success, stdout, _stderr = wezterm.run_child_process({ "sesh", "ls", "--json" })
--- local sessions = wezterm.json_parse(stdout)
--- local new_sessions = {}
--- for _, v in ipairs(sessions) do
--- 	table.insert(new_sessions, {
--- 		brief = "Sesh: " .. v.name,
--- 		icon = "mdi_lambda",
--- 		action = wezterm.action.SpawnCommandInNewTab({
--- 			args = { "sesh", "attach", v.name },
--- 		}),
--- 	})
--- end
--- wezterm.GLOBAL.sessions = new_sessions
--- wezterm.GLOBAL.sessions = {}
-
--- wezterm.on("augment-command-palette", function(window, _pane)
--- 	return wezterm.GLOBAL.sessions
--- end)
+wezterm.on("augment-command-palette", function(_window, _pane)
+	return {
+		{
+			brief = "Sesh: Create session",
+			icon = "mdi_plus",
+			action = wezterm.action.PromptInputLine({
+				description = "Enter new session name",
+				action = wezterm.action_callback(function(window, pane, line)
+					window:perform_action(
+						wezterm.action.SpawnCommandInNewTab({
+							-- directory = pane:get_current_working_dir(),
+							args = { "sesh", "start", "--name", line },
+						}),
+						pane
+					)
+				end),
+			}),
+		},
+	}
+end)
 
 if wezterm.config_builder then
 	config = wezterm.config_builder()

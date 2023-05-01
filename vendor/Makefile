@@ -15,6 +15,11 @@ awesome:
 	${CFG} submodule update --remote ${VENDOR}/awesome/
 	cd ${VENDOR}/awesome; make; sudo make install
 
+.PHONY: wezterm
+wezterm:
+	${CFG} submodule update --remote ${VENDOR}/wezterm/
+	cd ${VENDOR}/wezterm; cargo install --path=./
+
 .PHONY: all
-	all: nvim awesome
+all: nvim awesome
 	@echo "Done!"

@@ -45,8 +45,13 @@ source $ZSH/oh-my-zsh.sh
 # xmodmap
 # xmodmap ~/.Xmodmap
 
+function set_win_title(){
+    echo -ne "\033]0; zsh \007"
+}
+
 # Starship
 eval "$(starship init zsh)"
+precmd_functions+=(set_win_title)
 
 # Zoxide
 eval "$(zoxide init zsh)"
@@ -132,3 +137,5 @@ alias python="python3.10"
 # RIP
 #alias rm="rip"
 
+# Cloak
+alias otp="cloak view" # otp github -> cloak view github
