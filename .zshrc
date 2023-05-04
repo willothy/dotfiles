@@ -87,6 +87,9 @@ PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" `echo -n "$SESH_NA
 
 # handy aliases
 
+function psf() {
+	ps -aux | rg -e $1
+}
 
 function nvimdev() {
     nvim --cmd "let g:dev=\"$1\"" ${@:2}
@@ -139,3 +142,4 @@ alias python="python3.10"
 
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
+

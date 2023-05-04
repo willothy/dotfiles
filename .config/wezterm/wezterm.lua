@@ -1,6 +1,7 @@
 local wezterm = require("wezterm")
 local nf = wezterm.nerdfonts
 local act = wezterm.action
+local sesh = require("sesh")
 
 local config = {}
 
@@ -252,7 +253,7 @@ config.font = wezterm.font_with_fallback({
 	},
 })
 
-config.default_prog = { "sesh", "attach", "tab", "--create" }
+-- config.default_prog = { "sesh", "attach", "tab", "--create" }
 
 -- config.font = "Fira Code"
 config.font_size = 12.0
@@ -297,10 +298,10 @@ config.window_padding = {
 }
 
 config.launch_menu = {
-	{
-		label = "Sesh: Select session",
-		args = { "sesh", "select" },
-	},
+	-- {
+	-- 	label = "Sesh: Select session",
+	-- 	args = { "sesh", "select" },
+	-- },
 }
 
 -- Equivalent to POSIX basename(3)
@@ -310,7 +311,7 @@ local function basename(s)
 	return string.gsub(s, "(.*[/\\])(.*)", "%2")
 end
 
-local function is_vim(window, pane)
+local function is_vim(_window, pane)
 	local process_name = string.lower(pane:get_title())
 	return process_name == "nvim" or process_name == "vim"
 end
@@ -371,27 +372,32 @@ config.keys = {
 	{
 		key = "\\",
 		mods = "CTRL",
-		action = wezterm.action.DisableDefaultAssignment,
+		action = act.DisableDefaultAssignment,
 	},
 	{
 		key = "[",
 		mods = "CMD",
-		action = wezterm.action.ActivateTabRelative(-1),
+		action = act.ActivateTabRelative(-1),
 	},
 	{
 		key = "]",
 		mods = "CMD",
-		action = wezterm.action.ActivateTabRelative(1),
+		action = act.ActivateTabRelative(1),
 	},
 	{
 		key = "q",
 		mods = "CMD",
-		action = wezterm.action.CloseCurrentTab({ confirm = true }),
+		action = act.CloseCurrentTab({ confirm = true }),
 	},
 	{
 		key = "n",
 		mods = "CMD",
-		action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+		action = act.SpawnTab("CurrentPaneDomain"),
+	},
+	{
+		key = "S",
+		mods = "CMD",
+		action = sesh.attach.action,
 	},
 }
 
@@ -457,10 +463,6 @@ end
 local entries_cache = {}
 
 wezterm.on("update-right-status", function(window, pane)
-	-- if not window:get_dimensions().is_full_screen then
-	-- 	window:set_right_status("")
-	-- 	return
-	-- end
 	local pwd = ""
 	if pane ~= nil then
 		local panewd = pane:get_current_working_dir()
@@ -562,23 +564,16 @@ end)
 
 wezterm.on("augment-command-palette", function(_window, _pane)
 	return {
-		{
-			brief = "Sesh: Create session",
-			icon = "mdi_plus",
-			action = wezterm.action.PromptInputLine({
-				description = "Enter new session name",
-				action = wezterm.action_callback(function(window, pane, line)
-					window:perform_action(
-						wezterm.action.SpawnCommandInNewTab({
-							-- directory = pane:get_current_working_dir(),
-							args = { "sesh", "start", "--name", line },
-						}),
-						pane
-					)
-				end),
-			}),
-		},
+		sesh.create,
+		sesh.attach,
 	}
+end)
+
+wezterm.on("new-tab-button-click", function(window, pane, button, _default_action)
+	if button == "Left" then
+		window:perform_action(sesh.create.action, pane)
+		return false
+	end
 end)
 
 return config
