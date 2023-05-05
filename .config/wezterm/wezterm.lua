@@ -395,7 +395,7 @@ config.keys = {
 		action = act.SpawnTab("CurrentPaneDomain"),
 	},
 	{
-		key = "S",
+		key = "`",
 		mods = "CMD",
 		action = sesh.attach.action,
 	},
