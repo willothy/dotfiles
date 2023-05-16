@@ -5,6 +5,8 @@ export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/opt/cross/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 
+setopt PROMPT_SUBST
+
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
 
@@ -49,9 +51,19 @@ function set_win_title(){
     echo -ne "\033]0; zsh \007"
 }
 
+# function precmd() {
+# 	if test -z "$SESH_NAME" 
+# 	then 
+# 		export PROMPT_SESH_NAME=""
+# 	else
+# 		export PROMPT_SESH_NAME="\033[0;31m$SESH_NAME\033[0m"
+# 	fi
+# }
+
 # Starship
 eval "$(starship init zsh)"
 precmd_functions+=(set_win_title)
+# precmd_functions+=(precmd)
 
 # Zoxide
 eval "$(zoxide init zsh)"
@@ -133,9 +145,8 @@ alias push='git push'
 alias pull='git pull'
 
 # Python
-alias py="python3.10"
-alias python3="python3.10"
-alias python="python3.10"
+alias python3="python"
+alias py="python"
 
 # RIP
 #alias rm="rip"

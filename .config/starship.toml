@@ -5,11 +5,6 @@ $git_branch\
 $git_commit\
 $git_status\
 $git_state\
-$rust\
-$lua\
-$python\
-$nodejs\
-$c\
 ${custom.sesh}\
 $line_break\
 $jobs\
@@ -18,6 +13,12 @@ $character\
 
 right_format="""
 """
+
+# $rust\
+# $lua\
+# $python\
+# $nodejs\
+# $c\
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
@@ -51,7 +52,7 @@ when = ''' test "$NVIM" != "" '''
 style = '#5de4c7'
 command = "echo $SESH_NAME"
 when = ''' test "$SESH_NAME" != "" '''
-format = '\(sesh [$output]($style)\)'
+format = '\[[$output]($style)\]'
 
 [git_branch]
 style = '#89ddff'
