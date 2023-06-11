@@ -4,6 +4,8 @@ export PATH="/usr/bin:${PATH}"
 export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/opt/cross/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
+export PATH="${HOME}/.luarocks/bin:${PATH}"
+export PATH="${HOME}/vendor/zig:${PATH}"
 
 setopt PROMPT_SUBST
 
@@ -154,3 +156,5 @@ alias py="python"
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
 
+# opam configuration
+[[ ! -r /home/willothy/.opam/opam-init/init.zsh ]] || source /home/willothy/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
