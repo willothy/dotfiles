@@ -243,7 +243,7 @@ config.max_fps = 30
 config.font = wezterm.font_with_fallback({
 	-- "Noto Color Emoji",
 	{
-		family = "Fira Code",
+		family = "FiraCode Nerd Font",
 		weight = "Regular",
 		assume_emoji_presentation = false,
 	},
