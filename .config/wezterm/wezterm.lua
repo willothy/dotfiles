@@ -241,17 +241,24 @@ end
 config.animation_fps = 30
 config.max_fps = 30
 config.font = wezterm.font_with_fallback({
-	-- "Noto Color Emoji",
+	-- {
+	-- 	family = "FiraMono Nerd Font",
+	-- 	assume_emoji_presentation = false,
+	-- },
 	{
 		family = "FiraCode Nerd Font",
 		weight = "Regular",
-		assume_emoji_presentation = false,
 	},
-	{
-		family = "JetBrains Mono",
-		weight = "Regular",
-	},
+	-- "Material Icons",
+	-- "Noto Color Emoji",
+	-- {
+	-- 	family = "JetBrains Mono",
+	-- 	weight = "Regular",
+	-- },
 })
+
+config.allow_square_glyphs_to_overflow_width = "Always"
+-- config.allow_square_glyphs_to_overflow_width = "Never"
 
 -- config.default_prog = { "sesh", "attach", "tab", "--create" }
 
@@ -274,8 +281,6 @@ config.window_frame = {
 	border_bottom_color = "#1a1b26",
 	border_top_height = "0.0cell",
 }
-
-config.allow_square_glyphs_to_overflow_width = "Always"
 
 -- config.window_background_opacity = 0.9
 config.colors = {

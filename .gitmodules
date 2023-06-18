@@ -8,12 +8,8 @@
 	branch = main
 [submodule "vendor/neovim"]
 	path = vendor/neovim
-	url = git@github.com:neovim/neovim
-	branch = master
-[submodule "vendor/awesome"]
-	path = vendor/awesome
-	url = git@github.com:awesomeWM/awesome.git
-	branch = master
+	url = git@github.com:willothy/neovim
+	branch = subscribe-to-mouse
 [submodule "vendor/wezterm"]
 	path = vendor/wezterm
 	url = git@github.com:wez/wezterm.git
