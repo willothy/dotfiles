@@ -24,11 +24,10 @@ local process_icons = {
 		Text = nf.linux_docker,
 	},
 	["nvim"] = {
-		-- Text = nf.custom_vim
 		Text = nf.custom_vim,
 	},
 	["vim"] = {
-		Text = nf.dev_vim,
+		Text = nf.custom_vim, --nf.dev_vim,
 	},
 	["node"] = {
 		Text = nf.mdi_hexagon,
@@ -242,13 +241,17 @@ config.animation_fps = 30
 config.max_fps = 30
 config.font = wezterm.font_with_fallback({
 	-- {
-	-- 	family = "FiraMono Nerd Font",
+	-- 	family = "Party Business",
 	-- 	assume_emoji_presentation = false,
+	-- },
+	-- {
+	--
 	-- },
 	{
 		family = "FiraCode Nerd Font",
 		weight = "Regular",
 	},
+	"Bruh-Font",
 	-- "Material Icons",
 	-- "Noto Color Emoji",
 	-- {
