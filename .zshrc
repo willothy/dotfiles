@@ -109,6 +109,10 @@ function nvimdev() {
     nvim --cmd "let g:dev=\"$1\"" ${@:2}
 }
 
+function brightness() {
+    sudo brightnessctl -d intel_backlight set $1%
+}
+
 # alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
 
 # Neovim
