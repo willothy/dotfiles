@@ -30,20 +30,21 @@ local process_icons = {
 		Text = nf.custom_vim, --nf.dev_vim,
 	},
 	["node"] = {
-		Text = nf.mdi_hexagon,
+		Text = nf.md_hexagon,
 	},
 	["zsh"] = {
-		Text = nf.dev_terminal_badge,
+		Text = nf.md_lambda,
+		-- Text = nf.dev_terminal_badge,
 		-- Text = nf.mdi_apple_keyboard_command,
 	},
 	["bash"] = {
 		Text = nf.cod_terminal_bash,
 	},
 	["btm"] = {
-		Text = nf.mdi_chart_donut_variant,
+		Text = nf.md_chart_donut_variant,
 	},
 	["htop"] = {
-		Text = nf.mdi_chart_donut_variant,
+		Text = nf.md_chart_donut_variant,
 	},
 	["cargo"] = {
 		Text = nf.dev_rust,
@@ -52,7 +53,7 @@ local process_icons = {
 		Text = nf.dev_rust,
 	},
 	["go"] = {
-		Text = nf.mdi_language_go,
+		Text = nf.md_language_go,
 	},
 	["lazydocker"] = {
 		Text = nf.linux_docker,
@@ -64,10 +65,10 @@ local process_icons = {
 		Text = nf.seti_lua,
 	},
 	["wget"] = {
-		Text = nf.mdi_arrow_down_box,
+		Text = nf.md_arrow_down_box,
 	},
 	["curl"] = {
-		Text = nf.mdi_flattr,
+		Text = nf.md_flattr,
 	},
 	["gh"] = {
 		Text = nf.dev_github_badge,
@@ -527,10 +528,10 @@ wezterm.on("update-right-status", function(window, pane)
 		then
 			icon_txt = nf.seti_lua
 			icon_col = palette.blue
-		elseif pwd == wezterm.home_dir .. "/" or pwd == wezterm.home_dir then
-			-- icon = nf.seti_shell
-			-- icon = nf.mdi_home_circle
-			icon_txt = nf.mdi_lambda
+		-- elseif pwd == wezterm.home_dir .. "/" or pwd == wezterm.home_dir then
+		-- 	-- icon = nf.seti_shell
+		-- 	-- icon = nf.mdi_home_circle
+		-- 	icon_txt = nf.md_lambda
 		elseif
 			exists(pwd .. "/package.json")
 			or exists(pwd .. "/node_modules")
@@ -545,7 +546,7 @@ wezterm.on("update-right-status", function(window, pane)
 			icon_txt = nf.dev_javascript_badge
 			icon_col = palette.yellow
 		elseif exists(pwd .. "/go.mod") then
-			icon_txt = nf.mdi_language_go
+			icon_txt = nf.md_language_go
 			icon_col = palette.pale_azure
 		end
 	end

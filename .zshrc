@@ -15,32 +15,30 @@ select-word-style bash
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
 
-eval "$(neosuggest init)"
-
-function set_win_title(){
-    echo -ne "\033]0; zsh \007"
-}
-
-# Starship
-eval "$(starship init zsh)"
-precmd_functions+=(set_win_title)
-
-# Zoxide
-eval "$(zoxide init zsh)"
 
 bindkey '^I' forward-word #autosuggest-accept
 bindkey '^ ' autosuggest-accept
 
-# Atuin
-eval "$(atuin init zsh)"
-
-_zsh_autosuggest_strategy_atuin() {
-    suggestion=$(RUST_LOG=error atuin search --limit 1 --cwd="$PWD" --cmd-only --search-mode prefix -- $BUFFER)
+_zsh_autosuggest_strategy_atuin-cwd() {
+    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode directory --cmd-only --search-mode prefix -- $BUFFER)
 }
 
-export ZSH_AUTOSUGGEST_STRATEGY=(atuin neosuggest completion)
+_zsh_autosuggest_strategy_atuin-session() {
+    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode session --cmd-only --search-mode prefix -- $BUFFER)
+}
 
-# Lines configured by zsh-newuser-install
+_zsh_autosuggest_strategy_atuin-global() {
+    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode global --cmd-only --search-mode prefix -- $BUFFER)
+}
+
+export ZSH_AUTOSUGGEST_STRATEGY=(
+    atuin-cwd      # pwd history
+    neosuggest     # pwd files/dirs and zoxide
+    atuin-session  # session history
+    atuin-global   # global history
+    completion     # base zsh completion
+)
+
 export HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
@@ -75,6 +73,15 @@ source $ZSH/oh-my-zsh.sh
 # Td todos
 td init
 
+# Neosuggest
+eval "$(neosuggest init)"
+
+# Zoxide
+eval "$(zoxide init zsh)"
+
+# Atuin
+eval "$(atuin init zsh)"
+
 # Sesh wezterm integration using Usar Vars
 
 export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
@@ -94,6 +101,14 @@ function tcled() {
 	echo "$TCLED" | sudo tee '/sys/class/leds/input28::capslock/brightness'
 }
 PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" `echo -n "$SESH_NAME" | base64`)$PROMPT"
+
+function set_win_title(){
+    echo -ne "\033]0; zsh \007"
+}
+
+# Starship
+eval "$(starship init zsh)"
+precmd_functions+=(set_win_title)
 
 # handy aliases
 
