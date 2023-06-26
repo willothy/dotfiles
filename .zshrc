@@ -9,20 +9,42 @@ export PATH="${HOME}/vendor/zig:${PATH}"
 
 setopt PROMPT_SUBST
 
+autoload -U select-word-style
+select-word-style bash
+
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
 
 eval "$(neosuggest init)"
 
-export ZSH_AUTOSUGGEST_STRATEGY=(neosuggest)
+function set_win_title(){
+    echo -ne "\033]0; zsh \007"
+}
+
+# Starship
+eval "$(starship init zsh)"
+precmd_functions+=(set_win_title)
+
+# Zoxide
+eval "$(zoxide init zsh)"
+
+bindkey '^I' forward-word #autosuggest-accept
+bindkey '^ ' autosuggest-accept
+
+# Atuin
+eval "$(atuin init zsh)"
+
+_zsh_autosuggest_strategy_atuin() {
+    suggestion=$(RUST_LOG=error atuin search --limit 1 --cwd="$PWD" --cmd-only --search-mode prefix -- $BUFFER)
+}
+
+export ZSH_AUTOSUGGEST_STRATEGY=(atuin neosuggest completion)
 
 # Lines configured by zsh-newuser-install
 export HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 bindkey -e
-# End of lines configured by zsh-newuser-install
-# The following lines were added by compinstall
 zstyle :compinstall filename '/home/willothy/.zshrc'
 
 autoload -Uz compinit
@@ -49,32 +71,6 @@ source $ZSH/oh-my-zsh.sh
 # xmodmap
 # xmodmap ~/.Xmodmap
 
-function set_win_title(){
-    echo -ne "\033]0; zsh \007"
-}
-
-# function precmd() {
-# 	if test -z "$SESH_NAME" 
-# 	then 
-# 		export PROMPT_SESH_NAME=""
-# 	else
-# 		export PROMPT_SESH_NAME="\033[0;31m$SESH_NAME\033[0m"
-# 	fi
-# }
-
-# Starship
-eval "$(starship init zsh)"
-precmd_functions+=(set_win_title)
-# precmd_functions+=(precmd)
-
-# Zoxide
-eval "$(zoxide init zsh)"
-
-bindkey '^I' neosuggest-accept
-bindkey '^ ' autosuggest-fetch
-
-# Atuin
-eval "$(atuin init zsh --disable-up-arrow)"
 
 # Td todos
 td init
@@ -159,6 +155,3 @@ alias py="python"
 
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
-
-# opam configuration
-[[ ! -r /home/willothy/.opam/opam-init/init.zsh ]] || source /home/willothy/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
