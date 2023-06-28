@@ -9,8 +9,9 @@ export PATH="${HOME}/vendor/zig:${PATH}"
 
 setopt PROMPT_SUBST
 
-autoload -U select-word-style
-select-word-style bash
+# autoload -U select-word-style
+# select-word-style normal
+
 
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
@@ -66,9 +67,6 @@ plugins=(
 export ZSH="$HOME/.oh-my-zsh"
 source $ZSH/oh-my-zsh.sh
 
-# xmodmap
-# xmodmap ~/.Xmodmap
-
 
 # Td todos
 td init
@@ -80,7 +78,7 @@ eval "$(neosuggest init)"
 eval "$(zoxide init zsh)"
 
 # Atuin
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
 
 # Sesh wezterm integration using Usar Vars
 
@@ -125,6 +123,12 @@ function brightness() {
 }
 
 # alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
+
+WORDCHARS='-_.'
+
+setxkbmap -option caps:escape
+# xmodmap
+# xmodmap ~/.xmodmap
 
 # Neovim
 alias nv="nvim"
