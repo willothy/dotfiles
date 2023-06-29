@@ -82,7 +82,7 @@ eval "$(atuin init zsh --disable-up-arrow)"
 
 # Sesh wezterm integration using Usar Vars
 
-export VISUAL="nvim --cmd 'let g:flatten_wait=1'"
+export VISUAL="nvim -b"
 # export VISUAL=nvim
 export EDITOR=nvim
 
