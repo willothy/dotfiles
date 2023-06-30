@@ -6,42 +6,58 @@ $git_commit\
 $git_status\
 $git_state\
 ${custom.sesh}\
+$battery\
+$rust\
+$lua\
+$python\
+$nodejs\
+$c\
+$fill\ 
+$git_metrics\
+$sudo\
 $line_break\
 $jobs\
 $character\
 """
 
-right_format="""
-"""
-
-# $rust\
-# $lua\
-# $python\
-# $nodejs\
-# $c\
-
 "$schema" = 'https://starship.rs/config-schema.json'
+
+[sudo]
+disabled = false
+symbol = '󱥠'
+format = '[$symbol]($style)'
+
+[fill]
+symbol = ' '
+
+[[battery.display]]
+threshold = 40
+
+[git_metrics]
+disabled = false
+only_nonzero_diffs=true
 
 [rust]
 style = 'red'
-format = '=> [$symbol($version)]($style) '
+format = '[$symbol]($style) '
+symbol = ""
 
 [lua]
 style = 'blue'
-format = '=> [$symbol($version)]($style) '
+format = '[$symbol]($style) '
 symbol = '󰢱 '
 
 [nodejs]
 style = 'green'
-format = '=> [$symbol($version)]($style) '
+format = '[$symbol]($style) '
 
 [c]
 style = '149'
-format = '=> [$symbol($version)]($style) '
+format = '[$symbol]($style) '
 
 [python]
 style = 'yellow'
-format = '=> [$symbol($version)]($style) '
+format = '[$symbol]($style) '
 
 [custom.vim]
 style = '#5de4c7'
