@@ -162,7 +162,7 @@ function git() {
     if [ "$HOME" = "$PWD" ]; then
         config $@
     else
-        git $@
+        /usr/bin/git $@
     fi
 }
 
