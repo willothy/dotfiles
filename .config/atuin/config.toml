@@ -1,0 +1,3 @@
+auto_sync = true
+sync_frequency = "30m"
+style = "auto"
