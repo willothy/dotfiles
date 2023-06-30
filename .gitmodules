@@ -2,10 +2,10 @@
 	path = .config/nvim
 	url = git@github.com:willothy/nvim-config
 	branch = main
+[submodule ".config/awesome"]
+	path = .config/awesome
+	url = git@github.com:willothy/awesome-config
+	branch = main
 [submodule "vendor/neovim"]
 	path = vendor/neovim
 	url = git@github.com:willothy/neovim
-	branch = subscribe-to-mouse
-[submodule "vendor/wezterm"]
-	path = vendor/wezterm
-	url = git@github.com:wez/wezterm.git

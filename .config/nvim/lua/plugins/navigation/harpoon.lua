@@ -1,5 +1,0 @@
-return {
-	{
-		"ThePrimeagen/harpoon",
-	},
-}
