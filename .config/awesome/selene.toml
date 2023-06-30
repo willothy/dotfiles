@@ -1,0 +1,8 @@
+std = "awesome"
+
+[rules]
+unscoped_variables = "allow"
+unused_variable = "allow"
+multiple_statements = "allow"
+global_usage = "allow"
+
