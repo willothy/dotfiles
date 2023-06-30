@@ -157,6 +157,15 @@ alias lla='exa -la --icons'
 alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 
 # Git
+# alias gs='git status'
+function git() {
+    if [ "$HOME" = "$PWD" ]; then
+        config $@
+    else
+        git $@
+    fi
+}
+
 alias gs='git status'
 alias gsp='git status --porcelain'
 alias ga='git add'
