@@ -1,0 +1,23 @@
+[user]
+	email = willothyh@gmail.com
+	name = Will Hopkins
+	signingkey = 8A45C5F17A0FB60B93B42473643B8C585BABBB68!
+[init]
+	defaultBranch = main
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    line-numbers = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+[commit]
+	gpgsign = true
