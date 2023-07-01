@@ -2,22 +2,29 @@
 	email = willothyh@gmail.com
 	name = Will Hopkins
 	signingkey = 8A45C5F17A0FB60B93B42473643B8C585BABBB68!
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
 [init]
 	defaultBranch = main
 [core]
-    pager = delta
-
+	editor = nvim
+	pager = delta
+[color]
+	pager = yes
 [interactive]
-    diffFilter = delta --color-only
-
+	diffFilter = delta --color-only
 [delta]
-    navigate = true    # use n and N to move between diff sections
-    line-numbers = true
-
+	navigate = true
+	light = false
+	line-numbers = true
 [merge]
-    conflictstyle = diff3
-
+	conflictstyle = diff3
+[pull]
+	rebase = true
 [diff]
-    colorMoved = default
+	colorMoved = default
 [commit]
 	gpgsign = true
