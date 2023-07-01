@@ -1,5 +1,4 @@
 format = """
-$hostname\
 $directory\
 $git_branch\
 $git_commit\
@@ -15,12 +14,17 @@ $c\
 $fill\ 
 $git_metrics\
 $sudo\
+$hostname\
 $line_break\
 $jobs\
 $character\
 """
 
 "$schema" = 'https://starship.rs/config-schema.json'
+
+[hostname]
+format = '[$ssh_symbol]($style)'
+ssh_symbol = ''
 
 [sudo]
 disabled = false
