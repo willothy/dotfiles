@@ -241,28 +241,15 @@ end
 config.animation_fps = 30
 config.max_fps = 30
 config.font = wezterm.font_with_fallback({
-	-- {
-	-- 	family = "Party Business",
-	-- 	assume_emoji_presentation = false,
-	-- },
-	-- {
-	--
-	-- },
 	{
 		family = "FiraCode Nerd Font",
 		weight = "Regular",
 	},
 	"Bruh-Font",
-	-- "Material Icons",
-	-- "Noto Color Emoji",
-	-- {
-	-- 	family = "JetBrains Mono",
-	-- 	weight = "Regular",
-	-- },
 })
 
-config.allow_square_glyphs_to_overflow_width = "Always"
--- config.allow_square_glyphs_to_overflow_width = "Never"
+-- config.allow_square_glyphs_to_overflow_width = "Always"
+config.allow_square_glyphs_to_overflow_width = "Never"
 
 -- config.default_prog = { "sesh", "attach", "tab", "--create" }
 
