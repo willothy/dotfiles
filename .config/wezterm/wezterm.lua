@@ -242,8 +242,12 @@ config.animation_fps = 30
 config.max_fps = 30
 config.font = wezterm.font_with_fallback({
 	{
-		family = "FiraCode Nerd Font",
-		weight = "Regular",
+		family = "Maple Mono",
+		-- weight = "Regular",
+	},
+	{
+		family = "FiraMono Nerd Font",
+		-- weight = "Regular",
 	},
 	"Bruh-Font",
 })

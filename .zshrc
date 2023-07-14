@@ -40,9 +40,6 @@ export ZSH_AUTOSUGGEST_STRATEGY=(
     completion     # base zsh completion
 )
 
-export HISTFILE=~/.histfile
-HISTSIZE=1000
-SAVEHIST=1000
 bindkey -e
 zstyle :compinstall filename '/home/willothy/.zshrc'
 
@@ -58,10 +55,10 @@ test -z "$PROFILEREAD" && . /etc/profile || true
 plugins=(
     git
     zsh-autosuggestions
-	rust
-	gh
-	npm
-	ripgrep
+    rust
+    gh
+    npm
+    ripgrep
 )
 
 export ZSH="$HOME/.oh-my-zsh"
@@ -83,7 +80,6 @@ eval "$(atuin init zsh --disable-up-arrow)"
 # Sesh wezterm integration using Usar Vars
 
 export VISUAL="nvim -b"
-# export VISUAL=nvim
 export EDITOR=nvim
 
 export LS_COLORS=$LS_COLORS:'di=1;34:'
@@ -91,12 +87,12 @@ export LS_COLORS=$LS_COLORS:'di=1;34:'
 export TCLED=0
 
 function tcled() {
-	if test $TCLED -eq 1; then
-		TCLED=0
-	else
-		TCLED=1
-	fi;
-	echo "$TCLED" | sudo tee '/sys/class/leds/input28::capslock/brightness'
+    if test $TCLED -eq 1; then
+        TCLED=0
+    else
+        TCLED=1
+    fi;
+    echo "$TCLED" | sudo tee '/sys/class/leds/input28::capslock/brightness'
 }
 PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" `echo -n "$SESH_NAME" | base64`)$PROMPT"
 
@@ -111,20 +107,16 @@ precmd_functions+=(set_win_title)
 # handy aliases
 
 function psf() {
-	ps -aux | rg -e $1
-}
-
-function nvimdev() {
-    nvim --cmd "let g:dev=\"$1\"" ${@:2}
+	ps -aux | rg -e "$1"
 }
 
 function brightness() {
-    sudo brightnessctl -d intel_backlight set $1%
+    sudo brightnessctl -d intel_backlight set "$1%"
 }
 
 # alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
 
-WORDCHARS='-_.'
+export WORDCHARS='-_.'
 
 setxkbmap -option caps:escape
 # xmodmap
@@ -143,9 +135,11 @@ alias cd='z'
 # Cat / Bat
 alias cat='bat'
 
-# Sesh 
+# Sesh
 alias detach='sesh detach'
 alias attach='sesh attach'
+alias exit='detach || exit'
+alias exit!='exec exit'
 
 # Ls / Exa
 alias ls='exa --icons'
@@ -154,15 +148,14 @@ alias ll='exa -l --icons'
 alias lla='exa -la --icons'
 
 # Dotfiles
-alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias config="/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME"
 
 # Git
-# alias gs='git status'
 function git() {
     if [ "$HOME" = "$PWD" ]; then
-        config $@
+        config "$@"
     else
-        /usr/bin/git $@
+        /usr/bin/git "$@"
     fi
 }
 
