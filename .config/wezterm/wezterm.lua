@@ -237,6 +237,34 @@ local function get_process(tab)
 	end
 end
 
+-- wezterm.gui.gui_windows
+
+-- local pane = os.getenv("WEZTERM_PANE")
+-- -- local pane = wezterm.mux.get_pane(pane):tab()
+-- local tab
+--
+-- for _, win in ipairs(wezterm.gui.gui_windows()) do
+-- 	if win:is_focused() then
+-- 		tab = win.active_tab:tab_id()
+-- 	end
+-- end
+
+-- pane = wezterm.mux.
+-- l ocal ok, wins = pcall(wezterm.gui.gui_windows)
+
+-- local wins = wezterm.mux.all_windows()
+-- local tab = wins[1]
+-- if tab then
+-- 	tab = tab:active_tab():tab_id()
+-- 	config.set_environment_variables = {
+-- 		WEZTERM_PID = tostring(wezterm.procinfo.pid()),
+-- 		WEZTERM_TAB = tostring(tab),
+-- 		-- WEZTERM_TAB = pane or "0",
+-- 		-- WEZTERM_TAB = wezterm.mux.get_pane(0):tab(),
+-- 		-- WEZTERM_TAB = wezterm.gui:get_window_for_mux_window(wezterm.mux:get_window()):active_tab():tab_id(),
+-- 	}
+-- end
+
 --config.default_cwd = "~"
 config.animation_fps = 30
 config.max_fps = 30
@@ -571,6 +599,20 @@ wezterm.on("new-tab-button-click", function(window, pane, button, _default_actio
 		return false
 	end
 end)
+
+-- wezterm.on("window-focus-changed", function(window)
+-- 	we["WEZTERM_TAB"] = window:active_tab():tab_id()
+-- end)
+
+-- local mux = wezterm.mux
+-- wezterm.on("gui-attached", function()
+-- 	local workspace = mux.get_active_workspace()
+-- 	for _, win in ipairs(mux.all_windows()) do
+-- 		if win:get_workspace() == workspace then
+-- 			config.set_environment_variables.WEZTERM_TAB = win:active_tab()
+-- 		end
+-- 	end
+-- end)
 
 config.hyperlink_rules = {
 	-- Linkify things that look like URLs and the host has a TLD name.
