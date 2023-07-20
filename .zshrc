@@ -13,6 +13,14 @@ setopt PROMPT_SUBST
 # select-word-style normal
 
 
+function pickfile() {
+    local file="$(fzf)"
+    if [ -z "$file" ]; then
+        return 1
+    fi
+    nvim "$file"
+}
+
 # Bindings
 bindkey -s '^o' 'nvim $(fzf)^M'
 
