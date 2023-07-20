@@ -12,17 +12,17 @@ setopt PROMPT_SUBST
 # autoload -U select-word-style
 # select-word-style normal
 
-
 function pickfile() {
-    local file="$(fzf)"
+    local file
+    file="$(fzf)"
     if [ -z "$file" ]; then
-        return 1
+        return 0
     fi
     nvim "$file"
 }
 
 # Bindings
-bindkey -s '^o' 'nvim $(fzf)^M'
+bindkey -s '^o' pickfile
 
 
 bindkey '^I' forward-word #autosuggest-accept
