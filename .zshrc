@@ -55,6 +55,7 @@ test -z "$PROFILEREAD" && . /etc/profile || true
 plugins=(
     git
     zsh-autosuggestions
+    zsh-syntax-highlighting
     rust
     gh
     npm
