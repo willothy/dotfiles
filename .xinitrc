@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
 exec awesome
-xrandr --output HDMI-0 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-4 --mode 2560x1080 --pos 1920x0 --primary

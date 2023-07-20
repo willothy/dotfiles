@@ -333,71 +333,81 @@ local function basename(s)
 	return string.gsub(s, "(.*[/\\])(.*)", "%2")
 end
 
-local function is_vim(_window, pane)
-	local process_name = string.lower(pane:get_title())
-	return process_name == "nvim" or process_name == "vim"
+-- local function is_vim(pane)
+-- 	-- local process_name = string.lower(pane:get_title())
+-- 	local process_name = string.gsub(pane:get_foreground_process_name(), "(.*[/\\])(.*)", "%2")
+-- 	return process_name == "nvim" or process_name == "vim"
+-- end
+
+local function is_vim(pane)
+	-- this is set by the plugin, and unset on ExitPre in Neovim
+	return pane:get_user_vars().IS_NVIM == "true" -- or get_proc_title(pane) == "nvim" or get_proc_title(pane) == "vim"
 end
 
 local direction_keys = {
-	-- Left = "h",
-	-- Down = "j",
-	-- Up = "k",
-	-- Right = "l",
 	-- reverse lookup
-	-- h = "Left",
-	-- j = "Down",
-	-- k = "Up",
-	-- l = "Right",
+	Up = "Up",
+	Down = "Down",
+	Left = "Left",
+	Right = "Right",
+	h = "Left",
+	j = "Down",
+	k = "Up",
+	l = "Right",
 	UpArrow = "Up",
 	DownArrow = "Down",
 	LeftArrow = "Left",
 	RightArrow = "Right",
-	-- Up = "UpArrow",
-	-- Down = "DownArrow",
-	-- Left = "LeftArrow",
-	-- Right = "RightArrow",
 }
 
-local function split_nav(resize_or_move, key, mods)
+local function split_nav(resize_or_move, key)
+	local mods = resize_or_move == "resize" and "ALT" or "CTRL"
 	return {
 		key = key,
 		mods = mods,
 		action = wezterm.action_callback(function(win, pane)
-			if is_vim(win, pane) then
-				-- pass the keys through to vim/nvim
+			if is_vim(pane) then
 				win:perform_action({
 					SendKey = { key = key, mods = mods },
 				}, pane)
+				return
+			end
+			if resize_or_move == "resize" then
+				win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
+        win:toast_notification("Moving pane", "Moving pane " .. direction_keys[key], "info", 1000)
 			else
-				if resize_or_move == "resize" then
-					win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
-				else
-					local k = direction_keys[key]
-					win:perform_action({ ActivatePaneDirection = k }, pane)
-				end
+				win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
 			end
 		end),
 	}
 end
 
-config.bypass_mouse_reporting_modifiers = "CTRL|SHIFT"
-
+config.bypass_mouse_reporting_modifiers = "SHIFT"
 -- config.disable_default_key_bindings = true
+
 -- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
 config.keys = {
-	split_nav("move", "UpArrow", "CTRL"),
-	split_nav("move", "DownArrow", "CTRL"),
-	split_nav("move", "LeftArrow", "CTRL"),
-	split_nav("move", "RightArrow", "CTRL"),
-	split_nav("resize", "UpArrow", "ALT"),
-	split_nav("resize", "DownArrow", "ALT"),
-	split_nav("resize", "LeftArrow", "ALT"),
-	split_nav("resize", "RightArrow", "ALT"),
-	{
-		key = "\\",
-		mods = "CTRL",
-		action = act.DisableDefaultAssignment,
-	},
+	split_nav("move", "h"),
+	split_nav("move", "j"),
+	split_nav("move", "k"),
+	split_nav("move", "l"),
+	split_nav("resize", "h"),
+	-- split_nav("resize", "j"),
+	-- split_nav("resize", "k"),
+	split_nav("resize", "l"),
+	split_nav("move", "LeftArrow"),
+	split_nav("move", "DownArrow"),
+	split_nav("move", "UpArrow"),
+	split_nav("move", "RightArrow"),
+	split_nav("resize", "LeftArrow"),
+	split_nav("resize", "RightArrow"),
+	split_nav("resize", "DownArrow"),
+	split_nav("resize", "UpArrow"),
+	-- {
+	-- 	key = "\\",
+	-- 	mods = "CTRL",
+	-- 	action = act.DisableDefaultAssignment,
+	-- },
 	{
 		key = "[",
 		mods = "CMD",
@@ -438,9 +448,9 @@ local function _popup(title, message, opts)
 	window:toast_notification(title, message, opts.url or "https://github.com/", opts.timeout_ms)
 end
 
-wezterm.on("open-uri", function(_window, _pane, uri)
-	wezterm.open_with(uri, "brave")
-end)
+-- wezterm.on("open-uri", function(_window, _pane, uri)
+-- 	wezterm.open_with(uri, "brave")
+-- end)
 
 wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, max_width)
 	local has_unseen_output = false
@@ -630,7 +640,7 @@ config.hyperlink_rules = {
 	-- ( "nvim-treesitter/nvim-treesitter" | wbthomason/packer.nvim | wez/wezterm | "wez/wezterm.git" )
 	-- As long as a full URL hyperlink regex exists above this it should not match a full URL to
 	-- GitHub or GitLab / BitBucket (i.e. https://gitlab.com/user/project.git is still a whole clickable URL)
-	{ regex = [[["]?([\w\d]{1}[-\w\d]+)(/){1}([-\w\d\.]+)["]?]], format = "https://www.github.com/$1/$3" },
+	{ regex = [["([\w\d]{1}[-\w\d]+)(/){1}([-\w\d\.]+)"]], format = "https://www.github.com/$1/$3" },
 }
 
 return config
