@@ -16,6 +16,7 @@ export PATH="${HOME}/vendor/zig:${PATH}"
 export HISTFILE="${ZDOTDIR:-~}/.zsh_history"
 export HISTFILESIZE=100000
 export HISTSIZE=100000
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
@@ -209,12 +210,13 @@ export ZSH_AUTOSUGGEST_STRATEGY=(
     completion     # base zsh completion
 )
 
-zstyle :compinstall filename '/home/willothy/.config/zsh/.zshrc'
 
-autoload -Uz compinit
+# Td todos
+td init
 
-compinit
-_comp_options+=(globdots)
+source "${ZDOTDIR:-~}/antidote/antidote.zsh"
+
+antidote load
 
 test -z "$PROFILEREAD" && . /etc/profile
 
@@ -237,12 +239,12 @@ zstyle ':completion:*:*:*:users' ignored-patterns \
 # # Make zsh know about hosts already accessed by SSH
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
-# Td todos
-td init
+zstyle :compinstall filename '/home/willothy/.config/zsh/.zshrc'
 
-source "${ZDOTDIR:-~}/antidote/antidote.zsh"
+autoload -Uz compinit
 
-antidote load
+compinit
+_comp_options+=(globdots)
 
 # Neosuggest
 eval "$(neosuggest init)"
