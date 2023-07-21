@@ -1,11 +1,20 @@
+. "$HOME/.cargo/env"
 export PATH="${HOME}/.local/bin:${PATH}"
 export PATH="/usr/local/bin:${PATH}"
 export PATH="/usr/bin:${PATH}"
-export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/opt/cross/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 export PATH="${HOME}/.luarocks/bin:${PATH}"
 export PATH="${HOME}/vendor/zig:${PATH}"
+
+export HISTFILE="${ZDOTDIR:-~}/.zsh_history"
+export HISTFILESIZE=100000
+export HISTSIZE=100000
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt EXTENDED_HISTORY
+setopt HIST_VERIFY
 
 setopt PROMPT_SUBST
 
@@ -14,7 +23,12 @@ setopt PROMPT_SUBST
 
 function pickfile() {
     local file
-    file="$(fzf)"
+    local dir
+    dir="$1"
+    if [ -z "$dir" ]; then
+        dir="$PWD"
+    fi
+    file="$(cd $dir; fzf)"
     if [ -z "$file" ]; then
         return 0
     fi
@@ -22,11 +36,12 @@ function pickfile() {
 }
 
 # Bindings
-bindkey -s '^o' pickfile
+bindkey -s '^o' pickfile         # <Ctrl-o>      : fzf current dir
 
+bindkey '^I' forward-word        # <Ctrl-Tab>    : accept word
+bindkey '^ ' autosuggest-accept  # <Ctrl-Space>  : accept all
+bindkey -s '\el' 'ls\n'          # <Esc-l>       : run command: ls
 
-bindkey '^I' forward-word #autosuggest-accept
-bindkey '^ ' autosuggest-accept
 
 _zsh_autosuggest_strategy_atuin-cwd() {
     suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode directory --cmd-only --search-mode prefix -- $BUFFER)
@@ -49,30 +64,18 @@ export ZSH_AUTOSUGGEST_STRATEGY=(
 )
 
 bindkey -e
-zstyle :compinstall filename '/home/willothy/.zshrc'
+zstyle :compinstall filename '/home/willothy/.config/zsh/.zshrc'
 
 autoload -Uz compinit
 
 compinit
 _comp_options+=(globdots)
 
-# End of lines added by compinstall
-
 test -z "$PROFILEREAD" && . /etc/profile || true
 
-plugins=(
-    git
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-    rust
-    gh
-    npm
-    ripgrep
-)
+source ${ZDOTDIR:-~}/antidote/antidote.zsh
 
-export ZSH="$HOME/.oh-my-zsh"
-source $ZSH/oh-my-zsh.sh
-
+antidote load
 
 # Td todos
 td init
@@ -123,7 +126,6 @@ function brightness() {
     sudo brightnessctl -d intel_backlight set "$1%"
 }
 
-# alias proj='cd $(pickfile $(pickfile ~/projects --prompt Language) --prompt Project)'
 
 export WORDCHARS='-_.'
 
@@ -156,12 +158,51 @@ alias la='exa -a --icons'
 alias ll='exa -l --icons'
 alias lla='exa -la --icons'
 
-# Dotfiles
-alias config="/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME"
+# Dotfiles / projects
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+function proj() {
+    local dir
+    dir=$(fd --type d --exclude .git --base-directory ~/projects --maxdepth 2 --min-depth 2 | fzf)
+    echo "$dir"
+    if [ -z "$dir" ]; then
+        return 0
+    fi
+    cd "$HOME/projects/$dir"
+}
 
 # Git
+
+function is_in_repo() {
+    # return true if command returned success
+    if /usr/bin/git rev-parse --git-dir > /dev/null 2>&1; then
+        return 0
+    elif config rev-parse --git-dir > /dev/null 2>&1; then
+        return 1
+    else
+        return 2
+    fi
+}
+
+# get current git dir, if any, including dotfiles dir
+function git_dir() {
+    local is_repo
+    is_in_repo
+    is_repo=$?
+    local dir
+
+    if [ $is_repo = 0 ]; then
+        /usr/bin/git rev-parse --git-dir
+    elif [ $is_repo = 1 ]; then
+        config rev-parse --git-dir
+    fi
+}
+
+# use dotfiles dir if not cloning repo and in non-repo subdir of dotfiles
 function git() {
-    if [ "$HOME" = "$PWD" ]; then
+    local dir
+    dir=$(git_dir)
+    if [ "$dir" != "" ] && [[ "$dir" =~ "$HOME/.dotfiles[/]?$" ]] && [ "$1" != "clone" ]; then
         config "$@"
     else
         /usr/bin/git "$@"
@@ -171,8 +212,11 @@ function git() {
 alias gs='git status'
 alias gsp='git status --porcelain'
 alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit --verbose'
+alias gau='git add --update'
 alias glog='git log'
-alias commit='git commit'
+alias commit='git commit --verbose'
 alias push='git push'
 alias pull='git pull'
 
