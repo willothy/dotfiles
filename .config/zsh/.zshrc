@@ -22,7 +22,6 @@ setopt HIST_EXPIRE_DUPS_FIRST
 setopt EXTENDED_HISTORY
 setopt HIST_VERIFY
 
-
 setopt PROMPT_SUBST
 
 export VISUAL="nvim -b"
@@ -91,6 +90,17 @@ function zvm_after_init() {
     zvm_bindkey vicmd '^[[B' down-line-or-beginning-search
     zvm_bindkey visual '^[[A' up-line-or-beginning-search
     zvm_bindkey visual '^[[B' down-line-or-beginning-search
+
+
+    # bindkey -rM visual "^r"
+    bindkey -r "^r"
+    bindkey -rM vicmd "^r"
+
+    # Atuin
+    eval "$(atuin init zsh --disable-up-arrow)"
+
+    zvm_bindkey vicmd "^r" _atuin_search_widget
+    zvm_bindkey visual "^r" _atuin_search_widget
 }
 
 fancy-ctrl-z () {
@@ -106,10 +116,6 @@ fancy-ctrl-z () {
 }
 zle -N fancy-ctrl-z
 bindkey '^Z' fancy-ctrl-z
-
-source "${ZDOTDIR:-~}/antidote/antidote.zsh"
-
-antidote load
 
 # autoload -U select-word-style
 # select-word-style normal
@@ -227,21 +233,22 @@ zstyle ':completion:*:*:*:users' ignored-patterns \
     operator pcap polkitd postfix postgres privoxy pulse pvm quagga radvd \
     rpc rpcuser rpm rtkit scard shutdown squid sshd statd svn sync tftp \
     usbmux uucp vcsa wwwrun xfs '_*'
-
-# Make zsh know about hosts already accessed by SSH
+#
+# # Make zsh know about hosts already accessed by SSH
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
 # Td todos
 td init
+
+source "${ZDOTDIR:-~}/antidote/antidote.zsh"
+
+antidote load
 
 # Neosuggest
 eval "$(neosuggest init)"
 
 # Zoxide
 eval "$(zoxide init zsh)"
-
-# Atuin
-eval "$(atuin init zsh --disable-up-arrow)"
 
 # Sesh wezterm integration using Usar Vars
 
@@ -369,7 +376,7 @@ function git_dir() {
 function git() {
     local dir
     dir=$(git_dir)
-    if [ "$dir" != "" ] && [[ "$dir" =~ $HOME/.dotfiles[/]?$ ]] && [ "$1" != "clone" ]; then
+    if [ "$dir" != "" ] && [[ "$dir" =~ $HOME/.dotfiles[/]?$ ]] && [ "$1" != "clone" ] && [ "$1" != "init" ]; then
         config "$@"
     else
         /usr/bin/git "$@"
@@ -402,5 +409,7 @@ alias -s zip="unzip -l"
 alias -s rar="unrar l"
 alias -s tar="tar tf"
 alias -s tar.gz="echo "
+
+
 
 zsh-startify
