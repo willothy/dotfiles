@@ -374,7 +374,7 @@ local function split_nav(resize_or_move, key)
 			end
 			if resize_or_move == "resize" then
 				win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
-        win:toast_notification("Moving pane", "Moving pane " .. direction_keys[key], "info", 1000)
+				win:toast_notification("Moving pane", "Moving pane " .. direction_keys[key], "info", 1000)
 			else
 				win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
 			end
@@ -383,7 +383,7 @@ local function split_nav(resize_or_move, key)
 end
 
 config.bypass_mouse_reporting_modifiers = "SHIFT"
--- config.disable_default_key_bindings = true
+config.disable_default_key_bindings = false
 
 -- config.leader = { key = "w", mods = "CTRL", timeout_milliseconds = 1000 }
 config.keys = {
@@ -433,6 +433,31 @@ config.keys = {
 		mods = "CMD",
 		action = sesh.attach.action,
 	},
+	{
+		key = "p",
+		mods = "CTRL|SHIFT",
+		action = act.ActivateCommandPalette,
+	},
+	{
+		key = "LeftArrow",
+		mods = "CTRL|SHIFT",
+		action = act.DisableDefaultAssignment,
+	},
+	{
+		key = "RightArrow",
+		mods = "CTRL|SHIFT",
+		action = act.DisableDefaultAssignment,
+	},
+	-- {
+	-- 	key = "5",
+	-- 	mods = "CTRL|ALT|SHIFT",
+	-- 	action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
+	-- },
+	-- {
+	-- 	key = "'",
+	-- 	mods = "CTRL|ALT|SHIFT",
+	-- 	action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+	-- },
 }
 
 local function _popup(title, message, opts)

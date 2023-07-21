@@ -20,22 +20,90 @@ setopt HIST_EXPIRE_DUPS_FIRST
 setopt EXTENDED_HISTORY
 setopt HIST_VERIFY
 
+
 setopt PROMPT_SUBST
 
 export VISUAL="nvim -b"
 export EDITOR="nvim"
 export BROWSER="brave"
 
+source "$ZDOTDIR/filetype.zsh"
 
 # plugin settings
 
-function zvm_config() {
-    ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
-    ZVM_VI_SURROUND_BINDKEY=classic
-    ZVM_READKEY_ENGINE=$ZVM_READKEY_ENGINE_NEX
+# Custom dircycle (modified from michaelxmcbride/zsh-dircycle) for compat with vi-mode
+_dircycle_update_cycled() {
+    setopt localoptions nopushdminus
+    if [ $ZVM_HACKY_INIT_DONE -eq 0 ]; then
+        zvm_select_vi_mode n
+        zvm_select_vi_mode i
+        ZVM_HACKY_INIT_DONE=1
+    fi
+
+    if [[ ${#dirstack} -eq 0 ]]; then
+        zle reset-prompt
+        return
+    fi
+
+    while ! builtin pushd -q "$1" &>/dev/null; do
+        # A missing directory was found; pop it out of the directory stack.
+        builtin popd -q "$1" || return
+
+        # Stop trying if there are no more directories in the directory stack.
+        [[ ${#dirstack} -eq 0 ]] && break
+    done
+    zle reset-prompt
 }
 
-zvm_after_init_commands+=("bindkey '^[[A' up-line-or-beginning-search" "bindkey '^[[B' down-line-or-beginning-search")
+_dircycle_insert_cycled_left() {
+    _dircycle_update_cycled +1
+}
+
+_dircycle_insert_cycled_right() {
+    _dircycle_update_cycled -0
+}
+
+ZVM_HACKY_INIT_DONE=0
+
+function zvm_config() {
+    ZVM_VI_SURROUND_BINDKEY=classic
+}
+
+function zvm_after_init() {
+    zle -N _dircycle_insert_cycled_left
+    zle -N _dircycle_insert_cycled_right
+
+    zvm_define_widget _dircycle_insert_cycled_left
+    zvm_define_widget _dircycle_insert_cycled_right
+
+    bindkey '^[[1;6D' _dircycle_insert_cycled_left
+    bindkey '^[[1;6C' _dircycle_insert_cycled_right
+
+    zvm_bindkey vicmd '^[[1;6D' _dircycle_insert_cycled_left
+    zvm_bindkey vicmd '^[[1;6C' _dircycle_insert_cycled_right
+
+    zvm_bindkey visual '^[[1;6D' _dircycle_insert_cycled_left
+    zvm_bindkey visual '^[[1;6C' _dircycle_insert_cycled_right
+
+    zvm_bindkey vicmd '^[[A' up-line-or-beginning-search
+    zvm_bindkey vicmd '^[[B' down-line-or-beginning-search
+    zvm_bindkey visual '^[[A' up-line-or-beginning-search
+    zvm_bindkey visual '^[[B' down-line-or-beginning-search
+}
+
+fancy-ctrl-z () {
+    if [[ $BUFFER = "" ]]; then
+        fg
+        zle accept-line
+    else
+        title "zsh"
+        zle push-input -w
+        zle clear-screen -w
+        zle reset-prompt -w
+    fi
+}
+zle -N fancy-ctrl-z
+bindkey '^Z' fancy-ctrl-z
 
 source "${ZDOTDIR:-~}/antidote/antidote.zsh"
 
@@ -52,6 +120,7 @@ function pick_and_edit() {
     else
         dir="$1"
     fi
+
     file="$(fd -t file --base-directory "$dir" | fzf)"
     if [ -z "$file" ]; then
         return 0
@@ -188,13 +257,8 @@ function tcled() {
 }
 PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" "$(echo -n "$SESH_NAME" | base64)")$PROMPT"
 
-function set_win_title(){
-    echo -ne "\033]0; zsh \007"
-}
-
 # Starship
 eval "$(starship init zsh)"
-precmd_functions+=(set_win_title)
 
 # handy aliases
 
@@ -205,7 +269,6 @@ function psf() {
 function brightness() {
     sudo brightnessctl -d intel_backlight set "$1%"
 }
-
 
 export WORDCHARS='-_.'
 
@@ -246,7 +309,7 @@ alias :q='exit'
 # Dotfiles / projects
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
-function fzdirs() {
+function fzd() {
     local dir
     local base
     local depth
@@ -262,20 +325,15 @@ function fzdirs() {
     if [ -z "$dir" ]; then
         return 0
     fi
-    cd "$dir" || return
+    cd "$base/$dir" || return
 }
 
-# function dots() {
-#
-# }
+function dots() {
+    fzd "$HOME/.config" 1
+}
 
 function proj() {
-    local dir
-    dir=$(fd --type d --exclude .git --base-directory ~/projects --maxdepth 2 --min-depth 2 | fzf)
-    if [ -z "$dir" ]; then
-        return 0
-    fi
-    cd "$HOME/projects/$dir" || return
+    fzd "$HOME/projects" 2
 }
 
 # Git
@@ -336,40 +394,6 @@ alias py="python"
 
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
-
-# zsh is able to auto-do some kungfoo
-# depends on the SUFFIX :)
-autoload -Uz is-at-least
-
-function filetype() {
-    alias -s $1=$2
-}
-
-# turn an array of (1 2 1 2) into ( (1 2) (1 2) )
-# then execute function provided as $1 on them
-function make_pairs() {
-    local -a pair
-    local -a array
-    array=("${@:2}")
-    for (( i=1; i < $#; i+=2 )); do
-        pair=("${array[$i]}" "${array[$i+1]}")
-        "$1" "${pair[@]}"
-    done
-}
-
-_editor_fts=(cpp cxx cc c hh h inl asc txt TXT tex rs lua py js ts css html)
-_editor_array=($EDITOR)
-make_pairs filetype "${_editor_fts[@]:^^_editor_array}"
-
-_browser_fts=(htm html de org net com at cx nl se dk)
-_browser_array=($BROWSER)
-make_pairs filetype "${_browser_fts[@]:^^_browser_array}"
-
-_media_fts=(ape avi flv m4a mkv mov mp3 mpeg mpg ogg ogm rm wav webm)
-_mplayer_array=(mplayer)
-make_pairs filetype "${_media_fts[@]:^^_mplayer_array}"
-
-# fold  $(map '$1' ${${_editor_fts[@]:^^_editor_array}[@]})
 
 #list whats inside packed file
 alias -s zip="unzip -l"

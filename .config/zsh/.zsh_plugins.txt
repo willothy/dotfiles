@@ -1,15 +1,16 @@
 zsh-users/zsh-autosuggestions
 zdharma-continuum/fast-syntax-highlighting
 mroth/evalcache
-jeffreytse/zsh-vi-mode
 zsh-users/zsh-completions
-mdumitru/fancy-ctrl-z
-bigH/git-fuzzy path:bin kind:path
 NorthIsMirror/zsh-startify
-trystan2k/zsh-tab-title
-Tarrasch/zsh-functional
+ael-code/zsh-colored-man-pages
+bigH/git-fuzzy path:bin kind:path
+#mdumitru/fancy-ctrl-z
+#michaelxmcbride/zsh-dircycle kind:defer
+jeffreytse/zsh-vi-mode
+
+#trystan2k/zsh-tab-title
 
 # defer
 wfxr/forgit kind:defer
-ael-code/zsh-colored-man-pages kind:defer
 Freed-Wu/zsh-command-not-found kind:defer
