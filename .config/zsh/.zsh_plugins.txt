@@ -1,4 +1,15 @@
 zsh-users/zsh-autosuggestions
-zsh-users/zsh-completions
 zdharma-continuum/fast-syntax-highlighting
-zsh-users/zsh-history-substring-search kind:defer
+mroth/evalcache
+jeffreytse/zsh-vi-mode
+zsh-users/zsh-completions
+mdumitru/fancy-ctrl-z
+bigH/git-fuzzy path:bin kind:path
+NorthIsMirror/zsh-startify
+trystan2k/zsh-tab-title
+Tarrasch/zsh-functional
+
+# defer
+wfxr/forgit kind:defer
+ael-code/zsh-colored-man-pages kind:defer
+Freed-Wu/zsh-command-not-found kind:defer
