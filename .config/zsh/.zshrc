@@ -4,6 +4,8 @@ if ! [[ -s "${HOME}/.rustup" ]]; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- --no-modify-path -y
 fi
 
+# source "$HOME/.cargo/env"
+export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/.local/bin:${PATH}"
 export PATH="/usr/local/bin:${PATH}"
 export PATH="/usr/bin:${PATH}"
