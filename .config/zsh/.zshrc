@@ -28,7 +28,7 @@ function pickfile() {
     if [ -z "$dir" ]; then
         dir="$PWD"
     fi
-    file="$(cd $dir; fzf)"
+    file="$(cd "$dir" || exit; fzf)"
     if [ -z "$file" ]; then
         return 0
     fi
@@ -44,15 +44,17 @@ bindkey -s '\el' 'ls\n'          # <Esc-l>       : run command: ls
 
 
 _zsh_autosuggest_strategy_atuin-cwd() {
-    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode directory --cmd-only --search-mode prefix -- $BUFFER)
+    suggestion="$(RUST_LOG=error atuin search --limit 1 --filter-mode directory --cmd-only --search-mode prefix -- "$BUFFER")"
 }
 
 _zsh_autosuggest_strategy_atuin-session() {
-    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode session --cmd-only --search-mode prefix -- $BUFFER)
+    suggestion="$(RUST_LOG=error atuin search --limit 1 --filter-mode session --cmd-only --search-mode prefix -- "$BUFFER")"
 }
 
 _zsh_autosuggest_strategy_atuin-global() {
-    suggestion=$(RUST_LOG=error atuin search --limit 1 --filter-mode global --cmd-only --search-mode prefix -- $BUFFER)
+    suggestion="$(RUST_LOG=error atuin search --limit 1 --filter-mode global --cmd-only --search-mode prefix -- "$BUFFER")"
+    local _x
+    _x=$suggestion
 }
 
 export ZSH_AUTOSUGGEST_STRATEGY=(
@@ -71,9 +73,9 @@ autoload -Uz compinit
 compinit
 _comp_options+=(globdots)
 
-test -z "$PROFILEREAD" && . /etc/profile || true
+test -z "$PROFILEREAD" && . /etc/profile
 
-source ${ZDOTDIR:-~}/antidote/antidote.zsh
+source "${ZDOTDIR:-~}/antidote/antidote.zsh"
 
 antidote load
 
@@ -99,14 +101,14 @@ export LS_COLORS=$LS_COLORS:'di=1;34:'
 export TCLED=0
 
 function tcled() {
-    if test $TCLED -eq 1; then
+    if test "$TCLED" -eq "1"; then
         TCLED=0
     else
         TCLED=1
     fi;
     echo "$TCLED" | sudo tee '/sys/class/leds/input28::capslock/brightness'
 }
-PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" `echo -n "$SESH_NAME" | base64`)$PROMPT"
+PROMPT="$(printf "\033]1337;SetUserVar=%s=%s\007" "sesh_name" "$(echo -n "$SESH_NAME" | base64)")$PROMPT"
 
 function set_win_title(){
     echo -ne "\033]0; zsh \007"
@@ -119,7 +121,7 @@ precmd_functions+=(set_win_title)
 # handy aliases
 
 function psf() {
-	ps -aux | rg -e "$1"
+    ps -aux | rg -e "$1"
 }
 
 function brightness() {
@@ -149,8 +151,6 @@ alias cat='bat'
 # Sesh
 alias detach='sesh detach'
 alias attach='sesh attach'
-alias exit='detach || exit'
-alias exit!='exec exit'
 
 # Ls / Exa
 alias ls='exa --icons'
@@ -161,14 +161,36 @@ alias lla='exa -la --icons'
 # Dotfiles / projects
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
-function proj() {
+function fzdirs() {
     local dir
-    dir=$(fd --type d --exclude .git --base-directory ~/projects --maxdepth 2 --min-depth 2 | fzf)
-    echo "$dir"
+    local base
+    local depth
+    base="$1"
+    depth="$2"
+    if [ -z "$depth" ]; then
+        depth=1
+    fi
+    if [ -z "$base" ]; then
+        base="$PWD"
+    fi
+    dir="$(fd --type d --exclude .git --base-directory "$base" --maxdepth "$depth" --min-depth "$depth" | fzf)"
     if [ -z "$dir" ]; then
         return 0
     fi
-    cd "$HOME/projects/$dir"
+    cd "$dir" || return
+}
+
+# function dots() {
+#
+# }
+
+function proj() {
+    local dir
+    dir=$(fd --type d --exclude .git --base-directory ~/projects --maxdepth 2 --min-depth 2 | fzf)
+    if [ -z "$dir" ]; then
+        return 0
+    fi
+    cd "$HOME/projects/$dir" || return
 }
 
 # Git
@@ -202,7 +224,7 @@ function git_dir() {
 function git() {
     local dir
     dir=$(git_dir)
-    if [ "$dir" != "" ] && [[ "$dir" =~ "$HOME/.dotfiles[/]?$" ]] && [ "$1" != "clone" ]; then
+    if [ "$dir" != "" ] && [[ "$dir" =~ $HOME/.dotfiles[/]?$ ]] && [ "$1" != "clone" ]; then
         config "$@"
     else
         /usr/bin/git "$@"
