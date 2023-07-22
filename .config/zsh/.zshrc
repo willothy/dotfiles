@@ -72,8 +72,10 @@ function zvm_config() {
 }
 
 function zvm_after_init() {
-    zle -N _dircycle_insert_cycled_left
-    zle -N _dircycle_insert_cycled_right
+    zvm_define_widget _dircycle_insert_cycled_left
+    zvm_define_widget _dircycle_insert_cycled_right
+    # zle -N _dircycle_insert_cycled_left
+    # zle -N _dircycle_insert_cycled_right
 
     zvm_define_widget _dircycle_insert_cycled_left
     zvm_define_widget _dircycle_insert_cycled_right
@@ -92,7 +94,6 @@ function zvm_after_init() {
     zvm_bindkey visual '^[[A' up-line-or-beginning-search
     zvm_bindkey visual '^[[B' down-line-or-beginning-search
 
-
     # bindkey -rM visual "^r"
     bindkey -r "^r"
     bindkey -rM vicmd "^r"
@@ -102,6 +103,36 @@ function zvm_after_init() {
 
     zvm_bindkey vicmd "^r" _atuin_search_widget
     zvm_bindkey visual "^r" _atuin_search_widget
+}
+
+
+# escape sequences
+bold_purple="\e[1;35m"
+bold_red="\e[1;31m"
+bold_green="\e[1;32m"
+bold_yellow="\e[1;33m"
+reset_color="\e[0m"
+
+# attempt at fixing starship prompt. didn't work.
+export ZVM_MODE_PROMPT="$bold_green->$reset"
+function zvm_after_select_vi_mode() {
+    case $ZVM_MODE in
+        "$ZVM_MODE_NORMAL")
+            ZVM_MODE_PROMPT="$bold_green ❮$reset"
+            ;;
+        "$ZVM_MODE_INSERT")
+            ZVM_MODE_PROMPT="$bold_green->$reset"
+            ;;
+        "$ZVM_MODE_VISUAL")
+            ZVM_MODE_PROMPT="$bold_yellow ❯$reset"
+            ;;
+        "$ZVM_MODE_VISUAL_LINE")
+            ZVM_MODE_PROMPT="$bold_yellow ❯$reset"
+            ;;
+        "$ZVM_MODE_REPLACE")
+            ZVM_MODE_PROMPT="$bold_red ❯$reset"
+            ;;
+    esac
 }
 
 fancy-ctrl-z () {

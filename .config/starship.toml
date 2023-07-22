@@ -39,7 +39,7 @@ threshold = 40
 
 [git_metrics]
 disabled = false
-only_nonzero_diffs=true
+only_nonzero_diffs = true
 
 [rust]
 style = 'red'
@@ -74,6 +74,18 @@ command = "echo $SESH_NAME"
 when = ''' test "$SESH_NAME" != "" '''
 format = '\[[$output]($style)\]'
 
+[custom.vi_mode]
+command = "echo $ZVM_MODE_PROMPT"
+when = ''' test "$ZVM_MODE_PROMPT" != "" '''
+format = '$output '
+
+[character]
+disabled = false
+success_symbol = "[->](green)"
+error_symbol = "[->](red)"
+vimcmd_symbol = "[<-](green)"
+vimcmd_visual_symbol = "[<-](yellow)"
+
 [git_branch]
 style = '#89ddff'
 format = 'on [$symbol](#8da3bf)[$branch(:$remote_branch)]($style)'
@@ -105,10 +117,6 @@ style_root = 'red'
 truncation_length = 4
 style = '#5de4c7'
 
-[character]
-disabled = false
-success_symbol = "[->](green)"
-error_symbol = "[->](red)"
 
 [jobs]
 style = 'blue'
