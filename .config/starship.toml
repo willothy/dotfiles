@@ -17,8 +17,9 @@ $sudo\
 $hostname\
 $line_break\
 $jobs\
-$character\
+${custom.vi_mode}
 """
+# $character\
 
 "$schema" = 'https://starship.rs/config-schema.json'
 

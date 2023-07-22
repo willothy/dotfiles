@@ -71,7 +71,44 @@ function zvm_config() {
     ZVM_VI_SURROUND_BINDKEY=classic
 }
 
+# escape sequences
+bold_purple="\e[1;35m"
+bold_red="\e[1;31m"
+bold_green="\e[1;32m"
+bold_yellow="\e[1;33m"
+bold_cyan="\e[1;36m"
+bold_blue="\e[1;34m"
+reset_color="\e[0m"
+
+function starship_vi_mode() {
+    case $ZVM_MODE in
+        "$ZVM_MODE_NORMAL")
+            ZVM_MODE_PROMPT="$bold_green->$reset"
+            zle reset-prompt
+            ;;
+        "$ZVM_MODE_INSERT")
+            ZVM_MODE_PROMPT="$bold_blue->$reset"
+            zle reset-prompt
+            ;;
+        "$ZVM_MODE_VISUAL")
+            ZVM_MODE_PROMPT="$bold_yellow->$reset"
+            zle reset-prompt
+            ;;
+        "$ZVM_MODE_VISUAL_LINE")
+            ZVM_MODE_PROMPT="$bold_yellow->$reset"
+            zle reset-prompt
+            ;;
+        "$ZVM_MODE_REPLACE")
+            ZVM_MODE_PROMPT="$bold_red->$reset"
+            zle reset-prompt
+            ;;
+    esac
+}
+# ❮ ❯
+export ZVM_MODE_PROMPT="$bold_blue->$reset"
+
 function zvm_after_init() {
+    zvm_define_widget starship_vi_mode
     zvm_define_widget _dircycle_insert_cycled_left
     zvm_define_widget _dircycle_insert_cycled_right
     # zle -N _dircycle_insert_cycled_left
@@ -103,36 +140,12 @@ function zvm_after_init() {
 
     zvm_bindkey vicmd "^r" _atuin_search_widget
     zvm_bindkey visual "^r" _atuin_search_widget
+
+    starship_vi_mode
 }
 
-
-# escape sequences
-bold_purple="\e[1;35m"
-bold_red="\e[1;31m"
-bold_green="\e[1;32m"
-bold_yellow="\e[1;33m"
-reset_color="\e[0m"
-
-# attempt at fixing starship prompt. didn't work.
-export ZVM_MODE_PROMPT="$bold_green->$reset"
 function zvm_after_select_vi_mode() {
-    case $ZVM_MODE in
-        "$ZVM_MODE_NORMAL")
-            ZVM_MODE_PROMPT="$bold_green ❮$reset"
-            ;;
-        "$ZVM_MODE_INSERT")
-            ZVM_MODE_PROMPT="$bold_green->$reset"
-            ;;
-        "$ZVM_MODE_VISUAL")
-            ZVM_MODE_PROMPT="$bold_yellow ❯$reset"
-            ;;
-        "$ZVM_MODE_VISUAL_LINE")
-            ZVM_MODE_PROMPT="$bold_yellow ❯$reset"
-            ;;
-        "$ZVM_MODE_REPLACE")
-            ZVM_MODE_PROMPT="$bold_red ❯$reset"
-            ;;
-    esac
+    starship_vi_mode
 }
 
 fancy-ctrl-z () {
@@ -442,7 +455,6 @@ alias -s zip="unzip -l"
 alias -s rar="unrar l"
 alias -s tar="tar tf"
 alias -s tar.gz="echo "
-
 
 
 zsh-startify
