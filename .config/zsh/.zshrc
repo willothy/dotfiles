@@ -31,7 +31,6 @@ source "$ZDOTDIR/aliases.zsh"
 # git-related functions
 source "$ZDOTDIR/git_utils.zsh"
 
-
 # zvm initialization functions
 # keymaps are sourced here as they need to load
 # lazily for ZVM to not overwrite them
