@@ -83,11 +83,11 @@ reset_color="\e[0m"
 function starship_vi_mode() {
     case $ZVM_MODE in
         "$ZVM_MODE_NORMAL")
-            ZVM_MODE_PROMPT="$bold_green->$reset"
+            ZVM_MODE_PROMPT="$bold_blue->$reset"
             zle reset-prompt
             ;;
         "$ZVM_MODE_INSERT")
-            ZVM_MODE_PROMPT="$bold_blue->$reset"
+            ZVM_MODE_PROMPT="$bold_green->$reset"
             zle reset-prompt
             ;;
         "$ZVM_MODE_VISUAL")
