@@ -391,6 +391,10 @@ function proj() {
     fzd "$HOME/projects" 2
 }
 
+function battery() {
+    upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep -E 'state|time to|percentage'
+}
+
 # Git
 
 function is_in_repo() {
