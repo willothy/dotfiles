@@ -53,3 +53,5 @@ eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
 source "$ZDOTDIR/startup.zsh"
+
+[ -f "/home/willothy/.ghcup/env" ] && source "/home/willothy/.ghcup/env" # ghcup-env
