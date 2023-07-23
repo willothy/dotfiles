@@ -12,3 +12,6 @@
 [submodule ".config/zsh/antidote"]
 	path = .config/zsh/antidote
 	url = git@github.com:mattmc3/antidote
+[submodule "vendor/awesome"]
+	path = vendor/awesome
+	url = git@github.com:awesomeWM/awesome
