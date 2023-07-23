@@ -25,11 +25,12 @@ source "$ZDOTDIR/completion.zsh"
 # custom autosuggestions sources (neosuggest and atuin)
 source "$ZDOTDIR/autosuggestions.zsh"
 
+# all aliases go here (for now)
+source "$ZDOTDIR/aliases.zsh"
+
 # git-related functions
 source "$ZDOTDIR/git_utils.zsh"
 
-# all aliases go here (for now)
-source "$ZDOTDIR/aliases.zsh"
 
 # zvm initialization functions
 # keymaps are sourced here as they need to load
