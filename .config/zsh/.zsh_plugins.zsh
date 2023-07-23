@@ -13,6 +13,7 @@ source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH
 export PATH="/home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-bigH-SLASH-git-fuzzy/bin:$PATH"
 fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-jeffreytse-SLASH-zsh-vi-mode )
 source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-jeffreytse-SLASH-zsh-vi-mode/zsh-vi-mode.plugin.zsh
+export PATH="/home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-dylanaraps-SLASH-pfetch:$PATH"
 if ! (( $+functions[zsh-defer] )); then
   fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-romkatv-SLASH-zsh-defer )
   source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-romkatv-SLASH-zsh-defer/zsh-defer.plugin.zsh

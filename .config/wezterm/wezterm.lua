@@ -521,7 +521,7 @@ end
 
 local entries_cache = {}
 
-wezterm.on("update-right-status", function(window, pane)
+local function make_right_status(window, pane)
 	local pwd = ""
 	if pane ~= nil then
 		local panewd = pane:get_current_working_dir()
@@ -619,7 +619,9 @@ wezterm.on("update-right-status", function(window, pane)
 		{ Text = icon_txt or "" },
 		{ Text = " " },
 	}))
-end)
+end
+
+wezterm.on("update-right-status", make_right_status)
 
 wezterm.on("augment-command-palette", function(_window, _pane)
 	return {

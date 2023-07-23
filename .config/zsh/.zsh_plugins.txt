@@ -10,6 +10,7 @@ bigH/git-fuzzy path:bin kind:path
 jeffreytse/zsh-vi-mode
 
 #trystan2k/zsh-tab-title
+dylanaraps/pfetch kind:path
 
 # defer
 wfxr/forgit kind:defer
