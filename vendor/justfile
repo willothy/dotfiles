@@ -1,0 +1,24 @@
+cfg:="git --git-dir=${HOME}/.dotfiles --work-tree=${HOME}"
+vendor:="${HOME}/vendor"
+
+list:
+    just --list
+
+update:
+    {{cfg}} submodule update --remote
+
+nvim:
+    #!/usr/bin/env bash 
+    {{cfg}} submodule update --remote {{vendor}}/neovim
+    cd {{vendor}}/neovim 
+    make CMAKE_BUILD_TYPE=Release 
+    sudo make install
+
+awesome:
+    #!/usr/bin/env bash 
+    {{cfg}} submodule update --init --recursive {{vendor}}/awesome
+    cd {{vendor}}/awesome 
+    make 
+    sudo make install
+
+all: nvim awesome
