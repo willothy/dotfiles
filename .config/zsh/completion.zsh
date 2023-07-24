@@ -1,3 +1,5 @@
+autoload -U compinit && compinit
+
 zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion::complete:*' gain-privileges 1
 zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
@@ -11,7 +13,7 @@ zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion:*:corrections' format ' %F{green}-- %d (errors: %e) --%f'
 zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
 zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
-zstyle ':completion:*' verbose yes
+#zstyle ':completion:*' verbose yes
 
 # Fuzzy match mistyped completions.
 zstyle ':completion:*' completer _complete _match _approximate
@@ -23,7 +25,7 @@ zstyle ':completion:*:approximate:*' max-errors 1 numeric
 zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3>7?7:($#PREFIX+$#SUFFIX)/3))numeric)'
 
 # Don't complete unavailable commands.
-zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
+zstyle ':completion:*:functions' ignored-patterns '(_*|__*|pre(cmd|exec))'
 
 # Array completion element sorting.
 zstyle ':completion:*:*:-subscript-:*' tag-order indexes parameters
@@ -74,9 +76,7 @@ zstyle ':completion:*:manuals.(^1*)' insert-sections true
 # # Make zsh know about hosts already accessed by SSH
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
-zstyle :compinstall filename '/home/willothy/.config/zsh/.zshrc'
-zstyle :compinstall filename '/home/willothy/.config/zsh/aliases.zsh'
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+source <(carapace _carapace)
 
 _comp_options+=(globdots)
-
-autoload -U compinit && compinit
