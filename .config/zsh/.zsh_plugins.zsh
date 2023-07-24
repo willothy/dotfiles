@@ -10,8 +10,6 @@ fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLA
 source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-jeffreytse-SLASH-zsh-vi-mode/zsh-vi-mode.plugin.zsh
 export PATH="/home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-bigH-SLASH-git-fuzzy/bin:$PATH"
 export PATH="/home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-tj-SLASH-git-extras/bin:$PATH"
-fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-marlonrichert-SLASH-zsh-autocomplete )
-source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-marlonrichert-SLASH-zsh-autocomplete/zsh-autocomplete.plugin.zsh
 fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-tj-SLASH-git-extras/etc )
 source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-tj-SLASH-git-extras/etc/git-extras-completion.zsh
 fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-zsh-users-SLASH-zsh-completions )

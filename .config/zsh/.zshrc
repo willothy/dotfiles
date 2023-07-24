@@ -1,11 +1,11 @@
 # dependency checks and boring stuff goes here
 source "$ZDOTDIR/init.zsh"
 
-# zsh settings
-source "$ZDOTDIR/settings.zsh"
-
 # env variables
 source "$ZDOTDIR/env.zsh"
+
+# zsh settings
+source "$ZDOTDIR/settings.zsh"
 
 # filetype aliases
 source "$ZDOTDIR/filetype.zsh"
@@ -18,6 +18,9 @@ source "$ZDOTDIR/prompt_utils.zsh"
 
 # utility functions and stuff
 source "$ZDOTDIR/functions.zsh"
+
+# compinit
+source "$ZDOTDIR/completion.zsh"
 
 # custom autosuggestions sources (neosuggest and atuin)
 source "$ZDOTDIR/autosuggestions.zsh"
@@ -36,9 +39,6 @@ source "$ZDOTDIR/zvm.zsh"
 # load antidote and initialize plugins
 source "$ZDOTDIR/antidote/antidote.zsh"
 antidote load
-
-# compinit
-# source "$ZDOTDIR/completion.zsh"
 
 # map caps to escape for vim purposes
 setxkbmap -option caps:escape

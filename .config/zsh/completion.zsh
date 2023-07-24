@@ -24,13 +24,3 @@ zstyle :compinstall filename '/home/willothy/.config/zsh/aliases.zsh'
 _comp_options+=(globdots)
 
 autoload -U compinit && compinit
-
-# Execute code in the background to not affect the current session
-# I don't remember where I got this but allegedly it makes zsh startup faster lol
-{
-    # Compile zcompdump, if modified, to increase startup speed.
-    zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
-    if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
-        zcompile "$zcompdump"
-    fi
-} &!

@@ -7,8 +7,6 @@ jeffreytse/zsh-vi-mode
 bigH/git-fuzzy path:bin kind:path
 tj/git-extras path:bin kind:path
 
-marlonrichert/zsh-autocomplete
-
 tj/git-extras path:etc
 zsh-users/zsh-completions
 
