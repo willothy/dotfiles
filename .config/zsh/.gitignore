@@ -1,3 +1,4 @@
 .zcompdump
 *.bak
 .zcompdump*
+.zsh_history

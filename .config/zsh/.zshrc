@@ -19,11 +19,11 @@ source "$ZDOTDIR/prompt_utils.zsh"
 # utility functions and stuff
 source "$ZDOTDIR/functions.zsh"
 
-# compinit
-source "$ZDOTDIR/completion.zsh"
-
 # custom autosuggestions sources (neosuggest and atuin)
 source "$ZDOTDIR/autosuggestions.zsh"
+
+# compinit
+source "$ZDOTDIR/completion.zsh"
 
 # all aliases go here (for now)
 source "$ZDOTDIR/aliases.zsh"
