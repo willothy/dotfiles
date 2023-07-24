@@ -9,7 +9,7 @@ update:
 
 nvim:
     #!/usr/bin/env bash 
-    {{cfg}} submodule update --remote {{vendor}}/neovim
+    {{cfg}} submodule update --init --recursive {{vendor}}/neovim
     cd {{vendor}}/neovim 
     make CMAKE_BUILD_TYPE=Release 
     sudo make install

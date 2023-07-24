@@ -19,9 +19,6 @@ source "$ZDOTDIR/prompt_utils.zsh"
 # utility functions and stuff
 source "$ZDOTDIR/functions.zsh"
 
-# compinit
-source "$ZDOTDIR/completion.zsh"
-
 # custom autosuggestions sources (neosuggest and atuin)
 source "$ZDOTDIR/autosuggestions.zsh"
 
@@ -30,6 +27,9 @@ source "$ZDOTDIR/aliases.zsh"
 
 # git-related functions
 source "$ZDOTDIR/git_utils.zsh"
+
+# compinit
+source "$ZDOTDIR/completion.zsh"
 
 # zvm initialization functions
 # keymaps are sourced here as they need to load
@@ -53,5 +53,3 @@ eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
 source "$ZDOTDIR/startup.zsh"
-
-[ -f "/home/willothy/.ghcup/env" ] && source "/home/willothy/.ghcup/env" # ghcup-env

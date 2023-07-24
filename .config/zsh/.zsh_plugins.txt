@@ -1,12 +1,11 @@
+zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 zdharma-continuum/fast-syntax-highlighting
 mroth/evalcache
-zsh-users/zsh-completions
 ael-code/zsh-colored-man-pages
 jeffreytse/zsh-vi-mode
 
 bigH/git-fuzzy path:bin kind:path
 
 # defer
-wfxr/forgit kind:defer
 Freed-Wu/zsh-command-not-found kind:defer

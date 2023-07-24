@@ -42,13 +42,17 @@ alias glog='git log'
 alias commit='git commit --verbose'
 alias push='git push'
 alias pull='git pull'
+alias grb='git rebase'
+alias gspop='git stash pop'
+alias gspush='git stash push'
+alias gsdrop='git stash drop'
 
 # Python
 alias python3="python"
 alias py="python"
 
 # RIP
-#alias rm="rip"
+alias rm="rip"
 
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
