@@ -51,9 +51,6 @@ alias gsdrop='git stash drop'
 alias python3="python"
 alias py="python"
 
-# RIP
-alias rm="rip"
-
 # Cloak
 alias otp="cloak view" # otp github -> cloak view github
 
