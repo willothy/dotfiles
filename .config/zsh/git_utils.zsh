@@ -1,6 +1,6 @@
 
 # depends on "config" alias, source before aliases.zsh
-function is_in_repo() {
+function __is_in_repo() {
     # return true if command returned success
     if /usr/bin/git rev-parse --git-dir > /dev/null 2>&1; then
         return 0
@@ -12,9 +12,9 @@ function is_in_repo() {
 }
 
 # get current git dir, if any, including dotfiles dir
-function git_dir() {
+function __git_dir() {
     local is_repo
-    is_in_repo
+    __is_in_repo
     is_repo=$?
     local dir
 
@@ -28,7 +28,7 @@ function git_dir() {
 # use dotfiles dir if not cloning repo and in non-repo subdir of dotfiles
 function git() {
     local dir
-    dir=$(git_dir)
+    dir=$(__git_dir)
     if [ "$dir" != "" ] && [[ "$dir" =~ $HOME/.dotfiles[/]?$ ]] && [ "$1" != "clone" ] && [ "$1" != "init" ]; then
         config "$@"
     else

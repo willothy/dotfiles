@@ -3,6 +3,7 @@ zstyle ':completion::complete:*' gain-privileges 1
 zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*' use-cache yes
 zstyle '*' single-ignored show
+zstyle ':completion:*' complete-options true
 
 zstyle ':completion:*:*:*:users' ignored-patterns \
     adm amanda apache at avahi avahi-autoipd beaglidx bin cacti canna \
@@ -18,17 +19,18 @@ zstyle ':completion:*:*:*:users' ignored-patterns \
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
 zstyle :compinstall filename '/home/willothy/.config/zsh/.zshrc'
+zstyle :compinstall filename '/home/willothy/.config/zsh/aliases.zsh'
 
-autoload -Uz compinit
-
-compinit
 _comp_options+=(globdots)
 
+autoload -U compinit && compinit
+
 # Execute code in the background to not affect the current session
-# {
-#     # Compile zcompdump, if modified, to increase startup speed.
-#     zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
-#     if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
-#         zcompile "$zcompdump"
-#     fi
-# } &!
+# I don't remember where I got this but allegedly it makes zsh startup faster lol
+{
+    # Compile zcompdump, if modified, to increase startup speed.
+    zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
+    if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
+        zcompile "$zcompdump"
+    fi
+} &!

@@ -28,9 +28,6 @@ source "$ZDOTDIR/aliases.zsh"
 # git-related functions
 source "$ZDOTDIR/git_utils.zsh"
 
-# compinit
-source "$ZDOTDIR/completion.zsh"
-
 # zvm initialization functions
 # keymaps are sourced here as they need to load
 # lazily for ZVM to not overwrite them
@@ -39,6 +36,9 @@ source "$ZDOTDIR/zvm.zsh"
 # load antidote and initialize plugins
 source "$ZDOTDIR/antidote/antidote.zsh"
 antidote load
+
+# compinit
+# source "$ZDOTDIR/completion.zsh"
 
 # map caps to escape for vim purposes
 setxkbmap -option caps:escape
