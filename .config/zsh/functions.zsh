@@ -78,3 +78,7 @@ function proj() {
 function battery() {
     upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep -E 'state|time to|percentage'
 }
+
+function disable-fn-lock() {
+    echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode
+}
