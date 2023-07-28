@@ -273,6 +273,8 @@ config.font = wezterm.font_with_fallback({
 	"FiraMono Nerd Font",
 	"Bruh-Font",
 })
+config.underline_thickness = 1
+config.underline_position = -2.0
 
 -- config.allow_square_glyphs_to_overflow_width = "Always"
 config.allow_square_glyphs_to_overflow_width = "Never"

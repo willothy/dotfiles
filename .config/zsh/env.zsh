@@ -10,9 +10,7 @@ export PATH="${HOME}/vendor/zig:${PATH}"
 export WORDCHARS='-_.'
 export LS_COLORS=$LS_COLORS:'di=1;34:'
 
-#export SRC_ENDPOINT="https://sourcegraph.com"
-#export SRC_ACCESS_TOKEN="$(lpass show --field=Key Sourcegraph)"
-
+#export TERM="wezterm"
 export VISUAL="nvim -b"
 export EDITOR="nvim"
 export BROWSER="brave"

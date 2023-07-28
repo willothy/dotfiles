@@ -67,6 +67,13 @@ function fzd() {
     cd "$base/$dir" || return
 }
 
+function __wezterm_terminfo() {
+    tempfile=$(mktemp)
+    curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/master/termwiz/data/wezterm.terminfo
+    tic -x -o ~/.terminfo $tempfile
+    rm $tempfile
+}
+
 function dots() {
     fzd "$HOME/.config" 1
 }
@@ -77,6 +84,11 @@ function proj() {
 
 function battery() {
     upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep -E 'state|time to|percentage'
+}
+
+function sourcegraph_login() {
+    export SRC_ENDPOINT="https://sourcegraph.com/"
+    export SRC_ACCESS_TOKEN="$(lpass show --field=Key Sourcegraph)"
 }
 
 function disable-fn-lock() {

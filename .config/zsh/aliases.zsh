@@ -1,8 +1,9 @@
 # Neovim
-alias nv="nvim"
-alias v="nvim"
-alias vim="nvim"
-alias vi="nvim"
+alias nv="TERM=wezterm nvim"
+alias v="TERM=wezterm nvim"
+alias vim="TERM=wezterm nvim"
+alias vi="TERM=wezterm nvim"
+alias nvim="TERM=wezterm nvim"
 alias nvcfg="nvim ~/.config/nvim/"
 
 # Zoxide
