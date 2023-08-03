@@ -1,8 +1,8 @@
 zsh-users/zsh-autosuggestions
 zdharma-continuum/fast-syntax-highlighting
-mroth/evalcache
 ael-code/zsh-colored-man-pages
 jeffreytse/zsh-vi-mode
+mroth/evalcache
 
 bigH/git-fuzzy path:bin kind:path
 tj/git-extras path:bin kind:path
