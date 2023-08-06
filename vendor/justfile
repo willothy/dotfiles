@@ -9,16 +9,16 @@ update:
 
 nvim:
     #!/usr/bin/env bash 
-    {{cfg}} submodule update --init --recursive {{vendor}}/neovim
+    {{cfg}} submodule update --remote {{vendor}}/neovim
     cd {{vendor}}/neovim 
     make CMAKE_BUILD_TYPE=Release 
     sudo make install
 
 awesome:
     #!/usr/bin/env bash 
-    {{cfg}} submodule update --init --recursive {{vendor}}/awesome
+    {{cfg}} submodule update --remote {{vendor}}/awesome
     cd {{vendor}}/awesome 
     make 
     sudo make install
 
-all: nvim awesome
+all: nvim awesome 
