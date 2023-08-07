@@ -11,8 +11,8 @@ _zsh_autosuggest_strategy_atuin-global() {
 }
 
 export ZSH_AUTOSUGGEST_STRATEGY=(
-    atuin-cwd      # pwd history
     neosuggest     # pwd files/dirs and zoxide
+    atuin-cwd      # pwd history
     atuin-session  # session history
     atuin-global   # global history
     completion     # base zsh completion
