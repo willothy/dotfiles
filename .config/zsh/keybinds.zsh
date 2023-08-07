@@ -4,6 +4,8 @@ bindkey '^[[1;6C' _dircycle_insert_cycled_right
 # bindkey -rM visual "^r"
 bindkey -r "^r"
 bindkey -rM vicmd "^r"
+bindkey -r "^j"
+bindkey -rM vicmd "^j"
 
 # Atuin
 eval "$(atuin init zsh --disable-up-arrow)"

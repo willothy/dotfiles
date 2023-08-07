@@ -342,8 +342,12 @@ end
 -- end
 
 local function is_vim(pane)
+	-- local vim = {
+	-- 	vim = true,
+	-- 	nvim = true,
+	-- }
 	-- this is set by the plugin, and unset on ExitPre in Neovim
-	return pane:get_user_vars().IS_NVIM == "true" -- or get_proc_title(pane) == "nvim" or get_proc_title(pane) == "vim"
+	return (pane:get_user_vars().IS_NVIM == "true") -- or vim[get_proc_title(pane)] == true
 end
 
 local direction_keys = {
@@ -362,18 +366,58 @@ local direction_keys = {
 	RightArrow = "Right",
 }
 
+-- local hjkl = {
+-- 	Up = "k",
+-- 	Down = "j",
+-- 	Left = "h",
+-- 	Right = "l",
+-- 	h = "h",
+-- 	j = "j",
+-- 	k = "k",
+-- 	l = "l",
+-- 	UpArrow = "k",
+-- 	DownArrow = "j",
+-- 	LeftArrow = "h",
+-- 	RightArrow = "l",
+-- }
+
 local function split_nav(resize_or_move, key)
 	local mods = resize_or_move == "resize" and "ALT" or "CTRL"
 	return {
 		key = key,
 		mods = mods,
 		action = wezterm.action_callback(function(win, pane)
-			if is_vim(pane) then
+			-- if is_zellij(pane) then
+			-- 	if resize_or_move == "resize" then
+			-- 		win:perform_action({
+			-- 			SendKey = { key = "n", mods = "CTRL" },
+			-- 		}, pane)
+			-- 	else
+			-- 		win:perform_action({
+			-- 			SendKey = { key = "p", mods = "CTRL" },
+			-- 		}, pane)
+			-- 	end
+			-- 	win:perform_action({
+			-- 		SendKey = { key = key },
+			-- 	}, pane)
+			-- 	return
+			-- end
+
+			local vim = is_vim(pane)
+
+			local matches = {
+				zellij = true,
+				rx = true,
+			}
+
+			local exe = basename(pane:get_foreground_process_info().executable)
+			if vim or matches[exe] then
 				win:perform_action({
 					SendKey = { key = key, mods = mods },
 				}, pane)
 				return
 			end
+
 			if resize_or_move == "resize" then
 				win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
 			else
