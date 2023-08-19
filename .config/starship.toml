@@ -73,7 +73,7 @@ when = ''' test "$NVIM" != "" '''
 style = '#5de4c7'
 command = "echo $SESH_NAME"
 when = ''' test "$SESH_NAME" != "" '''
-format = '\[[$output]($style)\]'
+format = '\[[$output]($style)\] '
 
 [custom.vi_mode]
 command = "echo $ZVM_MODE_PROMPT"
