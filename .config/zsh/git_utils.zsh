@@ -35,3 +35,7 @@ function git() {
         /usr/bin/git "$@"
     fi
 }
+
+function git_root() {
+    git rev-parse --show-toplevel
+}
