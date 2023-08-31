@@ -453,8 +453,9 @@ wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, _max
 		{ Text = icon },
 		{ Foreground = { Color = "#9196c2" } },
 		{ Text = title },
-		-- { Text = " " },
+		{ Text = " " },
 		-- { Text = get_current_working_dir(tab, 1) },
+		-- { Text = " " },
 	}
 end)
 
