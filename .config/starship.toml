@@ -11,14 +11,16 @@ $lua\
 $python\
 $nodejs\
 $c\
-$fill\ 
-$git_metrics\
-$sudo\
-$hostname\
 $line_break\
 $jobs\
 ${custom.vi_mode}
 """
+
+# $fill\
+# $git_metrics\
+# $sudo\
+# $hostname\
+
 # $character\
 
 "$schema" = 'https://starship.rs/config-schema.json'

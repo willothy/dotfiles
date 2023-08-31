@@ -121,27 +121,18 @@ local function exists(file)
 	return f and io.close(f)
 end
 
--- Lua implementation of PHP scandir function
-function scandir(directory)
-	local i, t, popen = 0, {}, io.popen
-	local pfile = popen('ls -a "' .. directory .. '"')
-	for filename in pfile:lines() do
-		i = i + 1
-		t[i] = filename
-	end
-	pfile:close()
-	return t
-end
-
-local function gitcheck(directory)
-	local d = directory
-	if not exists(d) then
+local function gitcheck(dir)
+	if not exists(dir) then
 		return nil
 	end
-	while #d > 1 and not exists(d .. "/.git") do
-		d = d:gsub("/+[^/]*$", "")
+	local prefix = "/"
+	if dir:sub(#dir) == "/" then
+		prefix = ""
 	end
-	return #d > 0 and d or directory
+	while #dir > 1 and not exists(dir .. prefix .. ".git") do
+		dir = dir:gsub("/+[^/]*$", "")
+	end
+	return #dir > 0 and dir or dir
 end
 
 ---Returns the dir relative to git root, or the original dir
@@ -167,19 +158,10 @@ end
 
 local HOME = wezterm.home_dir
 
-local pane_cwd_cache = {}
-
 local function get_current_working_dir(tab, max)
 	local pane = tab.active_pane
-	local pwd = ""
+	local pwd = tostring(pane.current_working_dir):gsub("file://%a+/", "/")
 
-	if pane_cwd_cache[pane.pane_id] ~= nil then
-		pwd = pane_cwd_cache[pane.pane_id]
-	else
-		pwd = pane.current_working_dir:gsub("%w+://%w+/", "/")
-	end
-
-	-- pwd = get_git_root(pwd, false)
 	pwd = pwd:gsub(HOME, "~")
 	if pwd == "~/" then
 		return "~"
@@ -208,66 +190,17 @@ local function get_current_working_dir(tab, max)
 			pwd = pwd .. split[i] .. "/"
 		end
 		pwd = pwd .. split[#split]
-		-- return string.format("~/%s/%s", split[2], split[#split])
 		return pwd
 	end
 	return pwd
 end
 
 local function get_proc_title(pane)
-	return (pane.title or pane:get_foreground_process_name()):gsub("^%s+", ""):gsub("%s+$", "")
+	return (pane.title or pane:get_foreground_process_name()):gsub("^%s+", ""):gsub("%s+$", ""):match("[^/]+$")
 end
 
-local function get_process(tab)
-	-- local shell = os.getenv("SHELL") or "bash"
-	-- local process_name = string.gsub(tab.active_pane.foreground_process_name, "(.*[/\\])(.*)", "%2")
-	-- local process_name = tab.active_pane.title --string.gsub(tab.active_pane.title, "(.*[/\\])(.*)", "%2")
-	local title = get_proc_title(tab.active_pane)
-
-	if process_icons[title] ~= nil then
-		return wezterm.format({
-			{ Text = " " },
-			process_icons[title],
-			{ Text = " " },
-		})
-	else
-		return wezterm.format({
-			{ Text = string.format(" %s", title) },
-		})
-	end
-end
-
--- wezterm.gui.gui_windows
-
--- local pane = os.getenv("WEZTERM_PANE")
--- -- local pane = wezterm.mux.get_pane(pane):tab()
--- local tab
---
--- for _, win in ipairs(wezterm.gui.gui_windows()) do
--- 	if win:is_focused() then
--- 		tab = win.active_tab:tab_id()
--- 	end
--- end
-
--- pane = wezterm.mux.
--- l ocal ok, wins = pcall(wezterm.gui.gui_windows)
-
--- local wins = wezterm.mux.all_windows()
--- local tab = wins[1]
--- if tab then
--- 	tab = tab:active_tab():tab_id()
--- 	config.set_environment_variables = {
--- 		WEZTERM_PID = tostring(wezterm.procinfo.pid()),
--- 		WEZTERM_TAB = tostring(tab),
--- 		-- WEZTERM_TAB = pane or "0",
--- 		-- WEZTERM_TAB = wezterm.mux.get_pane(0):tab(),
--- 		-- WEZTERM_TAB = wezterm.gui:get_window_for_mux_window(wezterm.mux:get_window()):active_tab():tab_id(),
--- 	}
--- end
-
---config.default_cwd = "~"
 config.animation_fps = 30
-config.max_fps = 30
+config.max_fps = 60
 config.font = wezterm.font_with_fallback({
 	"Maple Mono",
 	"FiraMono Nerd Font",
@@ -335,12 +268,6 @@ local function basename(s)
 	return string.gsub(s, "(.*[/\\])(.*)", "%2")
 end
 
--- local function is_vim(pane)
--- 	-- local process_name = string.lower(pane:get_title())
--- 	local process_name = string.gsub(pane:get_foreground_process_name(), "(.*[/\\])(.*)", "%2")
--- 	return process_name == "nvim" or process_name == "vim"
--- end
-
 local function is_vim(pane)
 	-- local vim = {
 	-- 	vim = true,
@@ -366,43 +293,12 @@ local direction_keys = {
 	RightArrow = "Right",
 }
 
--- local hjkl = {
--- 	Up = "k",
--- 	Down = "j",
--- 	Left = "h",
--- 	Right = "l",
--- 	h = "h",
--- 	j = "j",
--- 	k = "k",
--- 	l = "l",
--- 	UpArrow = "k",
--- 	DownArrow = "j",
--- 	LeftArrow = "h",
--- 	RightArrow = "l",
--- }
-
 local function split_nav(resize_or_move, key)
 	local mods = resize_or_move == "resize" and "ALT" or "CTRL"
 	return {
 		key = key,
 		mods = mods,
 		action = wezterm.action_callback(function(win, pane)
-			-- if is_zellij(pane) then
-			-- 	if resize_or_move == "resize" then
-			-- 		win:perform_action({
-			-- 			SendKey = { key = "n", mods = "CTRL" },
-			-- 		}, pane)
-			-- 	else
-			-- 		win:perform_action({
-			-- 			SendKey = { key = "p", mods = "CTRL" },
-			-- 		}, pane)
-			-- 	end
-			-- 	win:perform_action({
-			-- 		SendKey = { key = key },
-			-- 	}, pane)
-			-- 	return
-			-- end
-
 			local vim = is_vim(pane)
 
 			local matches = {
@@ -522,13 +418,27 @@ end
 -- 	wezterm.open_with(uri, "brave")
 -- end)
 
-wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, max_width)
+wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, _max_width)
 	local has_unseen_output = false
 	for _, pane in ipairs(tab.panes) do
 		if pane.has_unseen_output then
 			has_unseen_output = true
 			break
 		end
+	end
+	local title = get_proc_title(tab.active_pane)
+
+	local icon
+	if process_icons[title] ~= nil then
+		icon = wezterm.format({
+			{ Text = " " },
+			process_icons[title],
+			{ Text = " " },
+		})
+	else
+		icon = wezterm.format({
+			{ Text = string.format(" %s", title) },
+		})
 	end
 	return {
 		hover and {
@@ -540,12 +450,11 @@ wezterm.on("format-tab-title", function(tab, _tabs, _panes, _config, hover, max_
 					or (tab.is_active and palette.turquoise or "#9196c2"),
 			},
 		},
-		{ Text = get_process(tab) },
+		{ Text = icon },
 		{ Foreground = { Color = "#9196c2" } },
-		{ Text = " " },
-		-- { Text = tab.active_pane.current_working_dir },
-		{ Text = get_current_working_dir(tab, math.min(max_width, 14)) },
-		{ Text = " " },
+		{ Text = title },
+		-- { Text = " " },
+		-- { Text = get_current_working_dir(tab, 1) },
 	}
 end)
 
@@ -569,7 +478,7 @@ local entries_cache = {}
 local function make_right_status(window, pane)
 	local pwd = ""
 	if pane ~= nil then
-		local panewd = pane:get_current_working_dir()
+		local panewd = tostring(pane:get_current_working_dir())
 		if panewd and panewd ~= "" then
 			pwd = get_git_root(panewd:gsub("%w+://%w+/", "/"), false)
 		end
@@ -586,9 +495,9 @@ local function make_right_status(window, pane)
 			or entries_cache[pwd].timestamp + 10 < os.time()
 		then
 			entries_cache[pwd] = nil
-			entries = scandir(pwd .. "/")
+			entries = wezterm.read_dir(pwd .. "/")
 			if exists(pwd .. "/src/") then
-				for _, v in ipairs(scandir(pwd .. "/src/")) do
+				for _, v in ipairs(wezterm.read_dir(pwd .. "/src/")) do
 					table.insert(entries, v)
 				end
 			end
@@ -655,7 +564,7 @@ local function make_right_status(window, pane)
 				if name == nil or name == "" then
 					return ""
 				else
-					return string.format("%s %s ", name, "∘")
+					return string.format("%s %s", name, "∘")
 				end
 			end)(),
 		},
@@ -714,5 +623,7 @@ config.hyperlink_rules = {
 	-- GitHub or GitLab / BitBucket (i.e. https://gitlab.com/user/project.git is still a whole clickable URL)
 	{ regex = [["([\w\d]{1}[-\w\d]+)(/){1}([-\w\d\.]+)"]], format = "https://www.github.com/$1/$3" },
 }
+
+config.warn_about_missing_glyphs = false
 
 return config
