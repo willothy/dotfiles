@@ -43,7 +43,7 @@ command.silent_cmd("edit", "open in editor", command.completers.path(true, false
 	if args ~= "" and xplr.util.exists(xplr.util.absolute(args)) then
 		file = xplr.util.absolute(args)
 	end
-	file = file or app.focused_node.absolute_path
+	file = file:gsub("~", os.getenv("HOME")) or app.focused_node.absolute_path
 	---@return string?
 	local function try_addr(addr)
 		if addr and xplr.util.exists(addr) then
