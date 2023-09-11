@@ -4,14 +4,9 @@ local home = os.getenv("HOME")
 local xpm_path = home .. "/.local/share/xplr/dtomvan/xpm.xplr"
 local xpm_url = "https://github.com/dtomvan/xpm.xplr"
 
-package.path = package.path
-	.. ";"
-	.. xpm_path
-	.. "/?.lua;"
-	.. xpm_path
-	.. "/?/init.lua;"
-	.. home
-	.. "/projects/lua/?/init.lua;"
+package.path = package.path .. ";" .. xpm_path .. "/?.lua;" .. xpm_path .. "/?/init.lua;"
+-- .. home
+-- .. "/projects/lua/?/init.lua;"
 -- .. home
 -- .. "/.config/xplr/?/init.lua;"
 
@@ -22,7 +17,7 @@ require("xpm").setup({
 	plugins = {
 		"dtomvan/xpm.xplr",
 		"sayanarijit/map.xplr",
-		-- "willothy/command-mode.xplr",
+		"willothy/command-mode.xplr",
 		"sayanarijit/type-to-nav.xplr",
 	},
 	auto_install = true,
