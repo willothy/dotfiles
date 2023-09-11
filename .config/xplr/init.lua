@@ -72,7 +72,9 @@ command.silent_cmd("edit", "open in editor", command.completers.path)(function(a
 				{
 					Call = {
 						command = "nvim",
-						args = { "--server", valid, "--remote", file },
+						args = {
+							file,
+						},
 					},
 				},
 			}
@@ -91,6 +93,19 @@ command.silent_cmd("edit", "open in editor", command.completers.path)(function(a
 				},
 			},
 		},
+	}
+end)
+
+command.silent_cmd("cd", "change directory", command.completers.path)(function(app, args)
+	if not xplr.util.is_dir(args) then
+		if xplr.util.is_dir(app.pwd .. "/" .. args) then
+			args = app.pwd .. "/" .. args
+		else
+			return {}
+		end
+	end
+	return {
+		{ ChangeDirectory = args },
 	}
 end)
 
