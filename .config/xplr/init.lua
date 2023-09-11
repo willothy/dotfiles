@@ -42,7 +42,7 @@ command.setup({
 
 local run_path = "/var/run/user/1000"
 
-command.silent_cmd("edit", "open in editor", command.completers.path)(function(app, args)
+command.silent_cmd("edit", "open in editor", command.completers.path(true, false))(function(app, args)
 	args = args:gsub("^%s+", "")
 	local file
 	if args ~= "" and xplr.util.exists(xplr.util.absolute(args)) then
@@ -96,14 +96,8 @@ command.silent_cmd("edit", "open in editor", command.completers.path)(function(a
 	}
 end)
 
-command.silent_cmd("cd", "change directory", command.completers.path)(function(app, args)
-	if not xplr.util.is_dir(args) then
-		if xplr.util.is_dir(app.pwd .. "/" .. args) then
-			args = app.pwd .. "/" .. args
-		else
-			return {}
-		end
-	end
+command.silent_cmd("cd", "change directory", command.completers.path(true, true))(function(app, args)
+	args = args:gsub("~", os.getenv("HOME"))
 	return {
 		{ ChangeDirectory = args },
 	}
