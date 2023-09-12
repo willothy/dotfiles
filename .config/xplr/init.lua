@@ -24,6 +24,8 @@ require("xpm").setup({
 	auto_cleanup = true,
 })
 
+require("map").setup()
+
 local command = require("command-mode")
 
 command.setup({
