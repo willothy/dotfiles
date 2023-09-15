@@ -100,6 +100,12 @@ command.silent_cmd("cd", "change directory", command.completers.path(true, true)
 	}
 end)
 
+command.cmd("log", "view logs")(function()
+	return {
+		{ SwitchLayoutBuiltin = "input_and_logs" },
+	}
+end)
+
 command.cmd("q", "quit")(function()
 	return {
 		"Quit",
