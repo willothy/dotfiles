@@ -37,3 +37,12 @@ _dircycle_insert_cycled_right() {
 
 zle -N _dircycle_insert_cycled_left
 zle -N _dircycle_insert_cycled_right
+
+function dupd() {
+    local dir
+    dir=$dirstack[1]
+    if [[ -z $dir ]]; then
+        dir=$PWD
+    fi
+    builtin pushd "$dir"
+}
