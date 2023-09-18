@@ -204,7 +204,7 @@ config.max_fps = 60
 config.font = wezterm.font_with_fallback({
 	"Maple Mono",
 	"FiraMono Nerd Font",
-	"Bruh-Font",
+	-- "Bruh-Font",
 })
 config.underline_thickness = 1
 config.underline_position = -2.0
