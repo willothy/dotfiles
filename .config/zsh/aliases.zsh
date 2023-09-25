@@ -17,10 +17,10 @@ alias detach='sesh detach'
 alias attach='sesh attach'
 
 # Ls / Exa
-alias ls='exa --icons'
-alias la='exa -a --icons'
-alias ll='exa -l --icons'
-alias lla='exa -la --icons'
+alias ls='eza --icons'
+alias la='eza -a --icons'
+alias ll='eza -l --icons'
+alias lla='eza -la --icons'
 
 # cd
 alias ..='cd ..'
