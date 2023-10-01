@@ -10,6 +10,18 @@ if wezterm.config_builder then
 	config:set_strict_mode(false)
 end
 
+config.webgpu_preferred_adapter = {
+	backend = "Vulkan",
+	device = 7040,
+	device_type = "DiscreteGpu",
+	driver = "NVIDIA",
+	driver_info = "535.113.01",
+	name = "NVIDIA GeForce GTX 1080",
+	vendor = 4318,
+}
+config.front_end = "WebGpu"
+-- config.front_end = "OpenGL"
+
 local process_icons = {
 	["docker"] = {
 		Text = nf.linux_docker,
