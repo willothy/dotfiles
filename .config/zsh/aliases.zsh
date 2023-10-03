@@ -6,6 +6,9 @@ alias vi="TERM=wezterm nvim"
 alias nvim="TERM=wezterm nvim"
 alias nvcfg="nvim ~/.config/nvim/"
 
+# Safe rm
+# alias rm='rip'
+
 # Zoxide
 alias cd='z'
 
