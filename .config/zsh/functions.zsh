@@ -94,3 +94,10 @@ function sourcegraph_login() {
 function disable-fn-lock() {
     echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode
 }
+
+# Kill all processes via pgrep
+function killall() {
+    for pid in $(pgrep "$1"); do
+        kill -9 "$pid"
+    done
+}
