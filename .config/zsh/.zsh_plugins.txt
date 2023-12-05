@@ -10,5 +10,7 @@ tj/git-extras path:bin kind:path
 tj/git-extras path:etc
 zsh-users/zsh-completions
 
+chrisgrieser/zsh-magic-dashboard
+
 # defer
 Freed-Wu/zsh-command-not-found kind:defer

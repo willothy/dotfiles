@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Neovim
 alias nv="TERM=wezterm nvim"
 alias v="TERM=wezterm nvim"
@@ -5,6 +7,9 @@ alias vim="TERM=wezterm nvim"
 alias vi="TERM=wezterm nvim"
 alias nvim="TERM=wezterm nvim"
 alias nvcfg="nvim ~/.config/nvim/"
+
+# Walk
+alias w="walk"
 
 # Safe rm
 # alias rm='rip'

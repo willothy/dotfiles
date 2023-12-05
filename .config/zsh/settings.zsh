@@ -11,3 +11,5 @@ setopt HIST_VERIFY
 
 setopt PROMPT_SUBST
 unset zle_bracketed_paste
+
+. "${ZDOTDIR}/plugin_settings.zsh"
