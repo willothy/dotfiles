@@ -630,8 +630,10 @@ config.hyperlink_rules = {
 	-- GitHub or GitLab / BitBucket (i.e. https://gitlab.com/user/project.git is still a whole clickable URL)
 	{ regex = [["([\w\d]{1}[-\w\d]+)(/){1}([-\w\d\.]+)"]], format = "https://www.github.com/$1/$3" },
 
-	{ regex = [[localhost:\d+]], format = "http://localhost:$1" },
+	{ regex = [[localhost:(\d+)]], format = "http://localhost:$1" },
 }
+
+local x = "localhost:23233"
 
 config.warn_about_missing_glyphs = false
 
