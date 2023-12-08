@@ -637,4 +637,6 @@ local x = "localhost:23233"
 
 config.warn_about_missing_glyphs = false
 
+config.enable_kitty_keyboard = true
+
 return config
