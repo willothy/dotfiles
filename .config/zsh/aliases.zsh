@@ -68,3 +68,7 @@ alias -s zip="unzip -l"
 alias -s rar="unrar l"
 alias -s tar="tar tf"
 alias -s tar.gz="echo "
+
+
+# sesh
+# alias exit='sesh detach || exit' # do I want this?
