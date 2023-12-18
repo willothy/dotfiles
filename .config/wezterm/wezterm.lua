@@ -262,9 +262,10 @@ config.window_decorations = "RESIZE"
 
 config.window_padding = {
 	top = 5,
-	bottom = 1,
+	-- bottom = 1,
+	bottom = "0.0cell",
 	left = 10,
-	right = 10,
+	right = 8,
 }
 
 config.launch_menu = {
@@ -400,6 +401,11 @@ config.keys = {
 	{
 		key = "RightArrow",
 		mods = "CTRL|SHIFT",
+		action = act.DisableDefaultAssignment,
+	},
+	{
+		key = "Enter",
+		mods = "ALT",
 		action = act.DisableDefaultAssignment,
 	},
 	-- {
