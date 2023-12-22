@@ -250,6 +250,7 @@ config.window_frame = {
 -- config.window_background_opacity = 0.9
 config.colors = {
 	background = "#26283f",
+	-- background = "#0d1117",
 	-- cursor_bg = "#26283f",
 }
 
