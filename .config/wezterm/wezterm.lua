@@ -332,7 +332,24 @@ local function split_nav(resize_or_move, key)
 			if resize_or_move == "resize" then
 				win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
 			else
-				win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
+				local dir = direction_keys[key]
+
+				local tab = win:mux_window():active_tab()
+				local next_pane = tab and tab:get_pane_direction(direction_keys[key])
+				if next_pane and next_pane:pane_id() ~= pane:pane_id() then
+					next_pane:activate()
+				else
+					local offset
+					if dir == "Left" then
+						offset = -1
+					else --if dir == "Right" then
+						offset = 1
+					end
+
+					if offset then
+						win:perform_action({ ActivateTabRelative = offset }, pane)
+					end
+				end
 			end
 		end),
 	}
