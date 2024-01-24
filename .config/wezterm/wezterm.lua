@@ -595,6 +595,18 @@ local function make_right_status(window, pane)
 		{ Foreground = { Color = "#9196c2" } },
 		{
 			Text = (function()
+				-- local name = pane:get_user_vars().sesh_name
+				local name = pane:get_user_vars().IS_NVIM
+				-- i don't know if user vars are typed in any way
+				if name == nil or name == "" or tostring(name) == "false" then
+					return ""
+				else
+					return string.format("%s ", "")
+				end
+			end)(),
+		},
+		{
+			Text = (function()
 				local name = pane:get_user_vars().sesh_name
 				if name == nil or name == "" then
 					return ""
