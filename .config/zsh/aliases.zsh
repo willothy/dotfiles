@@ -60,9 +60,6 @@ alias gsdrop='git stash drop'
 alias python3="python"
 alias py="python"
 
-# Cloak
-alias otp="cloak view" # otp github -> cloak view github
-
 # list whats inside packed file
 alias -s zip="unzip -l"
 alias -s rar="unrar l"

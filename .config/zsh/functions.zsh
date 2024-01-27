@@ -96,8 +96,15 @@ function disable-fn-lock() {
 }
 
 # Kill all processes via pgrep
-function killall() {
-    for pid in $(pgrep "$1"); do
-        kill -9 "$pid"
-    done
+# function killall() {
+#     for pid in $(pgrep "$1"); do
+#         kill -9 "$pid"
+#     done
+# }
+
+
+# Cloak
+# otp github -> cloak view github | xsel --clipboard
+function otp() {
+    cloak view "$1" | xsel --clipboard
 }
