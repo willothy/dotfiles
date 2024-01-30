@@ -70,6 +70,8 @@ config.window_padding = {
 
 config.launch_menu = {}
 
+package.loaded.nvim = nil
+package.loaded.keymap = nil
 local nvim = require("nvim")
 local keymap = require("keymap")
 
