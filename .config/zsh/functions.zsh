@@ -108,3 +108,8 @@ function disable-fn-lock() {
 function otp() {
     cloak view "$1" | xsel --clipboard
 }
+
+function clean-nvim-sockets() {
+    rm /var/run/user/1000/nvim*
+    rm /var/run/user/1000/wezterm.nvim*
+}
