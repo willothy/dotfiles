@@ -1,0 +1,49 @@
+# Maintainer: Will Hopkins <willothyh@gmail.com>
+
+pkgbase=luajit
+pkgname=luajit-latest
+pkgver=2.1.r152.g9cc2e42b
+pkgrel=1
+pkgdesc="LuaJIT, built from git"
+arch=('i686' 'x86_64')
+url="https://luajit.org/"
+license=('MIT')
+depends=(
+  'gcc-libs'
+)
+makedepends=(
+  'git'
+)
+provides=(
+  "luajit=$pkgver"
+)
+conflicts=(
+  'luajit'
+)
+options=(
+  'staticlibs'
+)
+source=(
+  "git+https://luajit.org/git/luajit.git"
+)
+sha256sums=('SKIP')
+
+
+pkgver() {
+  cd "$pkgbase" || exit 1
+
+  git describe --tags | sed 's/^v//;s/-/./g' | sed 's/\.ROLLING\./.r/'
+}
+
+build() {
+  cd "$pkgbase" || exit 1
+
+  make
+}
+
+package() {
+  cd "$pkgbase" || exit 1
+
+  make DESTDIR="$pkgdir" PREFIX="/usr" install
+  install -Dm644 "COPYRIGHT" -t "$pkgdir/usr/share/licenses/luajit"
+}
