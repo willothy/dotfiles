@@ -15,3 +15,6 @@
 [submodule "vendor/awesome"]
 	path = vendor/awesome
 	url = git@github.com:awesomeWM/awesome
+[submodule "vendor/pkgbuilds"]
+	path = vendor/pkgbuilds
+	url = git@github.com:willothy/pkgbuilds.git
