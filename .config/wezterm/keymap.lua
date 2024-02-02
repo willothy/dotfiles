@@ -46,6 +46,10 @@ function keymap.disabled(map)
 		key = "Enter",
 		mods = "ALT",
 		action = action.DisableDefaultAssignment,
+	}, {
+		key = "w",
+		mods = "CMD",
+		action = action.DisableDefaultAssignment,
 	})
 end
 
