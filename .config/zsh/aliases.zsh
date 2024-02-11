@@ -66,6 +66,7 @@ alias -s rar="unrar l"
 alias -s tar="tar tf"
 alias -s tar.gz="echo "
 
+alias sudo='sudo -A'
 
 # sesh
 # alias exit='sesh detach || exit' # do I want this?
