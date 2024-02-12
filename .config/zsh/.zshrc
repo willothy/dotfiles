@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # dependency checks and boring stuff goes here
 source "$ZDOTDIR/init.zsh"
 

@@ -14,11 +14,3 @@ fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLA
 source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-tj-SLASH-git-extras/etc/git-extras-completion.zsh
 fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-zsh-users-SLASH-zsh-completions )
 source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-zsh-users-SLASH-zsh-completions/zsh-completions.plugin.zsh
-fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-chrisgrieser-SLASH-zsh-magic-dashboard )
-source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-chrisgrieser-SLASH-zsh-magic-dashboard/magic_dashboard.zsh
-if ! (( $+functions[zsh-defer] )); then
-  fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-romkatv-SLASH-zsh-defer )
-  source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-romkatv-SLASH-zsh-defer/zsh-defer.plugin.zsh
-fi
-fpath+=( /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-Freed-Wu-SLASH-zsh-command-not-found )
-zsh-defer source /home/willothy/.cache/antidote/https-COLON--SLASH--SLASH-github.com-SLASH-Freed-Wu-SLASH-zsh-command-not-found/command-not-found.plugin.zsh

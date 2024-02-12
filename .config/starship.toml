@@ -13,8 +13,10 @@ $nodejs\
 $c\
 $line_break\
 $jobs\
-${custom.vi_mode}
+${custom.vi_mode}\
+$character
 """
+
 
 # $fill\
 # $git_metrics\
@@ -78,12 +80,13 @@ when = ''' test "$SESH_NAME" != "" '''
 format = '\[[$output]($style)\] '
 
 [custom.vi_mode]
+disabled = false
 command = "echo $ZVM_MODE_PROMPT"
 when = ''' test "$ZVM_MODE_PROMPT" != "" '''
 format = '$output '
 
 [character]
-disabled = false
+disabled = true
 success_symbol = "[->](green)"
 error_symbol = "[->](red)"
 vimcmd_symbol = "[<-](green)"
@@ -120,11 +123,12 @@ style_root = 'red'
 truncation_length = 4
 style = '#5de4c7'
 
-
 [jobs]
 style = 'blue'
+format = '[$number]($style) '
 disabled = false
 symbol_threshold = 0
+number_threshold = 0
 
 [line_break]
 disabled = false

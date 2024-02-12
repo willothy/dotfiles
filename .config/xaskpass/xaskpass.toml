@@ -5,7 +5,7 @@
 # Use 'none' to use the processes' parent pid
 title = 'none'
 # Try to grab keyboard but back off if it cannot be done.
-grab_keyboard = true
+grab_keyboard = false
 show_hostname = true
 resizable = false
 # setting this to other than 32 uses the root depth
