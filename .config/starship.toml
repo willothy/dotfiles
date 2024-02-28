@@ -123,12 +123,12 @@ style_root = 'red'
 truncation_length = 4
 style = '#5de4c7'
 
-[jobs]
+[jobs] 
 style = 'blue'
-format = '[$number]($style) '
-disabled = false
+format = '[$number]($style)'
+disabled = true # there's an issue with the char width of the symbol in zsh
 symbol_threshold = 0
-number_threshold = 0
+number_threshold = 1
 
 [line_break]
 disabled = false
