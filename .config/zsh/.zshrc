@@ -55,3 +55,6 @@ eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
 source "$ZDOTDIR/startup.zsh"
+
+# bun completions
+[ -s "/home/willothy/.bun/_bun" ] && source "/home/willothy/.bun/_bun"
