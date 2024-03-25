@@ -113,3 +113,11 @@ function clean-nvim-sockets() {
     rm /var/run/user/1000/nvim*
     rm /var/run/user/1000/wezterm.nvim*
 }
+
+# Reboot to Windows in a grub-based dual boot system
+function to-windows() {
+    if gum confirm "Switch to Windows?"; then
+      windows_title=$(sudo grep -i windows /boot/grub/grub.cfg | cut -d "'" -f 2)
+      sudo grub-reboot "$windows_title" && sudo reboot
+    fi
+}
