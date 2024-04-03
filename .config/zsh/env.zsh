@@ -12,9 +12,15 @@ export PATH="${HOME}/vendor/zig:${PATH}"
 # Turso
 export PATH="/home/willothy/.turso:$PATH"
 
+# export ANDROID_HOME="${HOME}/android-sdk"
+# export PATH="$ANDROID_HOME/tools/bin/:$PATH"
+# export JAVA_HOME="/usr/lib/jvm/java-21-openjdk/"
+
 # export WORDCHARS='-_.'
 # export LS_COLORS=$LS_COLORS:'di=1;34:'
 
 # fix for Nix
 export LC_ALL="C"
-. "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+fi
