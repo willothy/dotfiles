@@ -121,3 +121,8 @@ function to-windows() {
       sudo grub-reboot "$windows_title" && sudo reboot
     fi
 }
+
+# I don't want to type this whole command every time
+function list-disks() {
+  lsblk --output "NAME,FSTYPE,LABEL,SIZE,MOUNTPOINTS,FSUSE%"
+}
