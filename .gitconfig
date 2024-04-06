@@ -1,7 +1,9 @@
 [user]
 	email = willothyh@gmail.com
 	name = Will Hopkins
-	signingkey = 8A45C5F17A0FB60B93B42473643B8C585BABBB68!
+	signingKey = ~/.ssh/id_ed25519.pub
+[gpg]
+	format = ssh
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
