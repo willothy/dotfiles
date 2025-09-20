@@ -9,6 +9,7 @@
       ./services/xserver.nix
       ./services/audio.nix
       ./services/desktop.nix
+      ./services/sccache.nix
     ];
 
   nix = {
@@ -92,6 +93,7 @@
     rustup
     nodejs
     python312
+    sccache
 
     luajit
     luajitPackages.luarocks
@@ -121,6 +123,9 @@
   programs.fish.enable = true;
   programs.zsh.enable = true;
   programs.bash.enable = true;
+
+  programs._1password.enable = true;
+  programs._1password-gui.enable = true;
 
   # Install firefox.
   programs.firefox.enable = true;

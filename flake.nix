@@ -12,19 +12,31 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
+    nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
+
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @inputs:
     let
       system = "x86_64-linux";
 
-      config = {
-        allowUnfree = true;
+      overlays = {
+        sccache = import ./overlays/sccache.nix;
       };
 
       pkgs = import nixpkgs {
         inherit system;
-        inherit config;
+
+        config = {
+          allowUnfree = true;
+        };
+
+        overlays = [
+          overlays.sccache
+        ];
       };
     in
     {
@@ -38,6 +50,13 @@
           };
 
           modules = [
+            {
+              nix.settings = {
+                substituters = [ "https://cosmic.cachix.org/" ];
+                trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
+              };
+            }
+            inputs.nixos-cosmic.nixosModules.default
             ./nixos/configuration.nix
             home-manager.nixosModules.home-manager
             {
@@ -56,5 +75,6 @@
           ];
         };
       };
+
     };
 }

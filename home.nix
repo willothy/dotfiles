@@ -206,4 +206,37 @@ in
       aliases = { };
     };
   };
+
+  programs.ssh =
+    let
+      darwin = pkgs.system == "aarch64-darwin";
+      socket =
+        if darwin then
+          "/Users/willothy/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        else
+          "/home/willothy/.1password/agent.sock"
+      ;
+      orbstack =
+        if darwin then
+          "Include /Users/willothy/.orbstack/ssh/config"
+        else
+          ""
+      ;
+    in
+    {
+      enable = true;
+      enableDefaultConfig = false;
+      matchBlocks = {
+        "*" = {
+          host = "*";
+          extraOptions.IdentityAgent = ''"${socket}"'';
+          forwardAgent = true;
+        };
+      };
+      extraConfig = ''
+        SetEnv TERM="xterm-256color"
+
+        ${orbstack}
+      '';
+    };
 }
