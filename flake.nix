@@ -14,7 +14,8 @@
     };
 
     # nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
-    nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
+    # nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
+    nixos-cosmic.url = "github:willothy/nixos-cosmic";
 
     flake-utils.url = "github:numtide/flake-utils";
   };

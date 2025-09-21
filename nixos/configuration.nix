@@ -106,6 +106,8 @@
 
     # libraries
     sqlite
+    libclang
+    clang
 
     # cli tools
     jq
@@ -126,6 +128,14 @@
 
   programs._1password.enable = true;
   programs._1password-gui.enable = true;
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      libclang
+      sqlite
+    ];
+  };
 
   # Install firefox.
   programs.firefox.enable = true;
