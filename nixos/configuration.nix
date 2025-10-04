@@ -78,6 +78,8 @@
       '';
     })
 
+    coreutils
+
     # usually need right away
     curl
     wget
@@ -120,6 +122,10 @@
     ghostty
 
     nautilus
+
+    # wayland clipboard fix
+    wl-clipboard
+    # wayclip
   ];
 
   programs.fish.enable = true;
@@ -128,6 +134,7 @@
 
   programs._1password.enable = true;
   programs._1password-gui.enable = true;
+  programs._1password-gui.polkitPolicyOwners = [ "willothy" ];
 
   programs.nix-ld = {
     enable = true;
@@ -158,6 +165,7 @@
   programs.hyprland.withUWSM = true;
   programs.hyprland.xwayland.enable = true;
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  # environment.sessionVariables.COSMIC_DATA_CONTROL_ENABLED = 1;
 
   environment.variables = {
     EDITOR = "vim";

@@ -65,7 +65,7 @@ in
 
       # Function to check if a command/binary exists
       function has
-          command -v $argv[1] >/dev/null 2>&1
+        command -v $argv[1] >/dev/null 2>&1
       end
 
       if set -q NVIM
@@ -80,10 +80,10 @@ in
         set fish_vi_force_cursor 1
       end
 
-      bind -e -M insert \t
-      bind -M insert \t forward-word
-      bind -M insert -k up history-prefix-search-backward
-      bind -M insert -k down history-prefix-search-forward
+      bind -e -M insert tab
+      bind -M insert tab forward-word
+      bind -M insert up history-prefix-search-backward
+      bind -M insert down history-prefix-search-forward
 
       # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
       #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
@@ -111,6 +111,8 @@ in
     package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
   };
 
+  home.file.".config/ghostty/config".source = ./configs/ghostty/config;
+
   # lua/plugins/* gets autoloaded by Lazy, so I use this to
   # do required nix-specific setup.
   home.file.".config/nvim/plugin/nix.lua" =
@@ -136,7 +138,7 @@ in
 
   programs.atuin = {
     enable = true;
-    enableBashIntegration = true;
+    #enableBashIntegration = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
     settings = {
@@ -168,7 +170,7 @@ in
 
   programs.zoxide = {
     enable = true;
-    enableBashIntegration = true;
+    #enableBashIntegration = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
     options = [
@@ -179,7 +181,7 @@ in
   programs.eza = {
     enable = true;
     enableFishIntegration = true;
-    enableBashIntegration = true;
+    #enableBashIntegration = true;
     enableZshIntegration = true;
     icons = "auto";
     git = true;
@@ -188,7 +190,7 @@ in
   programs.nix-index = {
     enable = true;
     enableFishIntegration = true;
-    enableBashIntegration = true;
+    #enableBashIntegration = true;
     enableZshIntegration = true;
   };
 
@@ -199,7 +201,7 @@ in
   programs.carapace = {
     enable = true;
     enableFishIntegration = true;
-    enableBashIntegration = true;
+    #enableBashIntegration = true;
     enableZshIntegration = true;
   };
 

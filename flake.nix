@@ -15,9 +15,11 @@
 
     # nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     # nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
-    nixos-cosmic.url = "github:willothy/nixos-cosmic";
+    # nixos-cosmic.url = "github:willothy/nixos-cosmic";
 
     flake-utils.url = "github:numtide/flake-utils";
+
+    # refindgen.url = "github:willothy/refindgen";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @inputs:
@@ -26,6 +28,7 @@
 
       overlays = {
         sccache = import ./overlays/sccache.nix;
+        refind = import ./overlays/refind.nix;
       };
 
       pkgs = import nixpkgs {
@@ -37,6 +40,8 @@
 
         overlays = [
           overlays.sccache
+          overlays.refind
+          # inputs.refindgen.overlays.default
         ];
       };
     in
@@ -53,11 +58,14 @@
           modules = [
             {
               nix.settings = {
-                substituters = [ "https://cosmic.cachix.org/" ];
-                trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
+                # substituters = [ "https://cosmic.cachix.org/" ];
+                # trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
               };
+              disabledModules = [ "system/boot/loader/refind/refind.nix" ];
             }
-            inputs.nixos-cosmic.nixosModules.default
+            ./modules/nixos/refind/default.nix
+            # inputs.refindgen.nixosModules.default
+            # inputs.nixos-cosmic.nixosModules.default
             ./nixos/configuration.nix
             home-manager.nixosModules.home-manager
             {
