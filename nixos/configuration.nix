@@ -45,7 +45,7 @@
   users.users.willothy = {
     isNormalUser = true;
     description = "Will Hopkins";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     packages = with pkgs; [
 
     ];
@@ -54,7 +54,7 @@
 
   environment.systemPackages = with pkgs; [
     # I will go insane without this
-    (vim_configurable.customize {
+    (vim-full.customize {
       vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
         start = [ vim-nix vim-lastplace ];
         opt = [ ];
@@ -80,6 +80,9 @@
 
     coreutils
 
+    # secure boot
+    sbctl
+
     # usually need right away
     curl
     wget
@@ -93,7 +96,9 @@
     gcc
     pkg-config
     rustup
+    zig
     nodejs
+    bun
     python312
     sccache
 
@@ -110,6 +115,13 @@
     sqlite
     libclang
     clang
+    protobuf
+
+    # vulkan
+    vulkan-loader
+    vulkan-headers
+    vulkan-validation-layers
+    vulkan-tools
 
     # cli tools
     jq
@@ -123,6 +135,8 @@
 
     nautilus
 
+    kubectl
+
     # wayland clipboard fix
     wl-clipboard
     # wayclip
@@ -130,22 +144,39 @@
 
   programs.fish.enable = true;
   programs.zsh.enable = true;
-  programs.bash.enable = true;
+  programs.bash = {
+    enable = true;
+    completion.enable = true;
+  };
 
   programs._1password.enable = true;
   programs._1password-gui.enable = true;
   programs._1password-gui.polkitPolicyOwners = [ "willothy" ];
 
+  security.polkit.enable = true;
+
+  virtualisation.docker = {
+    enable = true;
+  };
+
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [
+      libGL
+      libxkbcommon
       libclang
       sqlite
+      vulkan-headers
+      vulkan-loader
+      vulkan-tools
+      wayland
+      ncurses
     ];
   };
 
   # Install firefox.
   programs.firefox.enable = true;
+  programs.chromium.enable = true;
 
   programs.nautilus-open-any-terminal = {
     enable = true;
@@ -161,6 +192,19 @@
     };
   };
 
+  programs.vscode = {
+    enable = true;
+    defaultEditor = false;
+    extensions = with pkgs.vscode-extensions; [
+      github.copilot
+      github.copilot-chat
+      rust-lang.rust-analyzer
+      eamodio.gitlens
+      usernamehw.errorlens
+      vscodevim.vim
+    ];
+  };
+
   programs.hyprland.enable = true;
   programs.hyprland.withUWSM = true;
   programs.hyprland.xwayland.enable = true;
@@ -172,7 +216,7 @@
   };
 
   environment.shells = with pkgs; [
-    bash
+    bashInteractive
     zsh
     fish
   ];
@@ -181,6 +225,10 @@
     nerd-fonts.fira-mono
     nerd-fonts.jetbrains-mono
   ];
+
+  services.tailscale = {
+    enable = true;
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

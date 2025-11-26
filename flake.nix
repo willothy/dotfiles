@@ -19,6 +19,19 @@
 
     flake-utils.url = "github:numtide/flake-utils";
 
+    lanzaboote = {
+      # url = "github:nix-community/lanzaboote/v0.4.2";
+      url = "github:willothy/lanzaboote/refind";
+
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # refindgen.url = "github:willothy/refindgen";
   };
 
@@ -67,6 +80,7 @@
             # inputs.refindgen.nixosModules.default
             # inputs.nixos-cosmic.nixosModules.default
             ./nixos/configuration.nix
+            inputs.lanzaboote.nixosModules.lanzaboote
             home-manager.nixosModules.home-manager
             {
               home-manager = {

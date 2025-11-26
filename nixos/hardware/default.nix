@@ -3,6 +3,13 @@
   hardware.cpu.amd.updateMicrocode = true;
   hardware.i2c.enable = true;
 
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+
+    ];
+  };
+
   hardware.nvidia = {
     modesetting.enable = true;
 

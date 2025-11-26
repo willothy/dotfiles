@@ -22,22 +22,34 @@ in
   home.homeDirectory = "/home/willothy";
   home.stateVersion = "25.05";
 
+  home.packages = with pkgs; [
+    claude-code
+  ];
+
+  # programs.zed-editor = {
+  #   enable = true;
+  # };
+
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      light = false;
+    };
+  };
+
   programs.git = {
     enable = true;
-    userName = "Will Hopkins";
-    userEmail = "willothyh@gmail.com";
     signing = {
       # key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
       # signByDefault = true;
     };
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        light = false;
+    settings = {
+      user = {
+        name = "Will Hopkins";
+        email = "willothyh@gmail.com";
       };
-    };
-    extraConfig = {
       init = {
         defaultBranch = "main";
       };
@@ -80,8 +92,8 @@ in
         set fish_vi_force_cursor 1
       end
 
-      bind -e -M insert tab
-      bind -M insert tab forward-word
+      # bind -e -M insert tab
+      # bind -M insert tab forward-word
       bind -M insert up history-prefix-search-backward
       bind -M insert down history-prefix-search-forward
 
@@ -97,6 +109,8 @@ in
 
   programs.bash = {
     enable = true;
+    package = pkgs.bashInteractive;
+
     inherit shellAliases;
   };
 

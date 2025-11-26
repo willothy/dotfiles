@@ -140,8 +140,9 @@ def config_entry(is_sub: bool, bootspec: BootSpec, label: str, time: str) -> str
     return entry
 
 
-def generate_config_entry(profile: str, gen: str, special: bool, group_name: str) -> str:
-    time = datetime.datetime.fromtimestamp(os.stat(get_system_path(profile,gen), follow_symlinks=False).st_mtime).strftime("%F %H:%M:%S")
+def generate_single_gen_entry(profile: str, gen: str, is_submenu: bool, group_name: str) -> str:
+    """Generate a simple boot entry for a single generation (used in submenus)"""
+    time = datetime.datetime.fromtimestamp(os.stat(get_system_path(profile, gen), follow_symlinks=False).st_mtime).strftime("%F %H:%M:%S")
     boot_json = json.load(open(os.path.join(get_system_path(profile, gen), 'boot.json'), 'r'))
     boot_spec = bootjson_to_bootspec(boot_json)
 
@@ -149,7 +150,7 @@ def generate_config_entry(profile: str, gen: str, special: bool, group_name: str
     entry = ""
 
     if len(specialisation_list) > 0:
-        entry += f'menuentry "NixOS {group_name} Generation {gen}" {{\n'
+        entry += ('sub' if is_submenu else '') + f'menuentry "NixOS {group_name} Generation {gen}" {{\n'
         entry += config_entry(True, boot_spec, f'Default', str(time))
 
         for spec, spec_boot_spec in specialisation_list:
@@ -157,7 +158,45 @@ def generate_config_entry(profile: str, gen: str, special: bool, group_name: str
 
         entry += '}\n'
     else:
-        entry += config_entry(False, boot_spec, f'NixOS {group_name} Generation {gen}', str(time))
+        entry += config_entry(is_submenu, boot_spec, f'NixOS {group_name} Generation {gen}', str(time))
+    return entry
+
+
+def generate_config_entry_with_older(profile: str, gens: List[int], group_name: str) -> str:
+    """Generate entry for latest generation with older generations as submenus"""
+    if len(gens) == 0:
+        return ""
+
+    sorted_gens = sorted(gens, key=lambda x: x, reverse=True)
+    latest_gen = sorted_gens[0]
+    older_gens = sorted_gens[1:]
+
+    time = datetime.datetime.fromtimestamp(os.stat(get_system_path(profile, latest_gen), follow_symlinks=False).st_mtime).strftime("%F %H:%M:%S")
+    boot_json = json.load(open(os.path.join(get_system_path(profile, latest_gen), 'boot.json'), 'r'))
+    boot_spec = bootjson_to_bootspec(boot_json)
+
+    specialisation_list = boot_spec.specialisations.items()
+    entry = ""
+
+    # Main menu entry for latest generation
+    entry += f'menuentry "NixOS Latest (Gen. {latest_gen})" {{\n'
+    entry += '  icon /EFI/refind/themes/catppuccin/assets/mocha/icons/os_nixos.png\n'  # Explicitly set NixOS icon from rEFInd's built-in icons
+    entry += '  loader ' + get_kernel_uri(boot_spec.kernel) + '\n'
+
+    if boot_spec.initrd:
+        entry += '  initrd ' + get_kernel_uri(boot_spec.initrd) + '\n'
+
+    entry += '  options "' + ' '.join(['init=' + boot_spec.init] + boot_spec.kernelParams).strip() + '"\n'
+
+    # Add specialisations as submenus
+    for spec, spec_boot_spec in specialisation_list:
+        entry += config_entry(True, spec_boot_spec, f'{spec}', str(time))
+
+    # Add older generations as submenus
+    for gen in older_gens:
+        entry += generate_single_gen_entry(profile, gen, True, group_name)
+
+    entry += '}\n'
     return entry
 
 
@@ -228,12 +267,11 @@ def install_bootloader() -> None:
     ''')
 
     for (profile, gens) in profiles:
-        group_name = 'default profile' if profile == 'system' else f"profile '{profile}'"
-        isFirst = True
+        if len(gens) == 0:
+            continue
 
-        for gen in sorted(gens, key=lambda x: x, reverse=True):
-            config_file += generate_config_entry(profile, gen, isFirst, group_name)
-            isFirst = False
+        group_name = 'default profile' if profile == 'system' else f"profile '{profile}'"
+        config_file += generate_config_entry_with_older(profile, gens, group_name)
 
     config_file_path = os.path.join(refind_dir, 'refind.conf')
     config_file += '\n# NixOS boot entries end here\n\n'
