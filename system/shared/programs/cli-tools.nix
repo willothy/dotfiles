@@ -27,7 +27,7 @@
     btop # Resource monitor
     gping # Ping, but with a graph
     dig
-    dogdns # Modern dig replacement
+    # dogdns # Modern dig replacement
     duf # Disk usage TUI
     nix-du # du for /nix/store
 
@@ -46,7 +46,7 @@
     terraform # Infra as code
 
     # Official Third-Party CLIs
-    turso-cli # turso
+    # turso-cli # turso
     buf # buf.build
     # awscli2 # AWS
     gh # GitHub

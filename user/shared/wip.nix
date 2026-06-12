@@ -87,7 +87,9 @@ in
     extensions = [ ];
     settings = {
       git_protocol = "ssh";
-      aliases = { };
+      aliases = { 
+        
+      };
     };
   };
 
@@ -100,6 +102,20 @@ in
       # Function to check if a command/binary exists
       function has
           command -v $argv[1] >/dev/null 2>&1
+      end
+
+      function git-recent
+        set -l n 5
+        if test (count $argv) -ge 1
+          set n $argv[1]
+        end
+
+        git reflog show --all --format=%gs \
+        | string match -r '^checkout: moving from .* to .*$' \
+        | string replace -r '^checkout: moving from .* to (.*)$' '$1' \
+        | string match -v -r '^[0-9a-f]{7,}$' \
+        | awk 'seen[$0]++ == 0' \
+        | head -n $n
       end
 
       if set -q NVIM
@@ -116,8 +132,8 @@ in
 
       bind -e -M insert \t
       bind -M insert \t forward-word
-      bind -M insert -k up history-prefix-search-backward
-      bind -M insert -k down history-prefix-search-forward
+      bind -M insert up history-prefix-search-backward
+      bind -M insert down history-prefix-search-forward
 
       # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
       #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"

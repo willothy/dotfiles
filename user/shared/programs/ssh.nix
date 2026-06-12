@@ -26,13 +26,11 @@
         };
         nostromo = {
           host = "nostromo";
-          # extraOptions.IdentityAgent = ''"${socket}"'';
+          extraOptions.IdentityAgent = ''"${socket}"'';
           forwardAgent = true;
         };
       };
       extraConfig = ''
-        SetEnv TERM="xterm-256color"
-
         ${orbstack}
 
         Host kitchen
@@ -42,6 +40,9 @@
         Host nostromo
           HostName nostromo
           SetEnv TERM="xterm-256color"
+
+        Host dev-vm
+          HostName 192.168.10.135
       '';
     };
 }
