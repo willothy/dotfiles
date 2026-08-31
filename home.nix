@@ -138,10 +138,6 @@ in
       #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
       # end
 
-      if not set -q SSH_AUTH_SOCK
-        set -gx SSH_AUTH_SOCK ${onepassword_socket}
-      end
-
       if has fnm
         fnm env --use-on-cd --shell fish | source
       end
@@ -418,9 +414,9 @@ in
     };
   };
 
-  # home.sessionVariables = {
-  #   SSH_AUTH_SOCK = onepassword_socket;
-  # };
+  home.sessionVariables = {
+    SSH_AUTH_SOCK = onepassword_socket;
+  };
 
   programs.ssh =
     {
@@ -429,8 +425,9 @@ in
       matchBlocks = {
         "*" = {
           host = "*";
-          # extraOptions.IdentityAgent = ''"${socket}"'';
-          extraOptions.IdentityAgent = "SSH_AUTH_SOCK";
+          # Pin the agent rather than following SSH_AUTH_SOCK, so ssh reaches
+          # 1Password no matter what the desktop session exports.
+          extraOptions.IdentityAgent = ''"${onepassword_socket}"'';
           forwardAgent = true;
         };
       };
