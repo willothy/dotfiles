@@ -205,10 +205,10 @@
       vulkan-tools
       ncurses
 
-      xorg.libX11
-      xorg.libXcursor
-      xorg.libXi
-      xorg.libXrandr
+      libx11
+      libxcursor
+      libxi
+      libxrandr
     ];
   };
 
@@ -233,10 +233,10 @@
   #       libGL
   #       pkg-config
   #
-  #       xorg.libX11
-  #       xorg.libXcursor
-  #       xorg.libXi
-  #       xorg.libXrandr
+  #       libx11
+  #       libxcursor
+  #       libxi
+  #       libxrandr
   #     ];
   #     libPath = pkgs.lib.makeLibraryPath libs;
   #
