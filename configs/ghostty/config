@@ -92,3 +92,7 @@ window-padding-balance = true
 shell-integration-features = cursor,sudo,no-title,ssh-env,ssh-terminfo
 app-notifications = no-clipboard-copy
 
+clipboard-read = allow
+clipboard-write = allow
+
+focus-follows-mouse = true

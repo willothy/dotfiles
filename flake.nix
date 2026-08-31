@@ -32,6 +32,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    fdb-overlay.url = "github:foundationdb-rs/overlay";
+    fdb-overlay.inputs.nixpkgs.follows = "nixpkgs";
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake/beta";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
+    };
+
     # refindgen.url = "github:willothy/refindgen";
   };
 
@@ -42,6 +53,9 @@
       overlays = {
         sccache = import ./overlays/sccache.nix;
         refind = import ./overlays/refind.nix;
+        docutils-pin = import ./overlays/docutils-pin.nix;
+        pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
+        foundationdb = inputs.fdb-overlay.overlays.default;
       };
 
       pkgs = import nixpkgs {
@@ -54,6 +68,9 @@
         overlays = [
           overlays.sccache
           overlays.refind
+          overlays.docutils-pin
+          overlays.pytest-bs
+          # overlays.foundationdb
           # inputs.refindgen.overlays.default
         ];
       };

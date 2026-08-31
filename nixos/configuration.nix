@@ -45,11 +45,14 @@
   users.users.willothy = {
     isNormalUser = true;
     description = "Will Hopkins";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "i2c" "kvm" ];
     packages = with pkgs; [
 
     ];
     shell = pkgs.fish;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV"
+    ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -78,6 +81,8 @@
       '';
     })
 
+    dnsmasq # req'd for DNS and DCHP in libvirt VMs
+
     coreutils
 
     # secure boot
@@ -99,7 +104,7 @@
     zig
     nodejs
     bun
-    python312
+    python314
     sccache
 
     luajit
@@ -133,13 +138,27 @@
     # terminal emulator
     ghostty
 
+    # file manager
     nautilus
 
+    # disk utils
+    gnome-disk-utility
+
     kubectl
+    flyctl
 
     # wayland clipboard fix
     wl-clipboard
     # wayclip
+
+    # foundationdb
+    # fdbserver74
+    # libfdb74
+    # fdbcli74
+
+    # (callPackage ../packages/helium-browser.nix { })
+
+    inputs.zen-browser.packages."${system}".beta
   ];
 
   programs.fish.enable = true;
@@ -155,28 +174,82 @@
 
   security.polkit.enable = true;
 
-  virtualisation.docker = {
+  virtualisation.docker.enable = true;
+  virtualisation.libvirtd = {
     enable = true;
+    qemu.vhostUserPackages = with pkgs; [
+      virtiofsd
+    ];
   };
+  systemd.services.virt-secret-init-encryption.enable = false;
+
+  programs.virt-manager.enable = true;
 
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [
       libGL
+      libGL.dev
       libxkbcommon
+      egl-wayland
+      expat
+      wayland
+      wayland.dev
+      freetype
+      freetype.dev
+
       libclang
       sqlite
       vulkan-headers
       vulkan-loader
       vulkan-tools
-      wayland
       ncurses
+
+      xorg.libX11
+      xorg.libXcursor
+      xorg.libXi
+      xorg.libXrandr
     ];
   };
+
+
+  # environment.variables.LD_LIBRARY_PATH =
+  #   let
+  #     libs = with pkgs; [
+  #       libclang
+  #       sqlite
+  #       vulkan-headers
+  #       vulkan-loader
+  #       vulkan-tools
+  #       ncurses
+  #
+  #       wayland
+  #       egl-wayland
+  #       expat
+  #       fontconfig
+  #       freetype
+  #       freetype.dev
+  #       libxkbcommon
+  #       libGL
+  #       pkg-config
+  #
+  #       xorg.libX11
+  #       xorg.libXcursor
+  #       xorg.libXi
+  #       xorg.libXrandr
+  #     ];
+  #     libPath = pkgs.lib.makeLibraryPath libs;
+  #
+  #   in
+  #   "${libPath}"
+  # ;
+
+  services.flatpak.enable = true;
 
   # Install firefox.
   programs.firefox.enable = true;
   programs.chromium.enable = true;
+
 
   programs.nautilus-open-any-terminal = {
     enable = true;
@@ -208,7 +281,7 @@
   programs.hyprland.enable = true;
   programs.hyprland.withUWSM = true;
   programs.hyprland.xwayland.enable = true;
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   # environment.sessionVariables.COSMIC_DATA_CONTROL_ENABLED = 1;
 
   environment.variables = {
@@ -228,6 +301,54 @@
 
   services.tailscale = {
     enable = true;
+    # Allow this machine to *use* Tailscale routing features (e.g. connect to
+    # subnet routers or exit nodes) without advertising routes itself.
+    # "client" = can consume routes
+    # "server" = can advertise routes (subnet router)
+    # "none"   = disable routing features entirely
+    useRoutingFeatures = "client";
+  };
+
+  networking.wireguard.interfaces.wg0 = {
+    ips = [ "10.0.0.8/32" ];
+    privateKeyFile = "/etc/wireguard/wg0.key";
+
+    peers = [
+      {
+        publicKey = "kviiF0rZqQNx/P32sxe+1tJiE2fITlKfV5vCq6OW83g=";
+        endpoint = "jaz-wan.corp.freestyle.sh:51820";
+        allowedIPs = [
+          # NOTE: remove 192.168.1.0/16 unless corp explicitly uses it AND
+          # you are not on 192.168.1.x at home; it will hijack your LAN routes.
+          "192.168.0.0/16"
+          "10.101.0.0/18"
+          "10.102.0.0/18"
+          "10.103.0.0/18"
+          "10.104.0.0/18"
+        ];
+        persistentKeepalive = 25;
+      }
+    ];
+  };
+
+  systemd.network.networks."40-wg0" = {
+    dns = [ "192.168.1.1" ];
+    domains = [ "~corp.freestyle.sh" ];
+  };
+
+  services.resolved.enable = true;
+  networking.nameservers = [ "192.168.1.1" ];
+
+  zramSwap = {
+    enable = true;
+    memoryPercent = 25;
+  };
+
+  systemd.sleep.settings.Sleep = {
+    AllowSuspend = "no";
+    AllowHibernation = "no";
+    AllowHybridSleep = "no";
+    AllowSuspendThenHibernate = "no";
   };
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -241,7 +362,20 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+      PubkeyAuthentication = true;
+      AllowAgentForwarding = true;
+
+      # If you want X11 forwarding for GUI apps over SSH:
+      X11Forwarding = true;
+    };
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

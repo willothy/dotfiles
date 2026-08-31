@@ -16,15 +16,36 @@ let
     pls = "sudo";
     #cd = "z";
   };
+
+  is_darwin = pkgs.system == "aarch64-darwin";
+  onepassword_socket =
+    if is_darwin then
+      "/Users/willothy/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    else
+      "/home/willothy/.1password/agent.sock"
+  ;
+  orbstack_ssh_config =
+    if is_darwin then
+      "Include /Users/willothy/.orbstack/ssh/config"
+    else
+      ""
+  ;
 in
 {
   home.username = "willothy";
   home.homeDirectory = "/home/willothy";
   home.stateVersion = "25.05";
 
-  home.packages = with pkgs; [
-    claude-code
-  ];
+  home.packages =
+    with pkgs;
+    let
+      gdk = google-cloud-sdk.withExtraComponents (with pkgs.google-cloud-sdk.components; [
+        gke-gcloud-auth-plugin
+      ]);
+    in
+    [
+      gdk
+    ];
 
   # programs.zed-editor = {
   #   enable = true;
@@ -41,6 +62,9 @@ in
 
   programs.git = {
     enable = true;
+    lfs = {
+      enable = true;
+    };
     signing = {
       # key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
       # signByDefault = true;
@@ -92,20 +116,44 @@ in
         set fish_vi_force_cursor 1
       end
 
+      # Cat file if it's a file, or ls if it's a directory
+      function cat
+        if test -d $argv[1]
+          ls $argv
+        else
+          command bat $argv
+        end
+      end
+
       # bind -e -M insert tab
       # bind -M insert tab forward-word
       bind -M insert up history-prefix-search-backward
       bind -M insert down history-prefix-search-forward
 
+      fish_add_path $HOME/.local/bin
+      fish_add_path $HOME/.cargo/bin
+      fish_add_path "/home/willothy/.bun/bin"
+
       # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
       #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
       # end
+
+      if not set -q SSH_AUTH_SOCK
+        set -gx SSH_AUTH_SOCK ${onepassword_socket}
+      end
 
       if has fnm
         fnm env --use-on-cd --shell fish | source
       end
     '';
   };
+
+  programs.tmux.enable = true;
+  programs.tmux.extraConfig = ''
+    setw -g mouse on
+
+    set -g update-environment "DISPLAY SSH_ASKPASS SSH_AUTH_SOCK SSH_CONNECTION WINDOWID XAUTHORITY"
+  '';
 
   programs.bash = {
     enable = true;
@@ -365,36 +413,26 @@ in
     };
   };
 
+  # home.sessionVariables = {
+  #   SSH_AUTH_SOCK = onepassword_socket;
+  # };
+
   programs.ssh =
-    let
-      darwin = pkgs.system == "aarch64-darwin";
-      socket =
-        if darwin then
-          "/Users/willothy/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-        else
-          "/home/willothy/.1password/agent.sock"
-      ;
-      orbstack =
-        if darwin then
-          "Include /Users/willothy/.orbstack/ssh/config"
-        else
-          ""
-      ;
-    in
     {
       enable = true;
       enableDefaultConfig = false;
       matchBlocks = {
         "*" = {
           host = "*";
-          extraOptions.IdentityAgent = ''"${socket}"'';
+          # extraOptions.IdentityAgent = ''"${socket}"'';
+          extraOptions.IdentityAgent = "SSH_AUTH_SOCK";
           forwardAgent = true;
         };
       };
       extraConfig = ''
         SetEnv TERM="xterm-256color"
 
-        ${orbstack}
+        ${orbstack_ssh_config}
       '';
     };
 }

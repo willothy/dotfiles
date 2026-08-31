@@ -6,20 +6,26 @@
   services.displayManager.cosmic-greeter.enable = true;
 
   environment.systemPackages = with pkgs; [
-    #cosmic-store
-    #cosmic-ext-applet-minimon
-    #cosmic-ext-applet-caffeine
-    #cosmic-ext-applet-external-monitor-brightness
-    #cosmic-ext-tweaks
+    cosmic-store
+    cosmic-ext-applet-caffeine
+    cosmic-ext-applet-external-monitor-brightness
+    cosmic-ext-tweaks
 
     wayland
+    egl-wayland
     expat
     fontconfig
     freetype
     freetype.dev
-    wayland
     libxkbcommon
     libGL
     pkg-config
+
+    xorg.libX11
+    xorg.libXcursor
+    xorg.libXi
+    xorg.libXrandr
+
+    ddcutil
   ];
 }
