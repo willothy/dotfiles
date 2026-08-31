@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # refind 0.14.2 as rebuilt after this revision produces an EFI binary this
+    # board's firmware will not load - it hangs at the vendor logo before
+    # reaching rEFInd. Pin the package to the last build known to boot here.
+    nixpkgs-refind.url = "github:nixos/nixpkgs/400de68cd101e8cfebffea121397683caf7f5a34";
+
     # stable-nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
@@ -53,6 +58,9 @@
       overlays = {
         sccache = import ./overlays/sccache.nix;
         refind = import ./overlays/refind.nix;
+        refind-pin = final: prev: {
+          refind = (import inputs.nixpkgs-refind { inherit system; }).refind;
+        };
         docutils-pin = import ./overlays/docutils-pin.nix;
         pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
         foundationdb = inputs.fdb-overlay.overlays.default;
@@ -68,6 +76,7 @@
         overlays = [
           overlays.sccache
           overlays.refind
+          overlays.refind-pin
           overlays.docutils-pin
           overlays.pytest-bs
           # overlays.foundationdb
