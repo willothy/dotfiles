@@ -169,6 +169,9 @@ in
     withRuby = false;
     withPython3 = false;
     package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+    # nvim-treesitter's main branch builds parsers by shelling out to the CLI.
+    extraPackages = [ pkgs.tree-sitter ];
   };
 
   home.file.".config/ghostty/config".source = ./configs/ghostty/config;
