@@ -170,6 +170,8 @@ in
   programs.neovim = {
     enable = true;
     defaultEditor = true;
+    withRuby = false;
+    withPython3 = false;
     package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
