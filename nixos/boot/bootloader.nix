@@ -10,6 +10,7 @@
     enable = true;
     bootloader = "refind";
     pkiBundle = "/var/lib/sbctl";
+    configurationLimit = 50;
 
     refind = {
       extraConfig = ''
