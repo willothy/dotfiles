@@ -230,6 +230,9 @@ in
     # enableFishIntegration = true;
     # enableBashIntegration = true;
     # enableZshIntegration = true;
+
+    # atuin owns Ctrl-R
+    historyWidget.command = "";
   };
 
   programs.zoxide = {
