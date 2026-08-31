@@ -17,7 +17,7 @@ let
     #cd = "z";
   };
 
-  is_darwin = pkgs.system == "aarch64-darwin";
+  is_darwin = pkgs.stdenv.hostPlatform.system == "aarch64-darwin";
   onepassword_socket =
     if is_darwin then
       "/Users/willothy/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
@@ -80,7 +80,7 @@ in
       color.pager = "yes";
       "gpg \"ssh\"" = {
         program =
-          if (pkgs.system == "aarch64-darwin") then
+          if (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") then
             "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
           else
             "${pkgs._1password-gui}/bin/op-ssh-sign"
@@ -170,7 +170,7 @@ in
   programs.neovim = {
     enable = true;
     defaultEditor = true;
-    package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
+    package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
   home.file.".config/ghostty/config".source = ./configs/ghostty/config;
@@ -180,7 +180,7 @@ in
   home.file.".config/nvim/plugin/nix.lua" =
     let
       platform_ext =
-        if (builtins.match "darwin$" pkgs.system) == null then
+        if (builtins.match "darwin$" pkgs.stdenv.hostPlatform.system) == null then
           "so"
         else
           "dylib"
