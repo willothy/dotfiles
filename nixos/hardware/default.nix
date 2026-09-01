@@ -16,15 +16,15 @@
   # moved nvidia-drm.fbdev/modeset from the kernel command line into
   # modprobe.d, which only applies once the module is loaded - so it has to be
   # loaded early to matter.
-  # Only what KMS needs. nvidia_uvm is CUDA/compute and is not required to put
-  # a picture on screen, so it stays out of the initrd - nvidia.ko alone
-  # expands to roughly 90MB there, and every megabyte is read off the ESP by
-  # the firmware before the kernel starts.
-  boot.initrd.kernelModules = [
-    "nvidia"
-    "nvidia_modeset"
-    "nvidia_drm"
-  ];
+  # Deliberately NOT loading nvidia in the initrd.
+  #
+  # It looks like the way to get an early splash, but it is the opposite. The
+  # firmware hands over a GOP framebuffer and the kernel's built-in simpledrm
+  # binds to it at ~0.99s, before plymouth starts at ~1.14s - so there is
+  # already a DRM device to draw on. Pulling nvidia in costs ~97MB of GSP
+  # firmware in the initrd (gsp_ga10x.bin 69MB + gsp_tu10x.bin 28MB, the
+  # latter being Turing firmware this Blackwell card never uses) plus 1.7s of
+  # nvidia-drm init, to provide a display 2s later than simpledrm already did.
 
   hardware.nvidia = {
     modesetting.enable = true;
