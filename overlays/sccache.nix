@@ -19,7 +19,7 @@ final: prev: {
 
       buildInputs = with prev; [
         openssl
-      ] ++ prev.lib.optionals prev.stdenv.isDarwin [
+      ] ++ prev.lib.optionals prev.stdenv.hostPlatform.isDarwin [
         prev.darwin.apple_sdk.frameworks.Security
         prev.darwin.apple_sdk.frameworks.SystemConfiguration
       ];
