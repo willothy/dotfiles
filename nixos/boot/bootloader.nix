@@ -41,7 +41,10 @@ in
       package = refindUpstream;
 
       extraConfig = ''
-        resolution 0
+        # Pin the GOP mode to the panel's native resolution. The kernel
+        # inherits this framebuffer, so simpledrm comes up correctly
+        # proportioned instead of at whatever fallback the firmware picked.
+        resolution 3440 1440
 
         hideui singleuser,hints,arrows,badges,safemode,hwtest
 
