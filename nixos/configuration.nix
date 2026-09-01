@@ -318,33 +318,6 @@
     useRoutingFeatures = "client";
   };
 
-  networking.wireguard.interfaces.wg0 = {
-    ips = [ "10.0.0.8/32" ];
-    privateKeyFile = "/etc/wireguard/wg0.key";
-
-    peers = [
-      {
-        publicKey = "kviiF0rZqQNx/P32sxe+1tJiE2fITlKfV5vCq6OW83g=";
-        endpoint = "jaz-wan.corp.freestyle.sh:51820";
-        allowedIPs = [
-          # NOTE: remove 192.168.1.0/16 unless corp explicitly uses it AND
-          # you are not on 192.168.1.x at home; it will hijack your LAN routes.
-          "192.168.0.0/16"
-          "10.101.0.0/18"
-          "10.102.0.0/18"
-          "10.103.0.0/18"
-          "10.104.0.0/18"
-        ];
-        persistentKeepalive = 25;
-      }
-    ];
-  };
-
-  systemd.network.networks."40-wg0" = {
-    dns = [ "192.168.1.1" ];
-    domains = [ "~corp.freestyle.sh" ];
-  };
-
   services.resolved.enable = true;
   networking.nameservers = [ "192.168.1.1" ];
 
