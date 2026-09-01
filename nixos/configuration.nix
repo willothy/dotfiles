@@ -158,7 +158,9 @@
 
     # (callPackage ../packages/helium-browser.nix { })
 
-    inputs.zen-browser.packages."${system}".beta
+    # Spelled out because the enclosing `with pkgs;` shadows the `system`
+    # specialArg with pkgs.system, which is a deprecated alias.
+    inputs.zen-browser.packages.${stdenv.hostPlatform.system}.beta
   ];
 
   programs.fish.enable = true;
