@@ -425,14 +425,11 @@ in
     {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks = {
-        "*" = {
-          host = "*";
-          # Pin the agent rather than following SSH_AUTH_SOCK, so ssh reaches
-          # 1Password no matter what the desktop session exports.
-          extraOptions.IdentityAgent = ''"${onepassword_socket}"'';
-          forwardAgent = true;
-        };
+      settings."*" = {
+        # Pin the agent rather than following SSH_AUTH_SOCK, so ssh reaches
+        # 1Password no matter what the desktop session exports.
+        IdentityAgent = ''"${onepassword_socket}"'';
+        ForwardAgent = true;
       };
       extraConfig = ''
         SetEnv TERM="xterm-256color"
