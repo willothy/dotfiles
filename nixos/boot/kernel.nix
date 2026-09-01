@@ -14,6 +14,10 @@
     # nvidia
     "nvidia-drm.modeset=1"
     # "NVreg_PreserveVideoMemoryAllocations=1"
+
+    # TEMPORARY: why does plymouth draw nothing on simpledrm?
+    # Plain plymouth.debug redirects to /dev/tty1, which the journal misses.
+    "plymouth.debug=stream:/dev/kmsg"
   ];
 
   # boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
