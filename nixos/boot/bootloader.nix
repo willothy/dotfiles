@@ -10,6 +10,22 @@ let
   # the image" from "the image runs and hangs in early init".
   refindGnuEfi4 = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.refind;
 
+  # rEFInd's official binary release, built by the project rather than by
+  # nixpkgs. Same 0.14.2, independent toolchain (278328 bytes vs nixpkgs'
+  # 324096 and 328192). If this boots, the bug is in nixpkgs' gnu-efi 4 build
+  # and upstream binaries are a viable fix that also tracks new releases.
+  refindUpstreamEfi =
+    let
+      zip = pkgs.fetchurl {
+        url = "https://downloads.sourceforge.net/project/refind/0.14.2/refind-bin-0.14.2.zip";
+        hash = "sha256-QQx4KMT+wvIXm9lWBzUiQVgx0nwAQWOBuPcRU8GQoxE=";
+      };
+    in
+    pkgs.runCommand "refind-upstream-x64.efi" { nativeBuildInputs = [ pkgs.unzip ]; } ''
+      unzip -j ${zip} 'refind-bin-0.14.2/refind/refind_x64.efi' -d .
+      install -Dm444 refind_x64.efi $out
+    '';
+
   # rEFInd reads refind.conf from the directory it was loaded from, so each
   # test copy gets its own. Empty menus: drawing anything at all proves the
   # image loaded and initialised.
@@ -66,6 +82,10 @@ in
         menuentry "TEST: rEFInd gnu-efi 4 (textonly)" {
             loader \EFI\refind\test-txt\refind_x64.efi
         }
+
+        menuentry "TEST: rEFInd upstream binary" {
+            loader \EFI\refind\test-upstream\refind_x64.efi
+        }
       '';
 
       extraFiles = inputs.lanzaboote.lib.fetchRefindTheme {
@@ -81,6 +101,8 @@ in
         "test-gfx/refind.conf" = mkTestConf { textonly = false; };
         "test-txt/refind_x64.efi" = "${refindGnuEfi4}/share/refind/refind_x64.efi";
         "test-txt/refind.conf" = mkTestConf { textonly = true; };
+        "test-upstream/refind_x64.efi" = refindUpstreamEfi;
+        "test-upstream/refind.conf" = mkTestConf { textonly = false; };
       };
     };
   };
