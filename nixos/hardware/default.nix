@@ -27,6 +27,13 @@
 
     nvidiaSettings = true;
 
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    # gsp_tu10x.bin is Turing firmware; this card uses the ga10x lineage. It is
+    # 28MB of the ~111MB initrd, read by the firmware on every boot.
+    package = config.boot.kernelPackages.nvidiaPackages.beta.overrideAttrs (old: {
+      # generic.nix defaults postInstall to null, not "".
+      postInstall = (if old.postInstall == null then "" else old.postInstall) + ''
+        rm -f "$firmware"/lib/firmware/nvidia/*/gsp_tu10x.bin
+      '';
+    });
   };
 }
