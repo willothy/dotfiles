@@ -1,44 +1,28 @@
 { config, lib, pkgs, inputs, ... }:
 let
-  # rEFInd as built by current nixpkgs, i.e. against gnu-efi 4 - the build this
-  # firmware hangs on. Taken straight from the nixpkgs input so the refind-pin
-  # overlay doesn't shadow it.
-  #
-  # This is installed only as manually-selected menu entries, chainloaded from
-  # the working rEFInd. A failure costs a power-cycle, not a USB rescue, and
-  # rEFInd reports load errors - so this distinguishes "the firmware won't load
-  # the image" from "the image runs and hangs in early init".
-  refindGnuEfi4 = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.refind;
+  version = "0.14.2";
 
   # rEFInd's official binary release, built by the project rather than by
-  # nixpkgs. Same 0.14.2, independent toolchain (278328 bytes vs nixpkgs'
-  # 324096 and 328192). If this boots, the bug is in nixpkgs' gnu-efi 4 build
-  # and upstream binaries are a viable fix that also tracks new releases.
-  refindUpstreamEfi =
+  # nixpkgs.
+  #
+  # nixpkgs builds refind against gnu-efi 4, and that binary loads correctly
+  # here - LoadImage succeeds - then hangs before its first console write,
+  # before it even reads refind.conf. nixpkgs' older gnu-efi 3 build of the
+  # same version works, and so does this one. All three were compared by
+  # chainloading them from the working bootloader, which is also why this is a
+  # binary release rather than a source build: it is the artifact that was
+  # actually verified to boot on this machine.
+  refindUpstream =
     let
       zip = pkgs.fetchurl {
-        url = "https://downloads.sourceforge.net/project/refind/0.14.2/refind-bin-0.14.2.zip";
+        url = "https://downloads.sourceforge.net/project/refind/${version}/refind-bin-${version}.zip";
         hash = "sha256-QQx4KMT+wvIXm9lWBzUiQVgx0nwAQWOBuPcRU8GQoxE=";
       };
     in
-    pkgs.runCommand "refind-upstream-x64.efi" { nativeBuildInputs = [ pkgs.unzip ]; } ''
-      unzip -j ${zip} 'refind-bin-0.14.2/refind/refind_x64.efi' -d .
-      install -Dm444 refind_x64.efi $out
+    pkgs.runCommand "refind-bin-${version}" { nativeBuildInputs = [ pkgs.unzip ]; } ''
+      unzip -j ${zip} 'refind-bin-${version}/refind/refind_x64.efi' -d .
+      install -Dm444 refind_x64.efi $out/share/refind/refind_x64.efi
     '';
-
-  # rEFInd reads refind.conf from the directory it was loaded from, so each
-  # test copy gets its own. Empty menus: drawing anything at all proves the
-  # image loaded and initialised.
-  mkTestConf =
-    { textonly }:
-    pkgs.writeText "refind-test.conf" (
-      ''
-        timeout 10
-        use_nvram false
-        scanfor manual
-      ''
-      + lib.optionalString textonly "textonly\n"
-    );
 in
 {
   imports = [
@@ -54,6 +38,8 @@ in
     configurationLimit = 50;
 
     refind = {
+      package = refindUpstream;
+
       extraConfig = ''
         resolution 0
 
@@ -73,19 +59,6 @@ in
         scanfor internal,external,manual
         dont_scan_volumes NIX-BOOT
         dont_scan_dirs EFI/linux, EFI/nixos, EFI/ubuntu, EFI/systemd, EFI/BOOT
-
-        # Diagnostics for the gnu-efi 4 hang. Select by hand; never the default.
-        menuentry "TEST: rEFInd gnu-efi 4 (graphics)" {
-            loader \EFI\refind\test-gfx\refind_x64.efi
-        }
-
-        menuentry "TEST: rEFInd gnu-efi 4 (textonly)" {
-            loader \EFI\refind\test-txt\refind_x64.efi
-        }
-
-        menuentry "TEST: rEFInd upstream binary" {
-            loader \EFI\refind\test-upstream\refind_x64.efi
-        }
       '';
 
       extraFiles = inputs.lanzaboote.lib.fetchRefindTheme {
@@ -95,14 +68,6 @@ in
         repo = "refind";
         rev = "main";
         sha256 = "sha256-34+MkvWEp3xq6Di1uWKR4ieaG4t2rufnRRN1/V0WRfw=";
-      }
-      // {
-        "test-gfx/refind_x64.efi" = "${refindGnuEfi4}/share/refind/refind_x64.efi";
-        "test-gfx/refind.conf" = mkTestConf { textonly = false; };
-        "test-txt/refind_x64.efi" = "${refindGnuEfi4}/share/refind/refind_x64.efi";
-        "test-txt/refind.conf" = mkTestConf { textonly = true; };
-        "test-upstream/refind_x64.efi" = refindUpstreamEfi;
-        "test-upstream/refind.conf" = mkTestConf { textonly = false; };
       };
     };
   };

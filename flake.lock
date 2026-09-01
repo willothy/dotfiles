@@ -188,22 +188,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-refind": {
-      "locked": {
-        "lastModified": 1772643971,
-        "narHash": "sha256-+bllfMsclzbAAPMZTm3K9G/a5lG+s6l18/AyyYLPSIE=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "400de68cd101e8cfebffea121397683caf7f5a34",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "400de68cd101e8cfebffea121397683caf7f5a34",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1788179007,
@@ -250,7 +234,6 @@
         "lanzaboote": "lanzaboote",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs_2",
-        "nixpkgs-refind": "nixpkgs-refind",
         "rust-overlay": "rust-overlay",
         "zen-browser": "zen-browser"
       }
