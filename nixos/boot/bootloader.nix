@@ -1,4 +1,29 @@
 { config, lib, pkgs, inputs, ... }:
+let
+  # rEFInd as built by current nixpkgs, i.e. against gnu-efi 4 - the build this
+  # firmware hangs on. Taken straight from the nixpkgs input so the refind-pin
+  # overlay doesn't shadow it.
+  #
+  # This is installed only as manually-selected menu entries, chainloaded from
+  # the working rEFInd. A failure costs a power-cycle, not a USB rescue, and
+  # rEFInd reports load errors - so this distinguishes "the firmware won't load
+  # the image" from "the image runs and hangs in early init".
+  refindGnuEfi4 = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.refind;
+
+  # rEFInd reads refind.conf from the directory it was loaded from, so each
+  # test copy gets its own. Empty menus: drawing anything at all proves the
+  # image loaded and initialised.
+  mkTestConf =
+    { textonly }:
+    pkgs.writeText "refind-test.conf" (
+      ''
+        timeout 10
+        use_nvram false
+        scanfor manual
+      ''
+      + lib.optionalString textonly "textonly\n"
+    );
+in
 {
   imports = [
     ./refind-theme.nix
@@ -32,6 +57,15 @@
         scanfor internal,external,manual
         dont_scan_volumes NIX-BOOT
         dont_scan_dirs EFI/linux, EFI/nixos, EFI/ubuntu, EFI/systemd, EFI/BOOT
+
+        # Diagnostics for the gnu-efi 4 hang. Select by hand; never the default.
+        menuentry "TEST: rEFInd gnu-efi 4 (graphics)" {
+            loader \EFI\refind\test-gfx\refind_x64.efi
+        }
+
+        menuentry "TEST: rEFInd gnu-efi 4 (textonly)" {
+            loader \EFI\refind\test-txt\refind_x64.efi
+        }
       '';
 
       extraFiles = inputs.lanzaboote.lib.fetchRefindTheme {
@@ -41,6 +75,12 @@
         repo = "refind";
         rev = "main";
         sha256 = "sha256-34+MkvWEp3xq6Di1uWKR4ieaG4t2rufnRRN1/V0WRfw=";
+      }
+      // {
+        "test-gfx/refind_x64.efi" = "${refindGnuEfi4}/share/refind/refind_x64.efi";
+        "test-gfx/refind.conf" = mkTestConf { textonly = false; };
+        "test-txt/refind_x64.efi" = "${refindGnuEfi4}/share/refind/refind_x64.efi";
+        "test-txt/refind.conf" = mkTestConf { textonly = true; };
       };
     };
   };
