@@ -23,6 +23,13 @@ in {
   # Nice boot screen
   boot.plymouth = {
     enable = true;
+
+    # plymouth skips SimpleDRM devices until DeviceTimeout (8s) expires, waiting
+    # for a real GPU driver. Boot finishes first, so it never draws - it only
+    # tries the iGPU, which has no monitor attached, and fails.
+    extraConfig = ''
+      UseSimpledrm=1
+    '';
     # theme = "catppuccin-mocha";
     # themePackages = with pkgs; [
     #   (catppuccin-plymouth.override {
