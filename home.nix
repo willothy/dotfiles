@@ -174,6 +174,12 @@ in
     extraPackages = [ pkgs.tree-sitter ];
   };
 
+  # home-manager generates an init.lua from the provider settings above and
+  # takes ownership of ~/.config/nvim/init.lua, moving ours to init.lua.backup
+  # on every activation. The config in ~/.config/nvim is the source of truth;
+  # home-manager only supplies the package.
+  xdg.configFile."nvim/init.lua".enable = lib.mkForce false;
+
   home.file.".config/ghostty/config".source = ./configs/ghostty/config;
 
   # lua/plugins/* gets autoloaded by Lazy, so I use this to
