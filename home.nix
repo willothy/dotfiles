@@ -171,7 +171,10 @@ in
     package = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     # nvim-treesitter's main branch builds parsers by shelling out to the CLI.
-    extraPackages = [ pkgs.tree-sitter ];
+    extraPackages = [
+      pkgs.tree-sitter
+      pkgs.sqlite
+    ];
   };
 
   # home-manager generates an init.lua from the provider settings above and
