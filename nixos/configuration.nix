@@ -361,6 +361,12 @@
     };
   };
 
+  services.crucible-ci-runner-vms = {
+    tokenFile = "/etc/github-runner/crucible.token";
+    stateDirectory = "/var/lib/microvms";
+    asAvailable.startAtBoot = true;
+  };
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];

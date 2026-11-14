@@ -43,6 +43,8 @@
       };
     };
 
+    crucible.url = "git+ssh://git@github.com/willothy/crucible";
+
     # refindgen.url = "github:willothy/refindgen";
   };
 
