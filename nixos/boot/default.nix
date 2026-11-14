@@ -8,7 +8,7 @@ in {
   ];
 
   boot.consoleLogLevel = 0;
-  boot.initrd.verbose = false;
+  # boot.initrd.verbose = false;
 
   # The initrd carries the nvidia modules for early KMS, which pushes it to
   # ~118MB. The firmware reads all of that off the ESP before the kernel

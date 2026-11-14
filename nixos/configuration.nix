@@ -9,12 +9,12 @@
       ./services/xserver.nix
       ./services/audio.nix
       ./services/desktop.nix
-      ./services/sccache.nix
+      # ./services/sccache.nix
     ];
 
   nix = {
     settings = {
-      experimental-features = "nix-command flakes";
+      experimental-features = [ "nix-command" "flakes" ];
     };
   };
 
@@ -161,6 +161,8 @@
     # Spelled out because the enclosing `with pkgs;` shadows the `system`
     # specialArg with pkgs.system, which is a deprecated alias.
     inputs.zen-browser.packages.${stdenv.hostPlatform.system}.beta
+
+    capy
   ];
 
   programs.fish.enable = true;

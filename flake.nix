@@ -51,10 +51,11 @@
       system = "x86_64-linux";
 
       overlays = {
-        sccache = import ./overlays/sccache.nix;
+        # sccache = import ./overlays/sccache.nix;
         refind = import ./overlays/refind.nix;
         docutils-pin = import ./overlays/docutils-pin.nix;
         pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
+        capy = import ./overlays/capy.nix;
         foundationdb = inputs.fdb-overlay.overlays.default;
       };
 
@@ -66,10 +67,11 @@
         };
 
         overlays = [
-          overlays.sccache
+          # overlays.sccache
           overlays.refind
           overlays.docutils-pin
           overlays.pytest-bs
+          overlays.capy
           # overlays.foundationdb
           # inputs.refindgen.overlays.default
         ];
