@@ -8,7 +8,7 @@ final: prev: {
         hash = "sha256-/qKrQXNQZ+WVRDQToyBdDsj4ma3gNh1vV2KPguzUsck=";
       };
 
-      appimageContents = prev.appimageTools.extract {
+      appimageContents = prev.appimageTools.extractType2 {
         pname = "capy";
         inherit version src;
       };
@@ -17,30 +17,44 @@ final: prev: {
       pname = "capy";
       inherit version src;
 
-      nativeBuildInputs = with prev; [
-        makeWrapper
-      ];
-
       extraInstallCommands = ''
-        # Install the bundled application icon
+        # Install Capy's bundled icon.
         install -Dm644 \
           ${appimageContents}/.DirIcon \
           $out/share/icons/hicolor/256x256/apps/capy.png
 
-        # Create desktop entry
+        # Preserve the upstream desktop entry, including
+        # MimeType, StartupWMClass, and other integration.
         mkdir -p $out/share/applications
 
-        cat > $out/share/applications/capy.desktop <<EOF
-        [Desktop Entry]
-        Name=Capy
-        Comment=AI coding agent
-        Exec=$out/bin/capy %U
-        Icon=capy
-        Terminal=false
-        Type=Application
-        Categories=Development;IDE;
-        StartupNotify=true
-        EOF
+        desktopFile=$(find ${appimageContents} \
+          -name '*.desktop' -print -quit)
+
+        if [ -z "$desktopFile" ]; then
+          echo "Capy desktop entry not found" >&2
+          exit 1
+        fi
+
+        cp "$desktopFile" \
+          $out/share/applications/capy.desktop
+
+        # Point the launcher and OAuth callbacks at our
+        # Nix-wrapped executable.
+        sed -i \
+          "s|^Exec=.*|Exec=$out/bin/capy %U|" \
+          $out/share/applications/capy.desktop
+
+        sed -i \
+          "s|^Icon=.*|Icon=capy|" \
+          $out/share/applications/capy.desktop
+
+        # Ensure URI arguments can reach Capy.
+        if grep -q '^MimeType=.*x-scheme-handler/' \
+          $out/share/applications/capy.desktop; then
+          sed -i \
+            's|^Exec=.*|Exec='"$out"'/bin/capy %U|' \
+            $out/share/applications/capy.desktop
+        fi
       '';
 
       meta = with prev.lib; {

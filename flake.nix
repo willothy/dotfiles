@@ -102,6 +102,7 @@
             # inputs.nixos-cosmic.nixosModules.default
             ./nixos/configuration.nix
             inputs.lanzaboote.nixosModules.lanzaboote
+            inputs.crucible.nixosModules.ci-runner-desktop
             home-manager.nixosModules.home-manager
             {
               home-manager = {

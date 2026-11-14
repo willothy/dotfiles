@@ -183,6 +183,14 @@ in
   # home-manager only supplies the package.
   xdg.configFile."nvim/init.lua".enable = lib.mkForce false;
 
+  xdg.mimeApps = {
+    enable = true;
+
+    defaultApplications = {
+      "x-scheme-handler/capy" = "capy.desktop";
+    };
+  };
+
   home.file.".config/ghostty/config".source = ./configs/ghostty/config;
 
   # lua/plugins/* gets autoloaded by Lazy, so I use this to
