@@ -5,10 +5,10 @@ final: prev: {
 
       src = prev.fetchurl {
         url = "https://capy.ai/download/linux/x64/appimage";
-        hash = prev.lib.fakeHash;
+        hash = "sha256-/qKrQXNQZ+WVRDQToyBdDsj4ma3gNh1vV2KPguzUsck=";
       };
 
-      appimageContents = prev.appimageTools.extractType2 {
+      appimageContents = prev.appimageTools.extract {
         pname = "capy";
         inherit version src;
       };
