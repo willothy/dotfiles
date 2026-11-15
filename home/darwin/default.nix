@@ -7,7 +7,6 @@
     ./programs/wezterm.nix
     ./programs/ssh.nix
     ./programs/aerc.nix
-    ./wip.nix
     inputs._1password-shell-plugins.hmModules.default
   ];
 

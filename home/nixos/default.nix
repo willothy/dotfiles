@@ -30,56 +30,6 @@
     };
   };
 
-  programs.fish = {
-    enable = true;
-    shellInitLast = ''
-      set -g fish_greeting
-
-      # Function to check if a command/binary exists
-      function has
-        command -v $argv[1] >/dev/null 2>&1
-      end
-
-      if set -q NVIM
-        # Don't use vim bindings in Neovim terminal
-      else
-        fish_vi_key_bindings
-        fish_vi_cursor
-
-        set fish_cursor_default block
-        set fish_cursor_insert line
-        set fish_cursor_visual block
-        set fish_vi_force_cursor 1
-      end
-
-      # Cat file if it's a file, or ls if it's a directory
-      function cat
-        if test -d $argv[1]
-          ls $argv
-        else
-          command bat $argv
-        end
-      end
-
-      # bind -e -M insert tab
-      # bind -M insert tab forward-word
-      bind -M insert up history-prefix-search-backward
-      bind -M insert down history-prefix-search-forward
-
-      fish_add_path $HOME/.local/bin
-      fish_add_path $HOME/.cargo/bin
-      fish_add_path "/home/willothy/.bun/bin"
-
-      # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
-      #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
-      # end
-
-      if has fnm
-        fnm env --use-on-cd --shell fish | source
-      end
-    '';
-  };
-
   programs.tmux.enable = true;
   programs.tmux.extraConfig = ''
     setw -g mouse on
@@ -87,12 +37,7 @@
     set -g update-environment "DISPLAY SSH_ASKPASS SSH_AUTH_SOCK SSH_CONNECTION WINDOWID XAUTHORITY"
   '';
 
-  programs.bash = {
-    enable = true;
-    package = pkgs.bashInteractive;
-  };
-
-  programs.zsh.enable = true;
+  programs.bash.package = pkgs.bashInteractive;
 
   programs.neovim = {
     enable = true;

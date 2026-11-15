@@ -1,5 +1,3 @@
-# Things I need to refactor into their own modules
-{ config, pkgs, globalUserInfo, lib, ... }:
 {
   programs.fish = {
     enable = true;
@@ -8,7 +6,7 @@
 
       # Function to check if a command/binary exists
       function has
-          command -v $argv[1] >/dev/null 2>&1
+        command -v $argv[1] >/dev/null 2>&1
       end
 
       function git-recent
@@ -37,10 +35,23 @@
         set fish_vi_force_cursor 1
       end
 
+      # Cat file if it's a file, or ls if it's a directory
+      function cat
+        if test -d $argv[1]
+          ls $argv
+        else
+          command bat $argv
+        end
+      end
+
       bind -e -M insert \t
       bind -M insert \t forward-word
       bind -M insert up history-prefix-search-backward
       bind -M insert down history-prefix-search-forward
+
+      fish_add_path $HOME/.local/bin
+      fish_add_path $HOME/.cargo/bin
+      fish_add_path $HOME/.bun/bin
 
       # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
       #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
@@ -57,6 +68,7 @@
       atuin hex init fish | source
     '';
   };
+
   programs.bash = {
     enable = true;
 
@@ -75,6 +87,7 @@
       #fi
     '';
   };
+
   programs.zsh = {
     enable = true;
 
