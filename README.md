@@ -1,20 +1,64 @@
-# Willothy's NixOS Dotfiles
+# .nix
 
-I may move this into willothy/dotfiles when it's more usable.
+One flake for all of my machines: NixOS desktops and servers, and a nix-darwin Mac.
 
-I have just switched to NixOS, this repo is where I will be working on my Nix config that I will
-hopefully use in some form or other across all of my devices.
+| Host | Platform | What it is |
+| --- | --- | --- |
+| `nostromo` | NixOS, x86_64 | Main desktop. NVIDIA, COSMIC + Hyprland, rEFInd with Secure Boot (lanzaboote). |
+| `prometheus` | NixOS, x86_64 | Mostly-headless AMD box. Boots to a TTY; `desktop` starts COSMIC on demand. Installed with nixos-anywhere + disko. |
+| `macbonk` | nix-darwin, aarch64 | Mac. System config plus standalone home-manager, Homebrew casks. |
 
-Again, brand new to NixOS. I've only made this public to push myself to actually work on it and get
-comfortable with Nix. I would not recommend taking anything in here as an example for your own config. There are
-many great resources on the internet. Here are some I have found helpful:
+## Layout
 
-- [Vimjoyer (YouTube)](https://www.youtube.com/@vimjoyer)
-- [LibrePhoenix (YouTube)](https://www.youtube.com/@librephoenix)
-- [NixOS Search](https://search.nixos.org)
-- [NixOS Wiki](https://nixos.wiki/wiki/Main_Page)
-- [NixOS and Flakes Book](https://nixos-and-flakes.thiscute.world/)
-- [Home-Manager Wiki](https://nix-community.github.io/home-manager/)
-  - Don't miss the [list of all options](https://nix-community.github.io/home-manager/options.xhtml) in the appendices!
-  - If you're not sure about a home-manager package's configuration, [look at the source](https://github.com/nix-community/home-manager/).
-- [MyNixOS](https://mynixos.com/)
+```
+flake.nix          every host is wired up here
+hosts/<name>/      per-machine config, hardware, and home-manager entry point
+modules/nixos/     NixOS modules shared between the Linux hosts
+modules/darwin/    nix-darwin modules
+home/common/       home-manager config shared by every host (shells, starship, git, CLI tools)
+home/nixos/        home-manager config for the Linux hosts
+home/darwin/       home-manager config for the Mac
+configs/           raw dotfiles linked in by home-manager (ghostty, wezterm, aerospace, ...)
+overlays/          nixpkgs overlays
+packages/          local packages
+```
+
+The Linux hosts follow `nixos-unstable`. The Mac has its own pinned inputs (`nixpkgs-darwin`,
+`home-manager-darwin`, `darwin`) so it can be updated independently.
+
+## Usage
+
+Each host's config name matches its hostname, so no `#name` is needed when running on the machine itself.
+
+```sh
+# nostromo (or any NixOS host, locally)
+sudo nixos-rebuild switch --flake ~/.dotfiles
+
+# prometheus, deployed from another machine
+nixos-rebuild switch --flake .#prometheus --target-host willothy@prometheus --sudo
+
+# macbonk
+cd ~/.dotfiles
+sudo darwin-rebuild switch --flake .
+home-manager switch --flake .
+```
+
+The Mac configs live under `packages.aarch64-darwin.{darwinConfigurations,homeConfigurations}`;
+`darwin-rebuild` and `home-manager` find them through nix's `packages.<system>` fallback.
+
+### Installing a new NixOS host
+
+Add `hosts/<name>/` with a `disk.nix` (disko) and a placeholder `hardware-configuration.nix`, wire it
+into `flake.nix`, boot the target into a NixOS installer (or any Linux with SSH), then:
+
+```sh
+nix run github:nix-community/nixos-anywhere -- \
+  --flake .#<name> \
+  --generate-hardware-config nixos-generate-config ./hosts/<name>/hardware-configuration.nix \
+  <user>@<ip>
+```
+
+## History
+
+The NixOS side started as its own repo; the original nix-darwin config from this repo was merged into
+it. The pre-merge Mac-only history is kept at the `legacy-darwin` tag.
