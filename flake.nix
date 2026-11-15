@@ -125,6 +125,16 @@
             { disabledModules = [ "system/boot/loader/refind/refind.nix" ]; }
             ./modules/nixos/refind/default.nix
             ./hosts/nostromo
+            inputs.determinate.nixosModules.default
+            {
+              # Keep `nixpkgs#…` resolving to this flake's nixpkgs, not FlakeHub's nixpkgs-weekly.
+              nix.registry.nixpkgs.flake = inputs.nixpkgs;
+
+              nix.settings = {
+                extra-substituters = [ "https://install.determinate.systems" ];
+                extra-trusted-public-keys = [ "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=" ];
+              };
+            }
             inputs.lanzaboote.nixosModules.lanzaboote
             inputs.crucible.nixosModules.ci-runner-desktop
             home-manager.nixosModules.home-manager
