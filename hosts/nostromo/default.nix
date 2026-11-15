@@ -112,9 +112,6 @@
     ];
   };
 
-  programs.hyprland.enable = true;
-  programs.hyprland.withUWSM = true;
-  programs.hyprland.xwayland.enable = true;
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   # environment.sessionVariables.COSMIC_DATA_CONTROL_ENABLED = 1;
 
