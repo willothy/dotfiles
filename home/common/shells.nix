@@ -53,10 +53,6 @@
       fish_add_path $HOME/.cargo/bin
       fish_add_path $HOME/.bun/bin
 
-      # if [ -n "$GHOSTTY_RESOURCES_DIR" ];
-      #     source "$GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish"
-      # end
-
       if has fnm
         fnm env --use-on-cd --shell fish | source
       end
@@ -77,10 +73,6 @@
       if has fnm; then
         eval "$(fnm env --use-on-cd --shell bash)"
       fi
-
-      #if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
-      #    builtin source "$GHOSTTY_RESOURCES_DIR/shell-integration/bash/ghostty.bash"
-      #fi
     '';
   };
 
@@ -91,10 +83,6 @@
       has() {
         command -v "$1" >/dev/null 2>&1
       }
-
-      #if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
-      #    source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
-      #fi
 
       if has fnm; then
         eval "$(fnm env --use-on-cd --shell zsh)"
