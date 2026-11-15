@@ -7,14 +7,6 @@
     poetryPlugins.poetry-plugin-export
     python312
 
-    # go
-    # clang
     rustup
-
-    # protobuf
-
-    # ruby (ugh)
-    # ruby_3_3
   ];
 }
-

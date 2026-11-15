@@ -11,10 +11,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # neovim
-
-    # _1password-gui # install using Homebrew on mac
-
     ((vim-full.override { }).customize {
       name = "vim";
       vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
@@ -40,10 +36,6 @@
   ];
 
   programs._1password-cli.enable = true;
-
-  # programs.vim = {
-  #   enable = true;
-  # };
 
   programs.zsh.enable = true;
   programs.fish.enable = true;

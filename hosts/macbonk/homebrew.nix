@@ -27,7 +27,6 @@
     brews = [
       "localstack-cli" # Local AWS Dev Stack
       "codecrafters"
-      #"tailscale"
     ];
   };
 }
