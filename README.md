@@ -22,12 +22,33 @@ home/darwin/       home-manager config for the Mac
 configs/           raw dotfiles linked in by home-manager (ghostty, wezterm, aerospace, ...)
 overlays/          nixpkgs overlays
 scripts/           manual maintenance scripts
+secrets/<host>/    sops-encrypted secrets, one file per secret (.sops.yaml lists recipients)
 ```
 
 Every host follows the same `nixos-unstable` nixpkgs and home-manager pins, and runs Determinate Nix
 configured through the flake (on the Mac, Nix itself is installed by Determinate's installer).
 
-CI (`.github/workflows/eval.yml`) evaluates every host's configuration on each push.
+CI (`.github/workflows/eval.yml`) evaluates every host's configuration on each push, and a weekly job
+(`update.yml`) opens a `flake.lock` update PR once the updated lock evaluates on every host.
+
+prometheus runs a pool of [crucible](https://github.com/willothy/crucible) CI runner VMs
+(`hosts/prometheus/ci-runners.nix`), using crucible's own runner modules.
+
+## Secrets
+
+Secrets are encrypted with [sops](https://github.com/getsops/sops) to age keys and decrypted on the
+host at activation by [sops-nix](https://github.com/Mic92/sops-nix); nothing secret enters the Nix
+store. Each host decrypts with its SSH host key (its recipient in `.sops.yaml` comes from
+`ssh-to-age`); my own age key, kept in 1Password, can decrypt and edit everything.
+
+```sh
+# add or replace a secret (needs only the recipients' public keys)
+sops encrypt --filename-override secrets/<host>/<name> --input-type binary --output-type binary /dev/stdin \
+  > secrets/<host>/<name>
+
+# edit one (needs my age key in ~/.config/sops/age/keys.txt)
+sops edit secrets/<host>/<name>
+```
 
 ## Usage
 
