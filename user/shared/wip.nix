@@ -46,6 +46,7 @@ in
 
   programs.fzf = {
     enable = true;
+    historyWidget.command = "";
     # enableFishIntegration = true;
     # enableBashIntegration = true;
     # enableZshIntegration = true;
@@ -87,9 +88,7 @@ in
     extensions = [ ];
     settings = {
       git_protocol = "ssh";
-      aliases = { 
-        
-      };
+      aliases = { };
     };
   };
 
@@ -143,6 +142,11 @@ in
         fnm env --use-on-cd --shell fish | source
       end
 
+      if has atuin
+        atuin ai init fish | source
+      end
+
+      atuin hex init fish | source
     '';
   };
   programs.bash = {

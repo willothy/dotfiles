@@ -17,7 +17,6 @@
       gh
       # awscli2
       src-cli
-      openai
       flyctl
       # vault
     ];
