@@ -1,7 +1,24 @@
 { pkgs, globalUserInfo, ... }:
+let
+  onepassword = import ./onepassword.nix { inherit pkgs globalUserInfo; };
+
+  # Local sessions sign through the 1Password app; SSH sessions sign with
+  # ssh-keygen through the forwarded agent, so signing works over SSH even
+  # when this machine's 1Password is locked.
+  sshSign = pkgs.writeShellScript "git-ssh-sign" ''
+    if ${onepassword.useLocalAgent}; then
+      exec "${onepassword.sshSign}" "$@"
+    fi
+    exec ${pkgs.openssh}/bin/ssh-keygen "$@"
+  '';
+in
 {
   programs.git = {
     enable = true;
+    signing = {
+      key = globalUserInfo.sshPublicKey;
+      signByDefault = true;
+    };
     settings = {
       user = {
         name = globalUserInfo.fullName;
@@ -11,14 +28,7 @@
         defaultBranch = "main";
       };
       color.pager = "yes";
-      "gpg \"ssh\"" = {
-        program =
-          if (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") then
-            "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-          else
-            "${pkgs._1password-gui}/bin/op-ssh-sign"
-        ;
-      };
+      "gpg \"ssh\"".program = "${sshSign}";
       gpg.format = "ssh";
       pull = {
         rebase = true;
