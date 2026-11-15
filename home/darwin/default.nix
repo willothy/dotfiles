@@ -2,7 +2,6 @@
 {
   imports = [
     ./programs/neovim.nix
-    ./programs/git.nix
     ../common
     ./programs/wezterm.nix
     ./programs/aerc.nix
