@@ -179,6 +179,7 @@
     tokenFile = "/etc/github-runner/crucible.token";
     stateDirectory = "/var/lib/microvms";
     asAvailable.startAtBoot = true;
+    compilerCacheSize = 20;
   };
 
   # Open ports in the firewall.
