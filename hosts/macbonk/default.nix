@@ -4,18 +4,6 @@
   ];
 
   config = {
-    nix = {
-      enable = false;
-      gc = {
-        interval = {
-          Weekday = 0;
-          Hour = 2;
-          Minute = 0;
-        };
-        options = "--delete-older-than 30d";
-      };
-      package = lib.mkForce pkgs.nix;
-    };
     nixpkgs = {
       config.allowUnfree = true;
       hostPlatform = "aarch64-darwin";

@@ -1,6 +1,7 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
     ./_1password.nix
+    ./determinate.nix
   ];
 
   system.primaryUser = globalUserInfo.userName;
