@@ -38,16 +38,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-
-    home-manager-darwin = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
     darwin = {
       url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     onepassword-shell-plugins.url = "github:1Password/shell-plugins";
@@ -79,7 +72,7 @@
 
       darwinSystem = "aarch64-darwin";
 
-      darwinPkgs = import inputs.nixpkgs-darwin {
+      darwinPkgs = import nixpkgs {
         system = darwinSystem;
         config.allowUnfree = true;
       };
@@ -181,7 +174,7 @@
           ];
         };
 
-        homeConfigurations.${darwinUserInfo.userName} = inputs.home-manager-darwin.lib.homeManagerConfiguration {
+        homeConfigurations.${darwinUserInfo.userName} = home-manager.lib.homeManagerConfiguration {
           pkgs = darwinPkgs;
 
           extraSpecialArgs = darwinContext;
