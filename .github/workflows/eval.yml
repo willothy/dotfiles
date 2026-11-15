@@ -1,0 +1,39 @@
+name: eval
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # crucible is a private flake input fetched over ssh.
+      - uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.CRUCIBLE_DEPLOY_KEY }}
+
+      - uses: DeterminateSystems/determinate-nix-action@16f94ba7aae399b9f9077c254b6719ec6de7e3e3 # v3.24.2
+
+      - name: nostromo
+        run: nix eval --raw .#nixosConfigurations.nostromo.config.system.build.toplevel.drvPath
+
+      - name: prometheus
+        run: nix eval --raw .#nixosConfigurations.prometheus.config.system.build.toplevel.drvPath
+
+      - name: macbonk (system)
+        run: nix eval --raw .#packages.aarch64-darwin.darwinConfigurations.macbonk.system.drvPath
+
+      - name: macbonk (home)
+        run: nix eval --raw .#packages.aarch64-darwin.homeConfigurations.willothy.activationPackage.drvPath
