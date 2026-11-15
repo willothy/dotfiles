@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, globalUserInfo, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -16,7 +16,7 @@
 
   programs._1password.enable = true;
   programs._1password-gui.enable = true;
-  programs._1password-gui.polkitPolicyOwners = [ "willothy" ];
+  programs._1password-gui.polkitPolicyOwners = [ globalUserInfo.userName ];
 
   security.polkit.enable = true;
 

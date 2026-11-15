@@ -84,30 +84,34 @@
         config.allowUnfree = true;
       };
 
-      globalUserInfo = rec {
+      mkUserInfo = system: rec {
         userName = "willothy";
         fullName = "Will Hopkins";
         email = "willothyh@gmail.com";
         homeDir =
-          if (darwinSystem == "aarch64-darwin") then
+          if nixpkgs.lib.hasSuffix "darwin" system then
             "/Users/${userName}"
           else
             "/home/${userName}";
-        confDir = "~/.dotfiles";
-        editor = "nvim";
         editorVisual = "nvim -b";
         pager = "delta";
-        terminal = "wezterm";
         browser = "brave";
-        # Public key, obviously
-        sshSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
+        sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
+      };
+
+      linuxUserInfo = mkUserInfo system;
+      darwinUserInfo = mkUserInfo darwinSystem;
+
+      linuxContext = {
+        inherit inputs;
+        globalUserInfo = linuxUserInfo;
       };
 
       darwinContext = {
         inputs = inputs // {
           _1password-shell-plugins = inputs.onepassword-shell-plugins;
         };
-        inherit globalUserInfo;
+        globalUserInfo = darwinUserInfo;
       };
     in
     {
@@ -115,10 +119,7 @@
         nostromo = nixpkgs.lib.nixosSystem {
           inherit pkgs;
 
-          specialArgs = {
-            inherit system;
-            inherit inputs;
-          };
+          specialArgs = linuxContext // { inherit system; };
 
           modules = [
             { disabledModules = [ "system/boot/loader/refind/refind.nix" ]; }
@@ -132,21 +133,17 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
 
-                users.willothy = import ./hosts/nostromo/home.nix;
+                users.${linuxUserInfo.userName} = import ./hosts/nostromo/home.nix;
 
                 backupFileExtension = "backup";
-                extraSpecialArgs = {
-                  inherit inputs;
-                };
+                extraSpecialArgs = linuxContext;
               };
             }
           ];
         };
 
         prometheus = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-          };
+          specialArgs = linuxContext;
 
           modules = [
             inputs.disko.nixosModules.disko
@@ -157,12 +154,10 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
 
-                users.willothy = import ./hosts/prometheus/home.nix;
+                users.${linuxUserInfo.userName} = import ./hosts/prometheus/home.nix;
 
                 backupFileExtension = "backup";
-                extraSpecialArgs = {
-                  inherit inputs;
-                };
+                extraSpecialArgs = linuxContext;
               };
             }
           ];
@@ -186,7 +181,7 @@
           ];
         };
 
-        homeConfigurations.willothy = inputs.home-manager-darwin.lib.homeManagerConfiguration {
+        homeConfigurations.${darwinUserInfo.userName} = inputs.home-manager-darwin.lib.homeManagerConfiguration {
           pkgs = darwinPkgs;
 
           extraSpecialArgs = darwinContext;

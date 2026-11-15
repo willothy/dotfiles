@@ -1,11 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, globalUserInfo, ... }:
 {
   programs.git = {
     enable = true;
     settings = {
       user = {
-        name = "Will Hopkins";
-        email = "willothyh@gmail.com";
+        name = globalUserInfo.fullName;
+        inherit (globalUserInfo) email;
       };
       init = {
         defaultBranch = "main";

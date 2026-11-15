@@ -1,9 +1,9 @@
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, globalUserInfo, ... }:
 {
   imports = [ ../common ];
 
-  home.username = "willothy";
-  home.homeDirectory = "/home/willothy";
+  home.username = globalUserInfo.userName;
+  home.homeDirectory = globalUserInfo.homeDir;
 
   home.packages =
     with pkgs;

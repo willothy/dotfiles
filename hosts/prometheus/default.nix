@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, globalUserInfo, ... }:
 
 {
   imports = [
@@ -42,13 +42,11 @@
     memoryPercent = 25;
   };
 
-  users.users.willothy = {
+  users.users.${globalUserInfo.userName} = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "video" "docker" "libvirtd" "kvm" ];
     shell = pkgs.fish;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV"
-    ];
+    openssh.authorizedKeys.keys = [ globalUserInfo.sshPublicKey ];
   };
 
   security.sudo.wheelNeedsPassword = false;

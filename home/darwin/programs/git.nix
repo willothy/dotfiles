@@ -4,7 +4,7 @@
   ];
 
   programs.git.signing = {
-    key = globalUserInfo.sshSigningKey;
+    key = globalUserInfo.sshPublicKey;
     signByDefault = true;
   };
 }

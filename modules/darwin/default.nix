@@ -3,7 +3,7 @@
     ./_1password.nix
   ];
 
-  system.primaryUser = "willothy";
+  system.primaryUser = globalUserInfo.userName;
 
   security.pam.services.sudo_local.touchIdAuth = true;
 

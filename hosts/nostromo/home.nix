@@ -1,18 +1,6 @@
-{ pkgs, ... }:
+{ globalUserInfo, ... }:
 let
-  is_darwin = pkgs.stdenv.hostPlatform.system == "aarch64-darwin";
-  onepassword_socket =
-    if is_darwin then
-      "/Users/willothy/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-    else
-      "/home/willothy/.1password/agent.sock"
-  ;
-  orbstack_ssh_config =
-    if is_darwin then
-      "Include /Users/willothy/.orbstack/ssh/config"
-    else
-      ""
-  ;
+  onepassword_socket = "${globalUserInfo.homeDir}/.1password/agent.sock";
 in
 {
   imports = [ ../../home/nixos ];
@@ -44,7 +32,7 @@ in
       extraConfig = ''
         SetEnv TERM="xterm-256color"
 
-        ${orbstack_ssh_config}
+
       '';
     };
 }

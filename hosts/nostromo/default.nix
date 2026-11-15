@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }:
+{ inputs, config, pkgs, globalUserInfo, ... }:
 
 {
   imports =
@@ -34,14 +34,12 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  users.users.willothy = {
+  users.users.${globalUserInfo.userName} = {
     isNormalUser = true;
-    description = "Will Hopkins";
+    description = globalUserInfo.fullName;
     extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "i2c" "kvm" ];
     shell = pkgs.fish;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV"
-    ];
+    openssh.authorizedKeys.keys = [ globalUserInfo.sshPublicKey ];
   };
 
   environment.systemPackages = with pkgs; [
