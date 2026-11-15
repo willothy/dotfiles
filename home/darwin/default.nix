@@ -3,7 +3,7 @@
   imports = [
     ./programs/neovim.nix
     ./programs/git.nix
-    ./programs/starship.nix
+    ../common
     ./programs/wezterm.nix
     ./programs/ssh.nix
     ./programs/aerc.nix

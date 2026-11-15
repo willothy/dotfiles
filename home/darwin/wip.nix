@@ -1,88 +1,6 @@
 # Things I need to refactor into their own modules
 { config, pkgs, globalUserInfo, lib, ... }:
-let
-  shellAliases = {
-    ll = "ls -l";
-    la = "ls -a";
-    ls = "eza -s type";
-    lt = "eza --tree -s type";
-    ".." = "cd ..";
-    gs = "git status";
-    gc = "git commit";
-    ga = "git add";
-    gaa = "git add --all";
-    gau = "git add --update";
-    v = "nvim";
-    ":q" = "exit";
-    pls = "sudo";
-    #cd = "z";
-  };
-in
 {
-  programs.atuin = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableFishIntegration = true;
-    settings = {
-      auto_sync = true;
-      sync_frequency = "30m";
-      sync = {
-        record = true;
-      };
-      keymap_mode = "vim-insert";
-      keymap_cursor = {
-        emacs = "steady-block";
-        vim_insert = "steady-bar";
-        vim_normal = "steady-block";
-      };
-      style = "compact";
-      inline_height = 12;
-    };
-    flags = [
-      "--disable-up-arrow"
-    ];
-  };
-
-  programs.fzf = {
-    enable = true;
-    historyWidget.command = "";
-    # enableFishIntegration = true;
-    # enableBashIntegration = true;
-    # enableZshIntegration = true;
-  };
-  programs.zoxide = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableFishIntegration = true;
-    options = [
-      "--cmd cd"
-    ];
-  };
-  programs.eza = {
-    enable = true;
-    enableFishIntegration = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    icons = "auto";
-    git = true;
-  };
-  programs.nix-index = {
-    enable = true;
-    enableFishIntegration = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-  };
-  programs.bottom = {
-    enable = true;
-  };
-  programs.carapace = {
-    enable = true;
-    enableFishIntegration = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-  };
   programs.gh = {
     enable = true;
     extensions = [ ];
@@ -94,7 +12,6 @@ in
 
   programs.fish = {
     enable = true;
-    inherit shellAliases;
     shellInitLast = ''
       set -g fish_greeting
 
@@ -151,7 +68,6 @@ in
   };
   programs.bash = {
     enable = true;
-    inherit shellAliases;
 
     initExtra = ''
       # Function to check if a command/binary exists
@@ -170,7 +86,6 @@ in
   };
   programs.zsh = {
     enable = true;
-    inherit shellAliases;
 
     initContent = ''
       has() {
@@ -186,6 +101,4 @@ in
       fi
     '';
   };
-
-  programs.bat.enable = true;
 }
