@@ -1,6 +1,5 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
-    ./nh.nix
     ./cli-tools.nix
     ./languages.nix
     ./libraries.nix
@@ -39,11 +38,6 @@
       '';
     })
   ];
-
-  programs.nh = {
-    enable = true;
-    flake = "${globalUserInfo.homeDir}/.dotfiles";
-  };
 
   programs._1password-cli.enable = true;
 
