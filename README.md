@@ -20,7 +20,7 @@ home/nixos/        home-manager config for the Linux hosts
 home/darwin/       home-manager config for the Mac
 configs/           raw dotfiles linked in by home-manager (ghostty, wezterm, aerospace, ...)
 overlays/          nixpkgs overlays
-packages/          local packages
+scripts/           manual maintenance scripts
 ```
 
 The Linux hosts follow `nixos-unstable`. The Mac has its own pinned inputs (`nixpkgs-darwin`,
