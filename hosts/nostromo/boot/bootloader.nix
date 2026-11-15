@@ -60,7 +60,6 @@ in
         selection_small themes/refind/assets/mocha/selection_small.png
 
         scanfor internal,external,manual
-        dont_scan_volumes NIX-BOOT
         dont_scan_dirs EFI/linux, EFI/nixos, EFI/ubuntu, EFI/systemd, EFI/BOOT
       '';
 
@@ -122,7 +121,6 @@ in
       selection_big   themes/catppuccin/assets/mocha/selection_big.png
       selection_small themes/catppuccin/assets/mocha/selection_small.png
 
-      dont_scan_volumes NIX-BOOT
       dont_scan_dirs EFI/nixos, EFI/ubuntu, EFI/systemd, EFI/BOOT
     '';
   };
