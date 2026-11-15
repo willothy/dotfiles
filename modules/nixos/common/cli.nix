@@ -18,19 +18,7 @@
     clang
     libclang
 
-    zig
-    nodejs
-    bun
     python314
-    sccache
-
-    lua-language-server
-    stylua
-
-    protobuf
-
-    kubectl
-    flyctl
   ];
 
   programs.bash = {

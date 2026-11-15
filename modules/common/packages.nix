@@ -26,10 +26,20 @@
     pkg-config
 
     rustup
+    zig
+    nodejs
+    bun
+    sccache
 
     luajit
     luajitPackages.luarocks
+    lua-language-server
+    stylua
 
     sqlite
+    protobuf
+
+    kubectl
+    flyctl
   ];
 }
