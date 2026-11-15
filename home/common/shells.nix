@@ -61,10 +61,6 @@
         fnm env --use-on-cd --shell fish | source
       end
 
-      if has atuin
-        atuin ai init fish | source
-      end
-
       atuin hex init fish | source
     '';
   };
