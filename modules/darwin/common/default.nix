@@ -1,7 +1,6 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
     ../../common
-    ./cli-tools.nix
     ./languages.nix
   ];
 
