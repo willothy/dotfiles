@@ -61,8 +61,6 @@
     vulkan-validation-layers
     vulkan-tools
 
-    # (callPackage ../../packages/helium-browser.nix { })
-
     capy
   ];
 
