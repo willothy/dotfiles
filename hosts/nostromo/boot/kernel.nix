@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 {
-  # issue with 6.18 and nvidia drivers
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  # linuxPackages_latest (6.18) had issues with the nvidia drivers
   boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   boot.kernelParams = [
@@ -13,12 +12,7 @@
 
     # nvidia
     "nvidia-drm.modeset=1"
-    # "NVreg_PreserveVideoMemoryAllocations=1"
   ];
-
-  # boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
-
-  # boot.kernel.sysctl."kernel.modules_disabled" = 0;
 
   # for dev on firecracker
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;

@@ -78,7 +78,6 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.loader.systemd-boot = {
-    # enable = true;
     consoleMode = "max";
     windows = {
       win11 = {
@@ -87,9 +86,6 @@ in
         efiDeviceHandle = "HD3b";
       };
     };
-
-    # Used to get the efiDeviceHandle
-    # edk2-uefi-shell.enable = true;
   };
 
   boot.loader.grub = {
@@ -110,10 +106,6 @@ in
       catppuccin = "custom.conf";
     };
     theme = "catppuccin";
-    # maxGenerations = 100;
-    # refindgen = {
-    #   enable = false;
-    # };
     extraConfig = ''
       resolution 0
 
@@ -133,9 +125,5 @@ in
       dont_scan_volumes NIX-BOOT
       dont_scan_dirs EFI/nixos, EFI/ubuntu, EFI/systemd, EFI/BOOT
     '';
-    # in
-    # {
-    #   "efi/refind/themes/catppuccin/custom.conf" = themeConfig;
-    # };
   };
 }

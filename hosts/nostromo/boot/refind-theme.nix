@@ -67,71 +67,8 @@ in
       }
     ];
 
-    # boot.loader.refind.enable = mkDefault true;
-
-    # boot.loader.refind.extraConfig =
-    #   let
-    #     entrypoint = cfg.overrideEntry.${cfg.theme} or "theme.conf";
-    #   in
-    #   ''
-    #     include themes/${cfg.theme}/${entrypoint}
-    #   '';
-
     boot.loader.refind.additionalFiles =
       let themePackage = mkTheme cfg.theme cfg.themes.${cfg.theme};
       in mkThemeFiles cfg.theme themePackage;
   };
 }
-# { config, lib, pkgs, ... }:
-#
-# with lib;
-#
-# let
-#   cfg = config.boot.loader.refind;
-#
-#   mkTheme = name: src: pkgs.stdenv.mkDerivation {
-#     pname = "refind-theme-${name}";
-#     version = "1.0";
-#     inherit src;
-#
-#     installPhase = ''
-#       mkdir -p $out
-#       cp -r . $out/
-#     '';
-#   };
-#
-# in
-# {
-#   options.boot.loader.refind = {
-#     themes = mkOption {
-#       type = types.attrsOf types.package;
-#       default = { };
-#       description = "Available rEFInd themes";
-#     };
-#
-#     theme = mkOption {
-#       type = types.nullOr types.str;
-#       default = null;
-#       description = "Active theme name";
-#     };
-#   };
-#
-#   config = mkIf (cfg.theme != null) {
-#     assertions = [
-#       {
-#         assertion = cfg.themes ? ${cfg.theme};
-#         message = "Theme '${cfg.theme}' not found in available themes";
-#       }
-#     ];
-#
-#     boot.loader.refind.enable = mkDefault true;
-#
-#     boot.loader.refind.extraConfig = ''
-#       include themes/${cfg.theme}/theme.conf
-#     '';
-#
-#     boot.loader.refind.additionalFiles = {
-#       "themes/${cfg.theme}" = mkTheme cfg.theme cfg.themes.${cfg.theme};
-#     };
-#   };
-# }

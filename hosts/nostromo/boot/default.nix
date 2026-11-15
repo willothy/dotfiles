@@ -1,14 +1,11 @@
 { config, pkgs, ... }:
-let
-
-in {
+{
   imports = [
     ./bootloader.nix
     ./kernel.nix
   ];
 
   boot.consoleLogLevel = 0;
-  # boot.initrd.verbose = false;
 
   # The initrd carries the nvidia modules for early KMS, which pushes it to
   # ~118MB. The firmware reads all of that off the ESP before the kernel
@@ -20,14 +17,5 @@ in {
     "-T0"
   ];
 
-  # Nice boot screen
-  boot.plymouth = {
-    enable = true;
-    # theme = "catppuccin-mocha";
-    # themePackages = with pkgs; [
-    #   (catppuccin-plymouth.override {
-    #     variant = "mocha";
-    #   })
-    # ];
-  };
+  boot.plymouth.enable = true;
 }

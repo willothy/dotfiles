@@ -1,5 +1,4 @@
 { config, pkgs, ... }: {
-  # services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = false;
 
   services.desktopManager.cosmic.enable = true;
