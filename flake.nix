@@ -74,7 +74,6 @@
       system = "x86_64-linux";
 
       overlays = {
-        # sccache = import ./overlays/sccache.nix;
         refind = import ./overlays/refind.nix;
         docutils-pin = import ./overlays/docutils-pin.nix;
         pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
@@ -90,7 +89,6 @@
         };
 
         overlays = [
-          # overlays.sccache
           overlays.refind
           overlays.docutils-pin
           overlays.pytest-bs
