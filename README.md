@@ -56,7 +56,9 @@ Each host's config name matches its hostname, so no `#name` is needed when runni
 
 ```sh
 # nostromo (or any NixOS host, locally)
-sudo nixos-rebuild switch --flake ~/.dotfiles
+# (--sudo, not `sudo nixos-rebuild`: evaluation needs your ssh agent for the
+# private crucible input, and only the switch runs as root)
+nixos-rebuild switch --flake ~/.dotfiles --sudo
 
 # prometheus, deployed from another machine
 nixos-rebuild switch --flake .#prometheus --target-host willothy@prometheus --sudo
