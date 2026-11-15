@@ -30,6 +30,4 @@
   home.packages = with pkgs; [
     maple-mono.NF
   ];
-
-  programs.home-manager.enable = true;
 }

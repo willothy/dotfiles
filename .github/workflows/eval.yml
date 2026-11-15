@@ -32,8 +32,5 @@ jobs:
       - name: prometheus
         run: nix eval --raw .#nixosConfigurations.prometheus.config.system.build.toplevel.drvPath
 
-      - name: macbonk (system)
-        run: nix eval --raw .#packages.aarch64-darwin.darwinConfigurations.macbonk.system.drvPath
-
-      - name: macbonk (home)
-        run: nix eval --raw .#packages.aarch64-darwin.homeConfigurations.willothy.activationPackage.drvPath
+      - name: macbonk
+        run: nix eval --raw .#darwinConfigurations.macbonk.system.drvPath

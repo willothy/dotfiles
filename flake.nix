@@ -157,30 +157,30 @@
         };
       };
 
-      # `darwin-rebuild switch --flake .` and `home-manager switch --flake .`
-      # find these through nix's packages.<system> fallback.
-      packages.${darwinSystem} = {
-        darwinConfigurations.macbonk = inputs.darwin.lib.darwinSystem {
-          system = darwinSystem;
-          pkgs = darwinPkgs;
+      darwinConfigurations.macbonk = inputs.darwin.lib.darwinSystem {
+        system = darwinSystem;
+        pkgs = darwinPkgs;
 
-          specialArgs = darwinContext;
+        specialArgs = darwinContext;
 
-          modules = [
-            { system.configurationRevision = self.rev or self.dirtyRev or null; }
-            ./hosts/macbonk
-            ./modules/darwin
-            ./modules/darwin/common
-          ];
-        };
+        modules = [
+          { system.configurationRevision = self.rev or self.dirtyRev or null; }
+          ./hosts/macbonk
+          ./modules/darwin
+          ./modules/darwin/common
+          home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
 
-        homeConfigurations.${darwinUserInfo.userName} = home-manager.lib.homeManagerConfiguration {
-          pkgs = darwinPkgs;
+              users.${darwinUserInfo.userName} = import ./hosts/macbonk/home.nix;
 
-          extraSpecialArgs = darwinContext;
-
-          modules = [ ./hosts/macbonk/home.nix ];
-        };
+              backupFileExtension = "backup";
+              extraSpecialArgs = darwinContext;
+            };
+          }
+        ];
       };
     };
 }
