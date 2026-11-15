@@ -17,8 +17,6 @@
     # nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
     # nixos-cosmic.url = "github:willothy/nixos-cosmic";
 
-    flake-utils.url = "github:numtide/flake-utils";
-
     lanzaboote = {
       # url = "github:nix-community/lanzaboote/v0.4.2";
       url = "github:willothy/lanzaboote/refind";
