@@ -1,7 +1,3 @@
-{ globalUserInfo, ... }:
-let
-  onepassword_socket = "${globalUserInfo.homeDir}/.1password/agent.sock";
-in
 {
   imports = [ ../../home/nixos ];
 
@@ -13,9 +9,5 @@ in
     defaultApplications = {
       "x-scheme-handler/capy" = "capy.desktop";
     };
-  };
-
-  home.sessionVariables = {
-    SSH_AUTH_SOCK = onepassword_socket;
   };
 }

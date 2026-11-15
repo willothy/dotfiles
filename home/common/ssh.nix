@@ -15,6 +15,24 @@ let
   '';
 in
 {
+  # Same rule for everything that reads SSH_AUTH_SOCK: local sessions get
+  # 1Password, SSH sessions keep the forwarded agent.
+  programs.fish.shellInit = ''
+    if not set -q SSH_CONNECTION
+      set -gx SSH_AUTH_SOCK "${onepasswordSocket}"
+    end
+  '';
+  programs.bash.bashrcExtra = ''
+    if [ -z "$SSH_CONNECTION" ]; then
+      export SSH_AUTH_SOCK="${onepasswordSocket}"
+    fi
+  '';
+  programs.zsh.envExtra = ''
+    if [ -z "$SSH_CONNECTION" ]; then
+      export SSH_AUTH_SOCK="${onepasswordSocket}"
+    fi
+  '';
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;

@@ -25,13 +25,6 @@
     VISUAL = globalUserInfo.editorVisual;
     BROWSER = globalUserInfo.browser;
     PAGER = globalUserInfo.pager;
-
-    SSH_AUTH_SOCK =
-      if (pkgs.system == "aarch64-darwin") then
-        "${globalUserInfo.homeDir}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-      else
-        "${globalUserInfo.homeDir}/.1password/agent.sock"
-    ;
   };
 
   home.stateVersion = "24.05";
