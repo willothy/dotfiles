@@ -11,43 +11,23 @@
 
   environment.systemPackages = with pkgs; [
     coreutils
-
-    # usually need right away
-    curl
-    wget
     git
-    unzip
     gnutar
 
-    # build essentials
-    gnumake
-    cmake
     gcc
-    pkg-config
-    rustup
+    clang
+    libclang
+
     zig
     nodejs
     bun
     python314
     sccache
 
-    luajit
-    luajitPackages.luarocks
     lua-language-server
     stylua
 
-    # libraries
-    sqlite
-    libclang
-    clang
     protobuf
-
-    # cli tools
-    jq
-    ripgrep
-    fd
-    hexyl
-    fzf
 
     kubectl
     flyctl

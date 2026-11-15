@@ -3,7 +3,6 @@
     ../../common
     ./cli-tools.nix
     ./languages.nix
-    ./libraries.nix
   ];
 
   nix.settings = {

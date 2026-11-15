@@ -1,18 +1,8 @@
 { pkgs, ... }: {
   # TODO: Move these into optional config. I don't want them on servers.
   environment.systemPackages = with pkgs; [
-    # Essentials
-    curl
-    wget
-    unzip
-
     # Utilities
     bottom
-    jq
-    ripgrep
-    fd
-    hexyl # Hex editor
-    fzf
     tokei # Line count
     procs # Modern ps
     rm-improved # Modern rm with trash and more
@@ -32,10 +22,7 @@
 
     # Build Tools & Runners
     just # Task runner
-    gnumake
-    cmake
     ccache
-    pkg-config
     act # Run GitHub actions locally
 
     # Work & Development
