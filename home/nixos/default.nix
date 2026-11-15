@@ -16,19 +16,7 @@
       gdk
     ];
 
-  # programs.zed-editor = {
-  #   enable = true;
-  # };
-
-  programs.git = {
-    lfs = {
-      enable = true;
-    };
-    signing = {
-      # key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
-      # signByDefault = true;
-    };
-  };
+  programs.git.lfs.enable = true;
 
   programs.tmux.enable = true;
   programs.tmux.extraConfig = ''

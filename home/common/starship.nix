@@ -85,11 +85,6 @@
           format = "$output ";
         };
       };
-      #battery = {
-      #  display = {
-      #    threshold = 40;
-      #  };
-      #};
       rust = {
         style = "red";
         format = "[$symbol]($style) ";
@@ -129,8 +124,6 @@
         error_symbol = "[->](red)";
         vimcmd_symbol = "[->](green)";
         vimcmd_visual_symbol = "[->](yellow)";
-        # vimcmd_symbol = "[<-](green)";
-        # vimcmd_visual_symbol = "[<-](yellow)";
       };
     };
   };

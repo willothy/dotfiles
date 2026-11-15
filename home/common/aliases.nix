@@ -13,7 +13,6 @@ let
     v = "nvim";
     ":q" = "exit";
     pls = "sudo";
-    #cd = "z";
   };
 in
 {

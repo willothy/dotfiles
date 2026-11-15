@@ -1,11 +1,7 @@
 { pkgs, ... }: {
-  # TUI email client
   programs.aerc = {
     enable = true;
-    extraAccounts = {
-      # Personal = { };
-      # Work = { };
-    };
+    extraAccounts = { };
     extraConfig = {
       compose = {
         editor = "nvim";
