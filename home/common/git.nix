@@ -1,4 +1,4 @@
-{ pkgs, globalUserInfo, ... }:
+{ config, pkgs, globalUserInfo, ... }:
 let
   onepassword = import ./onepassword.nix { inherit pkgs globalUserInfo; };
 
@@ -28,13 +28,20 @@ in
         defaultBranch = "main";
       };
       color.pager = "yes";
-      "gpg \"ssh\"".program = "${sshSign}";
+      "gpg \"ssh\"" = {
+        program = "${sshSign}";
+        allowedSignersFile = "${config.xdg.configHome}/git/allowed_signers";
+      };
       gpg.format = "ssh";
       pull = {
         rebase = true;
       };
     };
   };
+
+  xdg.configFile."git/allowed_signers".text = ''
+    ${globalUserInfo.email} ${globalUserInfo.sshPublicKey}
+  '';
 
   programs.gh = {
     enable = true;
