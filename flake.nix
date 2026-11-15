@@ -32,9 +32,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    fdb-overlay.url = "github:foundationdb-rs/overlay";
-    fdb-overlay.inputs.nixpkgs.follows = "nixpkgs";
-
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake/beta";
       inputs = {
@@ -78,7 +75,6 @@
         docutils-pin = import ./overlays/docutils-pin.nix;
         pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
         capy = import ./overlays/capy.nix;
-        foundationdb = inputs.fdb-overlay.overlays.default;
       };
 
       pkgs = import nixpkgs {
@@ -93,7 +89,6 @@
           overlays.docutils-pin
           overlays.pytest-bs
           overlays.capy
-          # overlays.foundationdb
           # inputs.refindgen.overlays.default
         ];
       };

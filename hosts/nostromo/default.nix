@@ -62,11 +62,6 @@
     vulkan-validation-layers
     vulkan-tools
 
-    # foundationdb
-    # fdbserver74
-    # libfdb74
-    # fdbcli74
-
     # (callPackage ../../packages/helium-browser.nix { })
 
     capy
