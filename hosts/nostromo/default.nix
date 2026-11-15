@@ -107,6 +107,10 @@
     };
   };
 
+  # Local builds only use CPU the desktop isn't using.
+  nix.daemonCPUSchedPolicy = "idle";
+  nix.daemonIOSchedClass = "idle";
+
   services.crucible-ci-runner-vms = {
     tokenFile = "/etc/github-runner/crucible.token";
     stateDirectory = "/var/lib/microvms";
