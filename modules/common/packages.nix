@@ -30,6 +30,8 @@
     nodejs
     bun
     sccache
+    python314
+    uv
 
     luajit
     luajitPackages.luarocks

@@ -17,8 +17,6 @@
     gcc
     clang
     libclang
-
-    python314
   ];
 
   programs.bash = {

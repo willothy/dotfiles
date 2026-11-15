@@ -1,8 +1,5 @@
 { pkgs, globalUserInfo, ... }: {
-  imports = [
-    ../../common
-    ./languages.nix
-  ];
+  imports = [ ../../common ];
 
   nix.settings = {
     experimental-features = "nix-command flakes";
