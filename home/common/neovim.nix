@@ -1,6 +1,7 @@
 { config, inputs, pkgs, lib, globalUserInfo, ... }:
 let
   nvimConfigDir = "${config.xdg.configHome}/nvim";
+  sqliteLib = "libsqlite3${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
 in
 {
   # `nvim -b`: flatten.nvim repurposes -b so that an nvim opened as $VISUAL
@@ -29,9 +30,11 @@ in
   xdg.configFile."nvim/init.lua".enable = lib.mkForce false;
 
   # nvim-config's init.lua reads this into vim.g.sqlite_clib_path, so nothing
-  # nix-specific has to live inside the config repo.
-  home.sessionVariables.NVIM_SQLITE_CLIB_PATH =
-    "${pkgs.sqlite.out}/lib/libsqlite3${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
+  # nix-specific has to live inside the config repo. It names a stable link
+  # rather than the store path: session variables only refresh on a new
+  # login, while the link follows sqlite on every rebuild.
+  home.sessionVariables.NVIM_SQLITE_CLIB_PATH = "${config.xdg.dataHome}/nvim/nix/${sqliteLib}";
+  xdg.dataFile."nvim/nix/${sqliteLib}".source = "${pkgs.sqlite.out}/lib/${sqliteLib}";
 
   # ~/.config/nvim is a live git clone of nvim-config, edited and reloaded
   # without a rebuild. Clone it on machines that don't have it yet; an
