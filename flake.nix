@@ -51,11 +51,32 @@
     };
 
     # refindgen.url = "github:willothy/refindgen";
+
+    nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
+    home-manager-darwin = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
+    onepassword-shell-plugins.url = "github:1Password/shell-plugins";
+
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @inputs:
     let
       system = "x86_64-linux";
+
+      darwin = import ./darwin {
+        inherit self inputs;
+        system = "aarch64-darwin";
+      };
 
       overlays = {
         # sccache = import ./overlays/sccache.nix;
@@ -151,5 +172,8 @@
         };
       };
 
+      # `darwin-rebuild switch --flake .` and `home-manager switch --flake .`
+      # find these through nix's packages.<system> fallback.
+      packages.aarch64-darwin = darwin;
     };
 }

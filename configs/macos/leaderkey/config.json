@@ -1,0 +1,73 @@
+{
+  "actions": [
+    {
+      "key": "t",
+      "label": "",
+      "type": "application",
+      "value": "/Applications/Ghostty.app"
+    },
+    {
+      "actions": [
+        {
+          "key": "f",
+          "label": "",
+          "type": "url",
+          "value": "raycast://extensions/raycast/navigation/switch-windows"
+        },
+        {
+          "key": "H",
+          "label": "",
+          "type": "url",
+          "value": "raycast://extensions/raycast/window-management/left-half"
+        },
+        {
+          "key": "L",
+          "label": "",
+          "type": "url",
+          "value": "raycast://extensions/raycast/window-management/right-half"
+        },
+        {
+          "key": "J",
+          "label": "",
+          "type": "url",
+          "value": "raycast://extensions/raycast/window-management/bottom-half"
+        },
+        {
+          "key": "K",
+          "label": "",
+          "type": "url",
+          "value": "raycast://extensions/raycast/window-management/top-half"
+        }
+      ],
+      "key": "w",
+      "label": "",
+      "type": "group"
+    },
+    {
+      "actions": [
+        {
+          "key": "s",
+          "label": "",
+          "type": "application",
+          "value": "/Applications/Arc.app"
+        },
+        {
+          "key": "e",
+          "label": "",
+          "type": "application",
+          "value": "/Applications/Mail.app"
+        },
+        {
+          "key": "m",
+          "label": "",
+          "type": "application",
+          "value": "/Applications/Messages.app"
+        }
+      ],
+      "key": "o",
+      "label": "",
+      "type": "group"
+    }
+  ],
+  "type": "group"
+}
