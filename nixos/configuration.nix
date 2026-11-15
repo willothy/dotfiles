@@ -10,13 +10,10 @@
       ./services/audio.nix
       ./services/desktop.nix
       # ./services/sccache.nix
+      ./common/cli.nix
+      ./common/virtualisation.nix
+      ./common/desktop-apps.nix
     ];
-
-  nix = {
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-    };
-  };
 
   networking.hostName = "nostromo"; # Define your hostname.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -56,100 +53,14 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # I will go insane without this
-    (vim-full.customize {
-      vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
-        start = [ vim-nix vim-lastplace ];
-        opt = [ ];
-      };
-      vimrcConfig.customRC = ''
-        filetype plugin indent on
-        syntax on
-
-        set shiftwidth=2
-        set tabstop=2
-        set expandtab
-
-        set showtabline=3
-        set scrolloff=10
-
-        set number relativenumber
-
-        set nowrap hlsearch incsearch showmode
-
-        set clipboard=unnamedplus
-      '';
-    })
-
-    dnsmasq # req'd for DNS and DCHP in libvirt VMs
-
-    coreutils
-
     # secure boot
     sbctl
-
-    # usually need right away
-    curl
-    wget
-    git
-    unzip
-    gnutar
-
-    # build essentials
-    gnumake
-    cmake
-    gcc
-    pkg-config
-    rustup
-    zig
-    nodejs
-    bun
-    python314
-    sccache
-
-    luajit
-    luajitPackages.luarocks
-    lua-language-server
-    stylua
-
-    # dev essentials
-    docker
-    docker-compose
-
-    # libraries
-    sqlite
-    libclang
-    clang
-    protobuf
 
     # vulkan
     vulkan-loader
     vulkan-headers
     vulkan-validation-layers
     vulkan-tools
-
-    # cli tools
-    jq
-    ripgrep
-    fd
-    hexyl
-    fzf
-
-    # terminal emulator
-    ghostty
-
-    # file manager
-    nautilus
-
-    # disk utils
-    gnome-disk-utility
-
-    kubectl
-    flyctl
-
-    # wayland clipboard fix
-    wl-clipboard
-    # wayclip
 
     # foundationdb
     # fdbserver74
@@ -158,70 +69,8 @@
 
     # (callPackage ../packages/helium-browser.nix { })
 
-    # Spelled out because the enclosing `with pkgs;` shadows the `system`
-    # specialArg with pkgs.system, which is a deprecated alias.
-    inputs.zen-browser.packages.${stdenv.hostPlatform.system}.beta
-
     capy
   ];
-
-  programs.fish.enable = true;
-  programs.zsh.enable = true;
-  programs.bash = {
-    enable = true;
-    completion.enable = true;
-  };
-
-  programs._1password.enable = true;
-  programs._1password-gui.enable = true;
-  programs._1password-gui.polkitPolicyOwners = [ "willothy" ];
-
-  security.polkit.enable = true;
-
-  virtualisation.docker = {
-    enable = true;
-    # docker.socket is enabled, so the daemon starts on first use. Starting it
-    # at boot put it on the critical path to graphical.target, dragging in
-    # network-online.target and its ~5s wait for NetworkManager.
-    enableOnBoot = false;
-  };
-
-  virtualisation.libvirtd = {
-    enable = true;
-    qemu.vhostUserPackages = with pkgs; [
-      virtiofsd
-    ];
-  };
-  systemd.services.virt-secret-init-encryption.enable = false;
-
-  programs.virt-manager.enable = true;
-
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      libGL
-      libGL.dev
-      libxkbcommon
-      egl-wayland
-      expat
-      wayland
-      wayland.dev
-      freetype
-      freetype.dev
-
-      libclang
-      sqlite
-      vulkan-headers
-      vulkan-loader
-      vulkan-tools
-      ncurses
-
-      libx11
-      libxcursor
-      libxi
-      libxrandr
-    ];
-  };
 
 
   # environment.variables.LD_LIBRARY_PATH =
@@ -255,27 +104,6 @@
   #   "${libPath}"
   # ;
 
-  services.flatpak.enable = true;
-
-  # Install firefox.
-  programs.firefox.enable = true;
-  programs.chromium.enable = true;
-
-
-  programs.nautilus-open-any-terminal = {
-    enable = true;
-    terminal = "ghostty";
-  };
-
-  programs.git = {
-    enable = true;
-    config = {
-      init = {
-        defaultBranch = "main";
-      };
-    };
-  };
-
   programs.vscode = {
     enable = true;
     defaultEditor = false;
@@ -295,20 +123,6 @@
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   # environment.sessionVariables.COSMIC_DATA_CONTROL_ENABLED = 1;
 
-  environment.variables = {
-    EDITOR = "vim";
-  };
-
-  environment.shells = with pkgs; [
-    bashInteractive
-    zsh
-    fish
-  ];
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.fira-mono
-    nerd-fonts.jetbrains-mono
-  ];
 
   services.tailscale = {
     enable = true;

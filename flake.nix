@@ -45,6 +45,11 @@
 
     crucible.url = "git+ssh://git@github.com/willothy/crucible";
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # refindgen.url = "github:willothy/refindgen";
   };
 
@@ -110,6 +115,31 @@
                 useUserPackages = true;
 
                 users.willothy = import ./home.nix;
+
+                backupFileExtension = "backup";
+                extraSpecialArgs = {
+                  inherit inputs;
+                };
+              };
+            }
+          ];
+        };
+
+        prometheus = nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs;
+          };
+
+          modules = [
+            inputs.disko.nixosModules.disko
+            ./hosts/prometheus/default.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+
+                users.willothy = import ./home/prometheus.nix;
 
                 backupFileExtension = "backup";
                 extraSpecialArgs = {

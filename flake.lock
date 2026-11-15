@@ -59,11 +59,11 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1794695797,
-        "narHash": "sha256-7XuKo0WFGKma+eJzikiwuPCoz2l+fc29wUq+mE96Qa4=",
+        "lastModified": 1794698062,
+        "narHash": "sha256-Y99vg5lzHEtoELUcyBjlwNU6ZsyxQbuVYDA2td9ufq4=",
         "ref": "refs/heads/main",
-        "rev": "d8b25b15daa9e43bd4192b708dd023169226ea57",
-        "revCount": 1480,
+        "rev": "c4adee81929efb515262bd1dd8edbf560151df66",
+        "revCount": 1484,
         "type": "git",
         "url": "ssh://git@github.com/willothy/crucible"
       },
@@ -85,6 +85,26 @@
         "owner": "nix-community",
         "repo": "disko",
         "rev": "ff8702b4de27f72b4c78573dfb89ec74e36abdf1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
+    "disko_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794328522,
+        "narHash": "sha256-h2BYMW4nTFpIqnMd8gwAPFmJAp/1wWLQ6vT0NfL5qt4=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "1dd30c29c88d99ce295f15e27f93c49bc5fbae07",
         "type": "github"
       },
       "original": {
@@ -361,6 +381,7 @@
     "root": {
       "inputs": {
         "crucible": "crucible",
+        "disko": "disko_2",
         "fdb-overlay": "fdb-overlay",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
