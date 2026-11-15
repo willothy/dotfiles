@@ -72,7 +72,6 @@
 
       overlays = {
         refind = import ./overlays/refind.nix;
-        docutils-pin = import ./overlays/docutils-pin.nix;
         pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
         capy = import ./overlays/capy.nix;
       };
@@ -86,7 +85,6 @@
 
         overlays = [
           overlays.refind
-          overlays.docutils-pin
           overlays.pytest-bs
           overlays.capy
           # inputs.refindgen.overlays.default
