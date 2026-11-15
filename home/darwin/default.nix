@@ -1,7 +1,6 @@
 { config, pkgs, globalUserInfo, lib, inputs, ... }:
 {
   imports = [
-    ./programs/neovim.nix
     ../common
     ./programs/wezterm.nix
     ./programs/aerc.nix
@@ -21,7 +20,7 @@
   home.homeDirectory = globalUserInfo.homeDir;
 
   home.sessionVariables = {
-    VISUAL = globalUserInfo.editorVisual;
+    VISUAL = lib.mkForce globalUserInfo.editorVisual;
     BROWSER = globalUserInfo.browser;
     PAGER = globalUserInfo.pager;
   };
