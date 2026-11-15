@@ -20,7 +20,6 @@
   home.homeDirectory = globalUserInfo.homeDir;
 
   home.sessionVariables = {
-    VISUAL = lib.mkForce globalUserInfo.editorVisual;
     BROWSER = globalUserInfo.browser;
     PAGER = globalUserInfo.pager;
   };

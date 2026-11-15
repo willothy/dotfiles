@@ -1,5 +1,10 @@
-{ inputs, pkgs, lib, ... }:
+{ inputs, pkgs, lib, globalUserInfo, ... }:
 {
+  # `nvim -b`: flatten.nvim repurposes -b so that an nvim opened as $VISUAL
+  # inside a nested nvim terminal hands the file to the outer nvim and blocks
+  # until it's closed. Overrides defaultEditor's plain VISUAL=nvim.
+  home.sessionVariables.VISUAL = lib.mkForce globalUserInfo.editorVisual;
+
   programs.neovim = {
     enable = true;
     defaultEditor = true;
