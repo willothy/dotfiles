@@ -622,6 +622,7 @@
         "nixpkgs": "nixpkgs_5",
         "onepassword-shell-plugins": "onepassword-shell-plugins",
         "rust-overlay": "rust-overlay_2",
+        "sops-nix": "sops-nix_2",
         "zen-browser": "zen-browser"
       }
     },
@@ -679,6 +680,26 @@
         "owner": "Mic92",
         "repo": "sops-nix",
         "rev": "fe7b4228405aeac2ce7192c2049a6e2bc8637082",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
+      }
+    },
+    "sops-nix_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794624949,
+        "narHash": "sha256-3q/hxp/flW1PnV3Dx+H3p8kHGEHJ7251BqVMNsAAB9E=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "11e5885d241743ff0193465d533b20e754bc3ce0",
         "type": "github"
       },
       "original": {

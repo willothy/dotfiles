@@ -1,0 +1,12 @@
+keys:
+  # Will's age key; the private half is in 1Password.
+  - &admin age13x7lmwurscafzrszcp6cf5f7a28pl0jl8pz77hwwgc4t4glvrsxqptqkg6
+  # prometheus's SSH host key (ssh-to-age).
+  - &prometheus age1lr7yd94v08upqyp494knv74203tclk8yjfnlwdgevtw84x2y6uvq30gnmx
+
+creation_rules:
+  - path_regex: ^secrets/prometheus/
+    key_groups:
+      - age:
+          - *admin
+          - *prometheus
