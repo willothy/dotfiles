@@ -1,10 +1,8 @@
 {
-  description = "A very basic flake";
+  description = "NixOS and nix-darwin configurations for nostromo, prometheus and macbonk";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-    # stable-nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
@@ -13,12 +11,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
-    # nixos-cosmic.url = "github:jerbaroo/nixos-cosmic/patch-1";
-    # nixos-cosmic.url = "github:willothy/nixos-cosmic";
-
     lanzaboote = {
-      # url = "github:nix-community/lanzaboote/v0.4.2";
       url = "github:willothy/lanzaboote/refind";
 
       inputs.nixpkgs.follows = "nixpkgs";
@@ -44,8 +37,6 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # refindgen.url = "github:willothy/refindgen";
 
     nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
@@ -83,7 +74,6 @@
         overlays = [
           overlays.refind
           overlays.capy
-          # inputs.refindgen.overlays.default
         ];
       };
 
@@ -131,16 +121,8 @@
           };
 
           modules = [
-            {
-              nix.settings = {
-                # substituters = [ "https://cosmic.cachix.org/" ];
-                # trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
-              };
-              disabledModules = [ "system/boot/loader/refind/refind.nix" ];
-            }
+            { disabledModules = [ "system/boot/loader/refind/refind.nix" ]; }
             ./modules/nixos/refind/default.nix
-            # inputs.refindgen.nixosModules.default
-            # inputs.nixos-cosmic.nixosModules.default
             ./hosts/nostromo
             inputs.lanzaboote.nixosModules.lanzaboote
             inputs.crucible.nixosModules.ci-runner-desktop
