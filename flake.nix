@@ -73,11 +73,6 @@
     let
       system = "x86_64-linux";
 
-      darwin = import ./darwin {
-        inherit self inputs;
-        system = "aarch64-darwin";
-      };
-
       overlays = {
         # sccache = import ./overlays/sccache.nix;
         refind = import ./overlays/refind.nix;
@@ -104,6 +99,44 @@
           # inputs.refindgen.overlays.default
         ];
       };
+
+      darwinSystem = "aarch64-darwin";
+
+      darwinPkgs = import inputs.nixpkgs-darwin {
+        system = darwinSystem;
+        config.allowUnfree = true;
+
+        overlays = [
+          (import ./overlays/spider-cli.nix)
+          (import ./overlays/bufbuild.nix)
+        ];
+      };
+
+      globalUserInfo = rec {
+        userName = "willothy";
+        fullName = "Will Hopkins";
+        email = "willothyh@gmail.com";
+        homeDir =
+          if (darwinSystem == "aarch64-darwin") then
+            "/Users/${userName}"
+          else
+            "/home/${userName}";
+        confDir = "~/.dotfiles";
+        editor = "nvim";
+        editorVisual = "nvim -b";
+        pager = "delta";
+        terminal = "wezterm";
+        browser = "brave";
+        # Public key, obviously
+        sshSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
+      };
+
+      darwinContext = {
+        inputs = inputs // {
+          _1password-shell-plugins = inputs.onepassword-shell-plugins;
+        };
+        inherit globalUserInfo;
+      };
     in
     {
       nixosConfigurations = {
@@ -126,7 +159,7 @@
             ./modules/nixos/refind/default.nix
             # inputs.refindgen.nixosModules.default
             # inputs.nixos-cosmic.nixosModules.default
-            ./nixos/configuration.nix
+            ./hosts/nostromo
             inputs.lanzaboote.nixosModules.lanzaboote
             inputs.crucible.nixosModules.ci-runner-desktop
             home-manager.nixosModules.home-manager
@@ -135,7 +168,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
 
-                users.willothy = import ./home.nix;
+                users.willothy = import ./hosts/nostromo/home.nix;
 
                 backupFileExtension = "backup";
                 extraSpecialArgs = {
@@ -153,14 +186,14 @@
 
           modules = [
             inputs.disko.nixosModules.disko
-            ./hosts/prometheus/default.nix
+            ./hosts/prometheus
             home-manager.nixosModules.home-manager
             {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
 
-                users.willothy = import ./home/prometheus.nix;
+                users.willothy = import ./hosts/prometheus/home.nix;
 
                 backupFileExtension = "backup";
                 extraSpecialArgs = {
@@ -174,6 +207,28 @@
 
       # `darwin-rebuild switch --flake .` and `home-manager switch --flake .`
       # find these through nix's packages.<system> fallback.
-      packages.aarch64-darwin = darwin;
+      packages.${darwinSystem} = {
+        darwinConfigurations.macbonk = inputs.darwin.lib.darwinSystem {
+          system = darwinSystem;
+          pkgs = darwinPkgs;
+
+          specialArgs = darwinContext;
+
+          modules = [
+            { system.configurationRevision = self.rev or self.dirtyRev or null; }
+            ./hosts/macbonk
+            ./modules/darwin
+            ./modules/darwin/common
+          ];
+        };
+
+        homeConfigurations.willothy = inputs.home-manager-darwin.lib.homeManagerConfiguration {
+          pkgs = darwinPkgs;
+
+          extraSpecialArgs = darwinContext;
+
+          modules = [ ./hosts/macbonk/home.nix ];
+        };
+      };
     };
 }

@@ -168,7 +168,7 @@ in
   # home-manager only supplies the package.
   xdg.configFile."nvim/init.lua".enable = lib.mkForce false;
 
-  home.file.".config/ghostty/config".source = ../configs/ghostty/config;
+  home.file.".config/ghostty/config".source = ../../configs/ghostty/config;
 
   # lua/plugins/* gets autoloaded by Lazy, so I use this to
   # do required nix-specific setup.

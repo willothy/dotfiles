@@ -10,9 +10,9 @@
       ./services/audio.nix
       ./services/desktop.nix
       # ./services/sccache.nix
-      ./common/cli.nix
-      ./common/virtualisation.nix
-      ./common/desktop-apps.nix
+      ../../modules/nixos/common/cli.nix
+      ../../modules/nixos/common/virtualisation.nix
+      ../../modules/nixos/common/desktop-apps.nix
     ];
 
   networking.hostName = "nostromo"; # Define your hostname.
@@ -67,7 +67,7 @@
     # libfdb74
     # fdbcli74
 
-    # (callPackage ../packages/helium-browser.nix { })
+    # (callPackage ../../packages/helium-browser.nix { })
 
     capy
   ];

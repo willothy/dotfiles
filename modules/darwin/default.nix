@@ -1,6 +1,6 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
-    ./programs/_1password.nix
+    ./_1password.nix
   ];
 
   system.primaryUser = "willothy";

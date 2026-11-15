@@ -4,9 +4,9 @@
   imports = [
     ./disk.nix
     ./hardware-configuration.nix
-    ../../nixos/common/cli.nix
-    ../../nixos/common/virtualisation.nix
-    ../../nixos/common/desktop-apps.nix
+    ../../modules/nixos/common/cli.nix
+    ../../modules/nixos/common/virtualisation.nix
+    ../../modules/nixos/common/desktop-apps.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

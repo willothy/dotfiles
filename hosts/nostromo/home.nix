@@ -15,7 +15,7 @@ let
   ;
 in
 {
-  imports = [ ./home/common.nix ];
+  imports = [ ../../home/nixos ];
 
   home.stateVersion = "25.05";
 

@@ -1,9 +1,9 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
-    ./programs/nh.nix
-    ./programs/cli-tools.nix
-    ./programs/languages.nix
-    ./programs/libraries.nix
+    ./nh.nix
+    ./cli-tools.nix
+    ./languages.nix
+    ./libraries.nix
   ];
 
   nix.settings = {
