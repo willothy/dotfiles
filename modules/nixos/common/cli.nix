@@ -3,6 +3,10 @@
 {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # <nixpkgs> resolves through the flake registry to this flake's pinned
+  # nixpkgs, not a separately-updated channel.
+  nix.channel.enable = false;
+
   environment.systemPackages = with pkgs; [
     # I will go insane without this
     (vim-full.customize {
