@@ -30,4 +30,19 @@
   home.file.".config/ghostty/config".source = ../../configs/ghostty/config;
 
   programs.gh.gitCredentialHelper.enable = false;
+
+  # Start 1Password in the tray at login, so its ssh agent and commit signing
+  # are there from the start. 1Password's own "start at login" links a store
+  # path, which garbage collection eventually deletes.
+  xdg.autostart.enable = true;
+  xdg.autostart.entries =
+    let
+      onePassword = pkgs.makeDesktopItem {
+        name = "1password-silent";
+        desktopName = "1Password";
+        exec = "1password --silent";
+        icon = "1password";
+      };
+    in
+    [ "${onePassword}/share/applications/1password-silent.desktop" ];
 }
