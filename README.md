@@ -121,8 +121,7 @@ nix run github:nix-community/nixos-anywhere -- \
 
 This config started as two repos: a NixOS one and the nix-darwin `willothy/.nix`, merged into one with
 the NixOS history kept. It then moved here, replacing the Arch/awesome-era dotfiles that used to be
-this repo; helix and zellij configs came along into `configs/shared/`. Both earlier histories are
-kept as tags:
+this repo. Both earlier histories are kept as tags:
 
 - `legacy-darwin`: `willothy/.nix`'s Mac-only history before the merge
 - `legacy-arch`: this repo's old Arch Linux dotfiles
