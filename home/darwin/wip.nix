@@ -1,15 +1,6 @@
 # Things I need to refactor into their own modules
 { config, pkgs, globalUserInfo, lib, ... }:
 {
-  programs.gh = {
-    enable = true;
-    extensions = [ ];
-    settings = {
-      git_protocol = "ssh";
-      aliases = { };
-    };
-  };
-
   programs.fish = {
     enable = true;
     shellInitLast = ''

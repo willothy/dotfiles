@@ -20,45 +20,13 @@
   #   enable = true;
   # };
 
-  programs.delta = {
-    enable = true;
-    enableGitIntegration = true;
-    options = {
-      navigate = true;
-      light = false;
-    };
-  };
-
   programs.git = {
-    enable = true;
     lfs = {
       enable = true;
     };
     signing = {
       # key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuB3Fm5F9/qUWn2Ok7EXZc8OkKmvy6AHI+Wit0+XDiV";
       # signByDefault = true;
-    };
-    settings = {
-      user = {
-        name = "Will Hopkins";
-        email = "willothyh@gmail.com";
-      };
-      init = {
-        defaultBranch = "main";
-      };
-      color.pager = "yes";
-      "gpg \"ssh\"" = {
-        program =
-          if (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") then
-            "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-          else
-            "${pkgs._1password-gui}/bin/op-ssh-sign"
-        ;
-      };
-      gpg.format = "ssh";
-      pull = {
-        rebase = true;
-      };
     };
   };
 
@@ -168,13 +136,5 @@
       '';
     };
 
-  programs.gh = {
-    enable = true;
-    gitCredentialHelper.enable = false;
-    extensions = [ ];
-    settings = {
-      git_protocol = "ssh";
-      aliases = { };
-    };
-  };
+  programs.gh.gitCredentialHelper.enable = false;
 }
