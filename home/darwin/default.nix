@@ -5,7 +5,6 @@
     ./programs/git.nix
     ../common
     ./programs/wezterm.nix
-    ./programs/ssh.nix
     ./programs/aerc.nix
     inputs._1password-shell-plugins.hmModules.default
   ];
