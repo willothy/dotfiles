@@ -4,6 +4,7 @@
   imports =
     [
       ./hardware-configuration.nix
+      ./storage.nix
       ./boot/default.nix
       ./hardware/default.nix
       ./services/xserver.nix
