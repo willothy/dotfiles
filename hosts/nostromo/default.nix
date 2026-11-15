@@ -5,6 +5,7 @@
     [
       ./hardware-configuration.nix
       ./storage.nix
+      ./snapshots.nix
       ./boot/default.nix
       ./hardware/default.nix
       ./services/xserver.nix
