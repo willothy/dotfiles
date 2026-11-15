@@ -113,6 +113,16 @@
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
+  # With only zram as swap, running out of memory thrashes the machine into a
+  # hard freeze long before the kernel's OOM killer acts. earlyoom kills the
+  # single largest process first (systemd-oomd would kill its whole cgroup,
+  # e.g. the terminal or app that launched it).
+  services.earlyoom = {
+    enable = true;
+    enableNotifications = true;
+    extraArgs = [ "--avoid" "^(cosmic-comp|\\.cosmic-comp-wr|Xwayland|systemd|sshd)$" ];
+  };
+
   services.crucible-ci-runner-vms = {
     tokenFile = "/etc/github-runner/crucible.token";
     stateDirectory = "/var/lib/microvms";
