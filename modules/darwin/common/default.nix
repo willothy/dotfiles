@@ -1,5 +1,6 @@
 { pkgs, globalUserInfo, ... }: {
   imports = [
+    ../../common
     ./cli-tools.nix
     ./languages.nix
     ./libraries.nix
@@ -9,31 +10,6 @@
     experimental-features = "nix-command flakes";
     trusted-users = [ "@admin" globalUserInfo.userName ];
   };
-
-  environment.systemPackages = with pkgs; [
-    ((vim-full.override { }).customize {
-      name = "vim";
-      vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
-        start = [ vim-nix vim-lastplace ];
-        opt = [ ];
-      };
-      vimrcConfig.customRC = ''
-        filetype plugin indent on
-        syntax on
-
-        set shiftwidth=2
-        set tabstop=2
-        set expandtab
-
-        set showtabline=3
-        set scrolloff=10
-
-        set number relativenumber
-
-        set nowrap hlsearch incsearch showmode
-      '';
-    })
-  ];
 
   programs._1password-cli.enable = true;
 
