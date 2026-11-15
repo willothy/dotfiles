@@ -1,8 +1,5 @@
 { config, pkgs, ... }:
 {
-  # linuxPackages_latest (6.18) had issues with the nvidia drivers
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
-
   boot.kernelParams = [
     "quiet"
     "splash"
