@@ -1,0 +1,18 @@
+theme = "tokyonight_storm"
+
+[editor]
+line-number = "relative"
+bufferline = "multiple"
+shell = ["zsh", "-c"]
+
+[keys.normal]
+esc = ["collapse_selection"]
+
+[editor.cursor-shape]
+insert = "bar"
+
+[editor.file-picker]
+hidden = false
+
+[editor.statusline]
+left = ["mode", "spinner", "version-control"]
