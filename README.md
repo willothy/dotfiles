@@ -24,8 +24,8 @@ overlays/          nixpkgs overlays
 scripts/           manual maintenance scripts
 ```
 
-Every host follows the same `nixos-unstable` nixpkgs and home-manager pins. The Linux hosts run
-Determinate Nix from the flake; the Mac runs it from Determinate's installer.
+Every host follows the same `nixos-unstable` nixpkgs and home-manager pins, and runs Determinate Nix
+configured through the flake (on the Mac, Nix itself is installed by Determinate's installer).
 
 CI (`.github/workflows/eval.yml`) evaluates every host's configuration on each push.
 
