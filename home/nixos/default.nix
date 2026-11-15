@@ -5,6 +5,10 @@
   home.username = globalUserInfo.userName;
   home.homeDirectory = globalUserInfo.homeDir;
 
+  # Use the system Rex server (rex.service) instead of letting the CLI start a
+  # personal one on its default per-user socket.
+  home.sessionVariables.REX_SERVER = "unix:///run/rex/server.sock";
+
   home.packages =
     with pkgs;
     let
