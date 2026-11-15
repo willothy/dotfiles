@@ -72,7 +72,6 @@
 
       overlays = {
         refind = import ./overlays/refind.nix;
-        pytest-bs = import ./overlays/pytest-timeout-no-tests.nix;
         capy = import ./overlays/capy.nix;
       };
 
@@ -85,7 +84,6 @@
 
         overlays = [
           overlays.refind
-          overlays.pytest-bs
           overlays.capy
           # inputs.refindgen.overlays.default
         ];
