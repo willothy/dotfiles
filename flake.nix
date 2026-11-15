@@ -100,7 +100,6 @@
         config.allowUnfree = true;
 
         overlays = [
-          (import ./overlays/spider-cli.nix)
           (import ./overlays/bufbuild.nix)
         ];
       };
