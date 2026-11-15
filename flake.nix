@@ -51,6 +51,9 @@
     onepassword-shell-plugins.url = "github:1Password/shell-plugins";
 
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
+
+    # Prebuilt Rex (superlogical.com), snapshot channel: a build of every change.
+    rex.url = "https://pkgs.superlogical.com/rex/nix/snapshot.tar.gz";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @inputs:

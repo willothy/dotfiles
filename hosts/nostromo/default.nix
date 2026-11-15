@@ -15,6 +15,7 @@
       ../../modules/nixos/common/virtualisation.nix
       ../../modules/nixos/common/desktop-apps.nix
       ../../modules/nixos/common/determinate.nix
+      ../../modules/nixos/common/rex.nix
     ];
 
   networking.hostName = "nostromo";

@@ -569,6 +569,19 @@
         "type": "github"
       }
     },
+    "nixpkgs_7": {
+      "locked": {
+        "lastModified": 1789632929,
+        "narHash": "sha256-j08lBbqaYwjsW0xy6Dh4MNZpQ/oSvLU1MLAo38OXphM=",
+        "rev": "a32edd7654519351e48e80372a928df336394670",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1075288.a32edd765451/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+      }
+    },
     "onepassword-shell-plugins": {
       "inputs": {
         "nixpkgs": "nixpkgs_6",
@@ -610,6 +623,21 @@
         "type": "github"
       }
     },
+    "rex": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_7"
+      },
+      "locked": {
+        "lastModified": 1794719511,
+        "narHash": "sha256-oEAjNRNlUu9IWrbDXlLFtyPGNxogGmAIFaSWFCUwZI0=",
+        "type": "tarball",
+        "url": "https://pkgs.superlogical.com/rex/nix/snapshot/0.0.1794719511-gf91cd7.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://pkgs.superlogical.com/rex/nix/snapshot.tar.gz"
+      }
+    },
     "root": {
       "inputs": {
         "crucible": "crucible",
@@ -621,6 +649,7 @@
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs_5",
         "onepassword-shell-plugins": "onepassword-shell-plugins",
+        "rex": "rex",
         "rust-overlay": "rust-overlay_2",
         "sops-nix": "sops-nix_2",
         "zen-browser": "zen-browser"
