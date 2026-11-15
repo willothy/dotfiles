@@ -94,10 +94,6 @@
       darwinPkgs = import inputs.nixpkgs-darwin {
         system = darwinSystem;
         config.allowUnfree = true;
-
-        overlays = [
-          (import ./overlays/bufbuild.nix)
-        ];
       };
 
       globalUserInfo = rec {

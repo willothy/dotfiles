@@ -47,7 +47,6 @@
 
     # Official Third-Party CLIs
     # turso-cli # turso
-    buf # buf.build
     # awscli2 # AWS
     gh # GitHub
   ];
