@@ -112,6 +112,8 @@
     stateDirectory = "/var/lib/microvms";
     asAvailable.startAtBoot = true;
     compilerCacheSize = 20;
+    # Two runners, so CI can't swamp the desktop; prometheus runs the pool.
+    count = 2;
   };
 
   system.stateVersion = "25.05";
