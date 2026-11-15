@@ -67,5 +67,9 @@
   services.tailscale.enable = true;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
+  # A server on the tailnet: dev machines can reach it, it reaches nothing
+  # (the tailnet policy grants tag:server no outbound access).
+  services.rex.tailscale.advertiseTags = [ "tag:server" ];
+
   system.stateVersion = "26.11";
 }

@@ -1,4 +1,4 @@
-{ inputs, config, globalUserInfo, ... }:
+{ inputs, config, lib, globalUserInfo, ... }:
 {
   imports = [ inputs.rex.nixosModules.default ];
 
@@ -15,7 +15,7 @@
       hostname = "${config.networking.hostName}-rex";
       # tagged nodes have no owner, so the tailnet's access rules decide who
       # connects (the Macs' Rex apps are tagged too)
-      advertiseTags = [
+      advertiseTags = lib.mkDefault [
         "tag:dev"
         "tag:linux"
       ];
