@@ -9,7 +9,6 @@
       ./services/xserver.nix
       ./services/audio.nix
       ./services/desktop.nix
-      # ./services/sccache.nix
       ../../modules/nixos/common/cli.nix
       ../../modules/nixos/common/virtualisation.nix
       ../../modules/nixos/common/desktop-apps.nix
