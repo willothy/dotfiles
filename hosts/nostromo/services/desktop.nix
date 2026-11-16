@@ -10,6 +10,8 @@
   services.gnome.gcr-ssh-agent.enable = false;
 
   environment.systemPackages = with pkgs; [
+    rex-linux
+
     cosmic-store
     cosmic-ext-applet-caffeine
     cosmic-ext-applet-external-monitor-brightness

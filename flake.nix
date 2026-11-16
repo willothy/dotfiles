@@ -54,6 +54,10 @@
 
     # Prebuilt Rex (superlogical.com), snapshot channel: a build of every change.
     rex.url = "https://pkgs.superlogical.com/rex/nix/snapshot.tar.gz";
+
+    # Native Linux client for Rex. To build against a local checkout:
+    #   --override-input rex-linux git+file:///home/willothy/work/foss/rex-linux
+    rex-linux.url = "github:willothy/rex-linux";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @inputs:
@@ -75,6 +79,7 @@
         overlays = [
           overlays.refind
           overlays.capy
+          inputs.rex-linux.overlays.default
         ];
       };
 
