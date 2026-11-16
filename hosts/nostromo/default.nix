@@ -41,10 +41,16 @@
   users.users.${globalUserInfo.userName} = {
     isNormalUser = true;
     description = globalUserInfo.fullName;
-    extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "i2c" "kvm" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "i2c" "kvm" "userfaultfd" ];
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = [ globalUserInfo.sshPublicKey ];
   };
+
+  # /dev/userfaultfd for dev work, usable by members of this group.
+  users.groups.userfaultfd = { };
+  services.udev.extraRules = ''
+    KERNEL=="userfaultfd", GROUP="userfaultfd", MODE="0660"
+  '';
 
   environment.systemPackages = with pkgs; [
     # secure boot
