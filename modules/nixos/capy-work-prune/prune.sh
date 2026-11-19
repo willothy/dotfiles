@@ -113,11 +113,12 @@ available_kib() {
 }
 
 # KiB a path occupies on disk. Disk usage, not apparent size: this is what
-# removing it gives back.
+# removing it gives back. Fails for a path du cannot read, which is that entry's
+# problem and not the run's.
 disk_kib() {
   local used
   read -r used _ < <(du -sk -- "$1")
-  [[ $used =~ ^[0-9]+$ ]] || die "cannot measure the size of $1"
+  [[ $used =~ ^[0-9]+$ ]] || return 1
   printf '%s\n' "$used"
 }
 
@@ -255,11 +256,17 @@ target_removed=()
 target_kept=()
 removed_count=0
 removed_kib=0
+declare -A seen_paths=()
 
 add_target() {
   local path=$1 crew=$2 age size
+  [[ -n ${seen_paths[$path]:-} ]] && return 0
+  seen_paths["$path"]=1
   age=$(activity_age "$path") || return 0
-  size=$(disk_kib "$path")
+  size=$(disk_kib "$path") || {
+    log "skipped (cannot measure) $path"
+    return 0
+  }
   target_dirs+=("$path")
   target_crews+=("$crew")
   target_kibs+=("$size")
@@ -279,12 +286,18 @@ scan_targets() {
       add_target "$entry" "$(crew_of "$base")"
     fi
   done
-  # A delete that was interrupted leaves <checkout>/target.pruning.<stamp>; it is
-  # our own unfinished work and takes the same rules. A leftover at the top level
-  # is a directory still holding cargo's marks, so the loop above already saw it.
-  for leftover in "$work_dir"/*/target.pruning.*; do
+  # A delete that was interrupted leaves a .pruning marker: beside a checkout's
+  # target, or on a top-level target directory. Either way it is our own
+  # unfinished work and takes the same rules, and the entry loop may already have
+  # collected it.
+  for leftover in "$work_dir"/*/target.pruning.* "$work_dir"/*.pruning.*; do
     [[ -d $leftover && ! -L $leftover ]] || continue
-    add_target "$leftover" "$(crew_of "$(basename -- "$(dirname -- "$leftover")")")"
+    if [[ $(dirname -- "$leftover") == "$work_dir" ]]; then
+      base=$(basename -- "$leftover")
+    else
+      base=$(basename -- "$(dirname -- "$leftover")")
+    fi
+    add_target "$leftover" "$(crew_of "$base")"
   done
   held=$(total_kib)
   log "found ${#target_dirs[@]} target directories holding $(size_text "$held")"
@@ -310,14 +323,13 @@ crew_kib() {
   printf '%s\n' "$total"
 }
 
-# Last line of defence before an rm -rf: the path has to be a top-level entry of
-# the work directory, or a checkout's target/ under it, and never a symlink out
-# of it.
-assert_target_path() {
+# Whether a path is one this script may remove: a top-level entry of the work
+# directory, or a checkout's target/ under it, with any number of markers from an
+# interrupted delete after it.
+is_target_path() {
   local path=$1 relative
   relative=${path#"$work_dir"/}
-  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9.]+)?$ ]] ||
-    die "refusing to remove $path: not a target directory of $work_dir"
+  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9.]+)*$ ]]
 }
 
 # Removes one target directory under the given rule, after checking again that
@@ -330,12 +342,18 @@ prune_target() {
   if (( target_removed[index] || target_kept[index] )); then
     return 0
   fi
-  assert_target_path "$path"
+  if ! is_target_path "$path"; then
+    log "skipped (not a target directory of the work directory) $path"
+    return 0
+  fi
   if [[ ! -d $path ]] || [[ -L $path ]]; then
     log "skipped (gone since the scan) $path"
     return 0
   fi
-  if ! is_target_dir "$path"; then
+  # A marked path is one this script renamed itself, and a delete it did not
+  # finish may have taken the cargo marks with it, so only unmarked paths have to
+  # still look like build output.
+  if [[ ! $path =~ \.pruning\.[0-9.]+$ ]] && ! is_target_dir "$path"; then
     log "skipped (no cargo marks since the scan) $path"
     return 0
   fi
@@ -363,8 +381,13 @@ prune_target() {
   # a missing directory instead of losing files one at a time. The rename cannot
   # cross a filesystem, and --one-file-system keeps the delete off other
   # devices; a bind mount of the same filesystem is the one case it cannot see.
-  doomed="${path}.pruning.$(date +%s).$$"
-  mv -T -- "$path" "$doomed"
+  # A path that already carries a marker was left by an interrupted delete, so
+  # it is deleted as it stands instead of collecting another one.
+  doomed=$path
+  if [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
+    doomed="${path}.pruning.$(date +%s).$$"
+    mv -T -- "$path" "$doomed"
+  fi
   rm -rf --one-file-system --preserve-root -- "$doomed"
   log "removed (rule ${rule}, $(size_text "$size")) $path"
 }
