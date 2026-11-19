@@ -36,13 +36,15 @@ in
   };
 
   services.crucible-ci-runner-vms = {
-    # Three VMs of 5 vCPUs and 11 GiB: 15 vCPUs of the 16 threads, and 33
-    # GiB of memory, under the slice's cap with cloud-hypervisor's and
-    # virtiofsd's own. A guest's own Nix runs a compiler per vCPU, and
-    # cloud-hypervisor's build peaked 349 MiB short of 8 GiB in a VM of
-    # 8 vCPUs (crucible CRU-118); 11 GiB left 3.7 GiB free at 6 vCPUs.
-    count = 3;
-    reservedForMain = 1;
+    # Five VMs of 4 vCPUs and 7 GiB: 20 vCPUs on the 16 threads, and 35
+    # GiB of memory, under the slice's cap with QEMU's and virtiofsd's own.
+    # The slice's low CPU weight keeps the overcommit off this host's own
+    # services. A gigabyte less than the CI boxes' VMs leaves this host
+    # room for its own services; should the guests run out of memory, four
+    # VMs of 8 GiB fit the same cap.
+    count = 5;
+    # Every VM takes branch jobs, as the CI boxes' branch lane does.
+    reservedForMain = 0;
     url = "https://github.com/willothy/crucible";
     kvmModule = "kvm-amd";
     tokenFile = config.sops.secrets.crucible-runner-token.path;
@@ -52,12 +54,13 @@ in
       # and memory, on a store volume of its own; this host's store reaches
       # it read-only, as its first substituter.
       nix = "guest";
-      vcpu = 5;
-      memory = 11264;
-      # Three cache volumes of 32 GiB, three store volumes of 32 GiB, and
-      # three scratch volumes of 16 GiB: 240 GiB at most, in sparse images,
-      # on the disk this host's own files share.
-      cacheSize = 32768;
+      vcpu = 4;
+      memory = 7168;
+      # Five cache volumes of 64 GiB, as the CI boxes' cargo caches, five
+      # store volumes of 32 GiB, and five scratch volumes of 16 GiB: 560
+      # GiB at most, in sparse images, and 588 GiB with the compiler
+      # cache's image, on the 1 TB disk this host's own files share.
+      cacheSize = 65536;
       nixStoreSize = 32768;
       cacheTrimPercent = 80;
       scratchSize = 16384;
@@ -89,8 +92,10 @@ in
         # host's own services win the CPU and disk whenever they want them.
         cpuWeight = 10;
         ioWeight = 10;
-        # Of the 46 GiB, the host and its services always keep about 10.
-        memoryMax = "36G";
+        # The VMs' 35 GiB of guest memory and 1 GiB per VM for QEMU's and
+        # virtiofsd's own, the CI boxes' budget. Of the 46 GiB, the host and
+        # its services keep at least 6 with every VM full.
+        memoryMax = "40G";
       };
     };
   };
