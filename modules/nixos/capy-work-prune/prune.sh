@@ -103,7 +103,6 @@ parse_arguments() {
 
 check_arguments() {
   local name value
-  [[ -d $work_dir ]] || die "work directory does not exist: $work_dir"
   for name in crew_budget_gib idle_hours pressure_idle_hours free_floor_gib; do
     value=${!name}
     [[ $value =~ ^[1-9][0-9]*$ ]] || die "--${name//_/-} must be a positive integer, got: $value"
@@ -128,6 +127,15 @@ disk_kib() {
   read -r used _ < <(du -sk -- "$1")
   [[ $used =~ ^[0-9]+$ ]] || die "cannot measure the size of $1"
   printf '%s\n' "$used"
+}
+
+# KiB as a readable size: MiB below a GiB, GiB above.
+size_text() {
+  if (( $1 >= 1048576 )); then
+    printf '%s GiB' "$(($1 / 1048576))"
+  else
+    printf '%s MiB' "$(($1 / 1024))"
+  fi
 }
 
 proc_name() {
@@ -196,7 +204,7 @@ is_target_dir() {
 }
 
 # The crew a work directory entry belongs to: its name, lowercased, with a
-# trailing -target dropped, so CRU-334, CRU-334-target and cru-334/target all
+# trailing -target dropped, so CRU-334, CRU-334/target and CRU-334-target all
 # count against one crew's budget.
 crew_of() {
   local name=${1,,}
@@ -218,7 +226,7 @@ scan_targets() {
     base=$(basename -- "$entry")
     if is_target_dir "$entry"; then
       path=$entry
-    elif is_target_dir "$entry/target"; then
+    elif is_target_dir "$entry/target" && [[ ! -L $entry/target ]]; then
       path=$entry/target
     else
       continue
@@ -233,7 +241,7 @@ scan_targets() {
     target_removed+=(0)
   done
   held=$(total_kib)
-  log "found ${#target_dirs[@]} target directories holding $((held / 1048576)) GiB"
+  log "found ${#target_dirs[@]} target directories holding $(size_text "$held")"
 }
 
 total_kib() {
@@ -257,44 +265,53 @@ crew_kib() {
 }
 
 # Removes one target directory under the given rule, after checking again that
-# nothing is using it, and logs what went and why. Fails when it kept the
-# directory, so a caller counting freed space does not count it.
+# nothing is using it, and logs what went and why. A directory it kept stays in
+# target_dirs, which is how a caller counting freed space sees that nothing came
+# back.
 prune_target() {
   local index=$1 rule=$2
   local path=${target_dirs[$index]} size=${target_kibs[$index]} reason
-  die_on_unsafe_path "$path"
-  (( target_removed[index] )) && return 1
+  if (( target_removed[index] )); then
+    return 0
+  fi
+  assert_target_path "$path"
+  if [[ ! -d $path ]] || [[ -L $path ]]; then
+    log "skipped (gone since the scan) $path"
+    return 0
+  fi
+  if ! is_target_dir "$path"; then
+    log "skipped (no debug/ or release/ since the scan) $path"
+    return 0
+  fi
   if reason=$(busy_reason "$path"); then
     log "kept (in use) $path: $reason"
-    return 1
+    return 0
   fi
   target_removed[index]=1
   removed_count=$((removed_count + 1))
   removed_kib=$((removed_kib + size))
   if (( dry_run )); then
-    log "would remove (rule ${rule}, $((size / 1024)) MiB) $path"
+    log "would remove (rule ${rule}, $(size_text "$size")) $path"
     return 0
   fi
   rm -rf --one-file-system --preserve-root -- "$path"
-  log "removed (rule ${rule}, $((size / 1024)) MiB) $path"
+  log "removed (rule ${rule}, $(size_text "$size")) $path"
 }
 
-# Last line of defence before an rm -rf: the path must be a directory, a real
-# one rather than a symlink, directly inside the work directory, and still look
-# like a target directory.
-die_on_unsafe_path() {
-  local path=$1 parent
-  [[ -d $path && ! -L $path ]] || die "refusing to remove $path: not a directory"
-  parent=$(dirname -- "$path")
-  [[ $parent == "$work_dir" || $parent == "$(realpath -- "$work_dir")" ]] ||
-    die "refusing to remove $path: not directly inside $work_dir"
-  is_target_dir "$path" || die "refusing to remove $path: no debug/ or release/ left"
+# Last line of defence before an rm -rf: the path has to be a top-level entry of
+# the work directory or a checkout's target/ under it, and never a symlink out of
+# it.
+assert_target_path() {
+  local path=$1 relative
+  relative=${path#"$work_dir"/}
+  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?$ ]] ||
+    die "refusing to remove $path: not a target directory of $work_dir"
 }
 
 enforce_free_floor() {
   local index
   (( free_kib < floor_kib )) || return 0
-  log "free space $((free_kib / 1048576)) GiB is below the ${free_floor_gib} GiB floor: pruning everything idle for more than ${pressure_idle_hours}h"
+  log "free space $(size_text "$free_kib") is below the ${free_floor_gib} GiB floor: pruning everything idle for more than ${pressure_idle_hours}h"
   for index in "${!target_dirs[@]}"; do
     (( target_ages[index] >= pressure_seconds )) || continue
     prune_target "$index" "free-floor"
@@ -312,7 +329,7 @@ enforce_idle_window() {
 }
 
 enforce_crew_budgets() {
-  local crew index oldest total crew_indices
+  local crew index oldest before total crew_indices
   local -a crews
   ((${#target_crews[@]})) || return 0
   while read -r crew; do
@@ -322,7 +339,7 @@ enforce_crew_budgets() {
   for crew in "${crews[@]}"; do
     total=$(crew_kib "$crew")
     (( total > crew_budget_kib )) || continue
-    log "crew ${crew:-(unnamed)} holds $((total / 1048576)) GiB, over its ${crew_budget_gib} GiB budget: oldest first"
+    log "crew ${crew:-(unnamed)} holds $(size_text "$total"), over its ${crew_budget_gib} GiB budget: oldest first"
     crew_indices=()
     for index in "${!target_dirs[@]}"; do
       [[ ${target_crews[index]} == "$crew" ]] && crew_indices+=("$index")
@@ -336,8 +353,12 @@ enforce_crew_budgets() {
         fi
       done
       (( oldest >= 0 )) || break
-      prune_target "$oldest" "budget" || break
+      before=$total
+      prune_target "$oldest" "budget"
       total=$(crew_kib "$crew")
+      # Everything left in this crew is in use, and space is not what a budget
+      # dispute with a running build is worth.
+      (( total < before )) || break
     done
   done
   return 0
@@ -368,7 +389,7 @@ scan_would_be_pointless() {
       return 1
     fi
   done <"$state_dir/scan"
-  log "free space $((free_kib / 1048576)) GiB, every crew inside its budget as of the scan $(((now - scanned_at) / 60)) minutes ago: nothing to do"
+  log "free space $(size_text "$free_kib"), every crew inside its budget as of the scan $(((now - scanned_at) / 60)) minutes ago: nothing to do"
   return 0
 }
 
@@ -398,7 +419,17 @@ main() {
   floor_kib=$((free_floor_gib * 1048576))
   idle_seconds=$((idle_hours * 3600))
   pressure_seconds=$((pressure_idle_hours * 3600))
+  # A scan the hourly run may trust: one day, which is what the daily run
+  # replaces long before a crew's drift can matter.
   cache_seconds=$((24 * 3600))
+
+  if [[ ! -d $work_dir ]]; then
+    log "no work directory at $work_dir: nothing to prune"
+    return 0
+  fi
+  # One shape of path from here on, so the containment check before an rm
+  # compares like with like.
+  work_dir=$(realpath -- "$work_dir")
 
   if (( dry_run )); then
     log "dry run: nothing will be removed"
@@ -425,9 +456,9 @@ main() {
   if (( dry_run == 0 && removed_count > 0 )); then
     free_kib=$(available_kib "$work_dir")
   fi
-  log "finished: ${removed_count} target directories, $((removed_kib / 1024)) MiB, free space now $((free_kib / 1048576)) GiB"
+  log "finished: ${removed_count} target directories, $(size_text "$removed_kib"), free space now $(size_text "$free_kib")"
   if (( free_kib < floor_kib )); then
-    log "warning: still $((free_kib / 1048576)) GiB free, below the ${free_floor_gib} GiB floor; everything else is in use or recent"
+    log "warning: still $(size_text "$free_kib") free, below the ${free_floor_gib} GiB floor; everything else is in use or recent"
   fi
 }
 
