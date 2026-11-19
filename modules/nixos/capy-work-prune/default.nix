@@ -4,11 +4,13 @@
 # target directories from finished crews.
 #
 # A target directory counts whether it is a checkout's target/ or a top-level
-# directory that is one itself; it is recognised by the debug/ or release/
-# inside it, never by its name. Nothing is removed while a process has it as its
-# working directory, holds a file in it open, or has one of its files mapped,
-# and nothing is removed until neither debug/ nor release/ has been written for
-# the idle window. On top of that each crew is capped by name (`CRU-334` and
+# directory that is one itself, and it is recognised by cargo's own marks
+# (CACHEDIR.TAG, .rustc_info.json, or deps/ beside .fingerprint/ in a profile
+# directory), never by its name: a checkout that ships a release/ directory of
+# packaging scripts is source. Nothing is removed while a process has it as its
+# working directory, holds a file in it open, has one of its files mapped, or
+# while cargo holds its build locks in it, and nothing is removed until the
+# newest write anywhere under it is older than the idle window. On top of that each crew is capped by name (`CRU-334` and
 # `CRU-334-target` are one crew), oldest first, and a filesystem below the floor
 # drops to the shorter pressure window so a build starting later cannot be the
 # thing that finds the disk full.
@@ -30,7 +32,6 @@
 }:
 let
   inherit (lib)
-    mkEnableOption
     mkIf
     mkOption
     types
@@ -95,7 +96,22 @@ let
 in
 {
   options.services.capyWorkPrune = {
-    enable = mkEnableOption "pruning of stale cargo target directories under a shared work directory";
+    enable = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Prune cargo target directories under {option}`workDir` that are idle or
+        over their crew's budget.
+
+        The process check reads `/proc`, so it sees the processes of the user
+        this service runs as and nothing else: a build running under another
+        user, or inside a container, is invisible to it. Cargo builds are still
+        safe there, because cargo holds a lock file in the target directory for
+        as long as it builds and the prune probes that lock before deleting; a
+        build that is not cargo, runs in a container, and holds nothing open
+        inside its target directory can be removed under it.
+      '';
+    };
 
     user = mkOption {
       type = types.str;

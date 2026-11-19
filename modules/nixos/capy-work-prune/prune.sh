@@ -1,12 +1,21 @@
 # Reclaims cargo build output under the shared Capy work directory.
 #
-# A target directory is found by shape, never by name: it is a top-level
-# directory that itself holds debug/ or release/, or the target/ of a checkout
-# beside it. Two things must hold before one is removed: nothing may be using it
-# (busy_reason), and it must be idle, meaning neither debug/ nor release/ has
-# been written for --idle-hours. On top of that a crew's target directories are
-# capped at --crew-budget-gib, oldest first, and a filesystem with less than
-# --free-floor-gib free drops to the shorter --pressure-idle-hours window.
+# Cargo leaves evidence of its own in a target directory, and this goes by that
+# evidence rather than by names, which lie: a checkout that ships a release/
+# directory of packaging scripts is source, not build output. A directory is a
+# target directory when it holds CACHEDIR.TAG or .rustc_info.json, or when a
+# profile directory inside it holds both deps/ and .fingerprint/, and only then
+# is the directory itself the thing that gets removed. Both shapes count: a
+# checkout's target/ and a top-level directory that is a target directory
+# itself.
+#
+# Two things must hold before one is removed. Nothing may be using it: no
+# process may have a path under it as its working directory, open, or mapped,
+# and cargo must not be holding its build locks in it. And it must be idle,
+# meaning nothing anywhere under it has been written for --idle-hours. On top of
+# that a crew's target directories are capped at --crew-budget-gib, oldest
+# first, and a filesystem with less than --free-floor-gib free drops to the
+# shorter --pressure-idle-hours window.
 #
 # The NixOS module wraps this file in writeShellApplication, which supplies bash,
 # coreutils, findutils, grep and flock, and turns on errexit, nounset and
@@ -20,8 +29,8 @@ usage: capy-work-prune [options]
                            target directories (default: $HOME/.capy/work)
   --crew-budget-gib N      ceiling on the target directories of one crew, in
                            GiB (default: 100)
-  --idle-hours N           a target directory is idle once neither debug/ nor
-                           release/ has been written for this long (default: 24)
+  --idle-hours N           a target directory is idle once nothing under it has
+                           been written for this long (default: 24)
   --pressure-idle-hours N  shorter idle window used while free space is below
                            the floor (default: 2)
   --free-floor-gib N       free space on the work directory's filesystem below
@@ -55,30 +64,13 @@ dry_run=0
 full=0
 
 parse_arguments() {
+  local name
   while (( $# )); do
     case $1 in
-      --work-dir)
-        work_dir=${2:-}
-        shift 2
-        ;;
-      --crew-budget-gib)
-        crew_budget_gib=${2:-}
-        shift 2
-        ;;
-      --idle-hours)
-        idle_hours=${2:-}
-        shift 2
-        ;;
-      --pressure-idle-hours)
-        pressure_idle_hours=${2:-}
-        shift 2
-        ;;
-      --free-floor-gib)
-        free_floor_gib=${2:-}
-        shift 2
-        ;;
-      --state-dir)
-        state_dir=${2:-}
+      --work-dir | --crew-budget-gib | --idle-hours | --pressure-idle-hours | --free-floor-gib | --state-dir)
+        (( $# >= 2 )) || die "$1 needs a value"
+        name=${1#--}
+        printf -v "${name//-/_}" '%s' "$2"
         shift 2
         ;;
       --dry-run)
@@ -144,70 +136,114 @@ proc_name() {
   printf '%s\n' "$name"
 }
 
-# Prints why a target directory counts as in use, and fails when nothing is using
-# it. Walks /proc directly rather than calling lsof, which is not in this
-# module's closure: a process's working directory, its open descriptors, and the
-# files it has mapped (a test binary the process has finished opening but still
-# has mapped keeps the file's blocks alive, so a mapping counts too). Processes
-# of other users are invisible here, which is enough: everything under the work
-# directory is built as its owner.
-busy_reason() {
-  local real pid_dir pid link fd
-  real=$(realpath -- "$1")
+# Cargo holds an exclusive flock in the profile directory for as long as a build
+# runs, and locks are per-inode: a probe here sees a cargo build that /proc
+# cannot, in another mount namespace or under another uid. A lock file that is
+# not there is no evidence of use, not evidence of disuse.
+cargo_lock_held() {
+  local dir=$1 profile lock
+  for profile in debug release; do
+    for lock in "$dir/$profile"/.cargo-build-lock "$dir/$profile"/.cargo-lock "$dir/$profile"/.cargo-artifact-lock; do
+      [[ -e $lock ]] || continue
+      if ! flock -n -- "$lock" true; then
+        printf 'cargo holds %s\n' "$lock"
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+
+declare -A busy_paths=()
+
+# Collects, once per run, every path under the work directory that a process has
+# as its working directory, open, or mapped, and the process it belongs to.
+# Mappings count because a test binary whose descriptor has closed keeps its
+# blocks alive. /proc is read directly rather than through lsof, which is not in
+# this module's closure.
+collect_busy_paths() {
+  local pid_dir pid link fd line
   for pid_dir in /proc/[0-9]*; do
     pid=${pid_dir#/proc/}
     [[ $pid == "$$" ]] && continue
     if link=$(readlink -- "$pid_dir/cwd" 2>/dev/null); then
       link=${link% (deleted)}
-      if [[ $link == "$real" || $link == "$real"/* ]]; then
-        printf 'pid %s (%s) has it as its working directory\n' "$pid" "$(proc_name "$pid")"
-        return 0
+      if [[ $link == "$work_dir" || $link == "$work_dir"/* ]]; then
+        busy_paths["$link"]="pid $pid ($(proc_name "$pid")) has it as its working directory"
       fi
     fi
     for fd in "$pid_dir"/fd/*; do
       link=$(readlink -- "$fd" 2>/dev/null) || continue
       link=${link% (deleted)}
-      if [[ $link == "$real" || $link == "$real"/* ]]; then
-        printf 'pid %s (%s) has %s open\n' "$pid" "$(proc_name "$pid")" "$link"
-        return 0
+      if [[ $link == "$work_dir"/* ]]; then
+        busy_paths["$link"]="pid $pid ($(proc_name "$pid")) has it open"
       fi
     done
-    if [[ -r $pid_dir/maps ]] && grep -qsF -- "$real/" "$pid_dir/maps"; then
-      printf 'pid %s (%s) has one of its files mapped\n' "$pid" "$(proc_name "$pid")"
+    if [[ -r $pid_dir/maps ]] && grep -qsF -- "$work_dir/" "$pid_dir/maps"; then
+      while IFS= read -r line; do
+        # "address perms offset dev inode path", and the path may hold spaces.
+        link=${line#* * * * * }
+        link=${link% (deleted)}
+        busy_paths["$link"]="pid $pid ($(proc_name "$pid")) has it mapped"
+      done < <(grep -F -- "$work_dir/" "$pid_dir/maps")
+    fi
+  done
+}
+
+# Prints why a target directory counts as in use, and fails when nothing is
+# using it.
+busy_reason() {
+  local candidate=$1 key reason
+  if reason=$(cargo_lock_held "$candidate"); then
+    printf '%s\n' "$reason"
+    return 0
+  fi
+  for key in "${!busy_paths[@]}"; do
+    if [[ $key == "$candidate" || $key == "$candidate"/* ]]; then
+      printf '%s\n' "${busy_paths[key]}"
       return 0
     fi
   done
   return 1
 }
 
-# Seconds since either Cargo profile directory under a target directory was last
-# written, which is when cargo last added or removed anything there. Fails when
-# the directory holds neither, so it stopped being a target directory.
+# Seconds since anything anywhere under a target directory was written. Cargo's
+# writes land in deps/, .fingerprint/ and incremental/ far more than in the
+# profile directory itself, so the profile directory's own mtime says almost
+# nothing about the last build.
 activity_age() {
-  local dir=$1 newest=0 stamp sub age now
-  for sub in debug release; do
-    [[ -d $dir/$sub ]] || continue
-    stamp=$(stat -c %Y -- "$dir/$sub") || return 1
-    if (( stamp > newest )); then
-      newest=$stamp
+  local dir=$1 newest now
+  newest=$(find "$dir" -printf '%T@\n' 2>/dev/null | sort -g | tail -n 1)
+  newest=${newest%%.*}
+  [[ $newest =~ ^[0-9]+$ ]] || return 1
+  now=$(date +%s)
+  newest=$((now - newest))
+  (( newest >= 0 )) || newest=0
+  printf '%s\n' "$newest"
+}
+
+# Cargo's own marks on a target directory it created, or its own work inside a
+# profile directory. Nothing else is build output, whatever the directory is
+# called.
+is_target_dir() {
+  local dir=$1 profile
+  if [[ -f $dir/CACHEDIR.TAG || -f $dir/.rustc_info.json ]]; then
+    return 0
+  fi
+  for profile in debug release; do
+    if [[ -d $dir/$profile/deps && -d $dir/$profile/.fingerprint ]]; then
+      return 0
     fi
   done
-  (( newest != 0 )) || return 1
-  now=$(date +%s)
-  age=$((now - newest))
-  (( age >= 0 )) || age=0
-  printf '%s\n' "$age"
+  return 1
 }
 
-is_target_dir() {
-  [[ -d $1/debug || -d $1/release ]]
-}
-
-# The crew a work directory entry belongs to: its name, lowercased, with a
-# trailing -target dropped, so CRU-334, CRU-334/target and CRU-334-target all
-# count against one crew's budget.
+# The crew a work directory entry belongs to: its name, lowercased, without the
+# mark of an interrupted delete and without a trailing -target, so CRU-334,
+# CRU-334/target and CRU-334-target all count against one crew's budget.
 crew_of() {
   local name=${1,,}
+  name=${name%.pruning.*}
   printf '%s\n' "${name%-target}"
 }
 
@@ -216,29 +252,39 @@ target_crews=()
 target_kibs=()
 target_ages=()
 target_removed=()
+target_kept=()
 removed_count=0
 removed_kib=0
 
+add_target() {
+  local path=$1 crew=$2 age size
+  age=$(activity_age "$path") || return 0
+  size=$(disk_kib "$path")
+  target_dirs+=("$path")
+  target_crews+=("$crew")
+  target_kibs+=("$size")
+  target_ages+=("$age")
+  target_removed+=(0)
+  target_kept+=(0)
+}
+
 scan_targets() {
-  local entry base path crew size age held
+  local entry base leftover held
   for entry in "$work_dir"/*; do
     [[ -d $entry && ! -L $entry ]] || continue
     base=$(basename -- "$entry")
-    if is_target_dir "$entry"; then
-      path=$entry
-    elif is_target_dir "$entry/target" && [[ ! -L $entry/target ]]; then
-      path=$entry/target
-    else
-      continue
+    if is_target_dir "$entry/target" && [[ ! -L $entry/target ]]; then
+      add_target "$entry/target" "$(crew_of "$base")"
+    elif is_target_dir "$entry"; then
+      add_target "$entry" "$(crew_of "$base")"
     fi
-    age=$(activity_age "$path") || continue
-    size=$(disk_kib "$path")
-    crew=$(crew_of "$base")
-    target_dirs+=("$path")
-    target_crews+=("$crew")
-    target_kibs+=("$size")
-    target_ages+=("$age")
-    target_removed+=(0)
+  done
+  # A delete that was interrupted leaves <checkout>/target.pruning.<stamp>; it is
+  # our own unfinished work and takes the same rules. A leftover at the top level
+  # is a directory still holding cargo's marks, so the loop above already saw it.
+  for leftover in "$work_dir"/*/target.pruning.*; do
+    [[ -d $leftover && ! -L $leftover ]] || continue
+    add_target "$leftover" "$(crew_of "$(basename -- "$(dirname -- "$leftover")")")"
   done
   held=$(total_kib)
   log "found ${#target_dirs[@]} target directories holding $(size_text "$held")"
@@ -264,14 +310,24 @@ crew_kib() {
   printf '%s\n' "$total"
 }
 
+# Last line of defence before an rm -rf: the path has to be a top-level entry of
+# the work directory, or a checkout's target/ under it, and never a symlink out
+# of it.
+assert_target_path() {
+  local path=$1 relative
+  relative=${path#"$work_dir"/}
+  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9.]+)?$ ]] ||
+    die "refusing to remove $path: not a target directory of $work_dir"
+}
+
 # Removes one target directory under the given rule, after checking again that
 # nothing is using it, and logs what went and why. A directory it kept stays in
 # target_dirs, which is how a caller counting freed space sees that nothing came
 # back.
 prune_target() {
   local index=$1 rule=$2
-  local path=${target_dirs[$index]} size=${target_kibs[$index]} reason
-  if (( target_removed[index] )); then
+  local path=${target_dirs[$index]} size=${target_kibs[$index]} reason doomed
+  if (( target_removed[index] || target_kept[index] )); then
     return 0
   fi
   assert_target_path "$path"
@@ -280,10 +336,11 @@ prune_target() {
     return 0
   fi
   if ! is_target_dir "$path"; then
-    log "skipped (no debug/ or release/ since the scan) $path"
+    log "skipped (no cargo marks since the scan) $path"
     return 0
   fi
   if reason=$(busy_reason "$path"); then
+    target_kept[index]=1
     log "kept (in use) $path: $reason"
     return 0
   fi
@@ -294,18 +351,14 @@ prune_target() {
     log "would remove (rule ${rule}, $(size_text "$size")) $path"
     return 0
   fi
-  rm -rf --one-file-system --preserve-root -- "$path"
+  # Renamed before it is deleted, so a build that starts during the delete finds
+  # a missing directory instead of losing files one at a time. The rename cannot
+  # cross a filesystem, and --one-file-system keeps the delete off other
+  # devices; a bind mount of the same filesystem is the one case it cannot see.
+  doomed="${path}.pruning.$(date +%s).$$"
+  mv -T -- "$path" "$doomed"
+  rm -rf --one-file-system --preserve-root -- "$doomed"
   log "removed (rule ${rule}, $(size_text "$size")) $path"
-}
-
-# Last line of defence before an rm -rf: the path has to be a top-level entry of
-# the work directory or a checkout's target/ under it, and never a symlink out of
-# it.
-assert_target_path() {
-  local path=$1 relative
-  relative=${path#"$work_dir"/}
-  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?$ ]] ||
-    die "refusing to remove $path: not a target directory of $work_dir"
 }
 
 enforce_free_floor() {
@@ -380,7 +433,7 @@ scan_would_be_pointless() {
   read -r tag scanned_at <"$state_dir/scan" || return 1
   [[ $tag == "scanned_at" && $scanned_at =~ ^[0-9]+$ ]] || return 1
   now=$(date +%s)
-  if (( now - scanned_at > cache_seconds )); then
+  if (( scanned_at > now || now - scanned_at > cache_seconds )); then
     return 1
   fi
   while read -r tag crew kib; do
@@ -448,6 +501,7 @@ main() {
   fi
 
   scan_targets
+  collect_busy_paths
   enforce_free_floor
   enforce_idle_window
   enforce_crew_budgets
