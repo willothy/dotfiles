@@ -25,5 +25,8 @@
     "kernel.sysrq" = 1;
   };
   boot.kernelModules = [ "efi_pstore" ];
+
+  # Nested virtualisation: this is the crews' build and KVM device.
+  boot.extraModprobeConfig = "options kvm_amd nested=1";
   systemd.services.systemd-pstore.wantedBy = [ "sysinit.target" ];
 }

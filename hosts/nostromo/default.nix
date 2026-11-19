@@ -130,14 +130,10 @@
     extraArgs = [ "--avoid" "^(cosmic-comp|\\.cosmic-comp-wr|Xwayland|systemd|sshd)$" ];
   };
 
-  services.crucible-ci-runner-vms = {
-    tokenFile = "/etc/github-runner/crucible.token";
-    stateDirectory = "/var/lib/microvms";
-    asAvailable.startAtBoot = true;
-    compilerCacheSize = 20;
-    # Two runners, so CI can't swamp the desktop; prometheus runs the pool.
-    count = 2;
-  };
+  # CI runners are intentionally off on this host: CI jobs on a workstation
+  # once drove its load to 307 and hung it for six hours, and Will's
+  # instruction is that nostromo takes no CI work. prometheus runs the pool.
+  # crucible's desktop runner role is out of flake.nix with it.
 
   system.stateVersion = "25.05";
 }
