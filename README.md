@@ -36,7 +36,7 @@ CI (`.github/workflows/eval.yml`) evaluates every host's configuration on each p
 | Host | Disk | Mounted at | Notes |
 | --- | --- | --- | --- |
 | nostromo | 990 PRO 4 TB (NVMe) | `/`, `/boot` | btrfs root (`@`) and the ESP; the rest of the disk is Windows' `Big` |
-| nostromo | 980 1 TB (NVMe), label `fast` | `/mnt/fast` | one btrfs filesystem; subvolume `@data` is mounted, and `@microvms` and `@sccache` (nodatacow) hold the retired CI runners' images, unmounted |
+| nostromo | 980 1 TB (NVMe), label `fast` | `/mnt/fast` | one btrfs filesystem; subvolume `@data` is mounted, and `@microvms` and `@sccache` (nodatacow) hold the retired CI runners' images |
 | nostromo | 512 GB SATA SSD, label `bulk` | `/mnt/bulk` | btrfs, subvolume `@data` |
 | prometheus | 1 TB NVMe | `/`, `/home`, `/nix`, `/boot` | btrfs subvolumes, laid out by disko (`hosts/prometheus/disk.nix`) |
 | prometheus | 1 TB HDD | `/mnt/hdd` | automounted on first access, unmounted and spun down when idle |
