@@ -16,7 +16,14 @@
       ../../modules/nixos/common/desktop-apps.nix
       ../../modules/nixos/common/determinate.nix
       ../../modules/nixos/common/rex.nix
+      ../../modules/nixos/capy-work-prune
     ];
+
+  # This host is where every crew's builds run, and their cargo target
+  # directories once filled its root filesystem to 1.1 GB free. Only one crew
+  # at a time can use the space, so each gets a budget, and output nobody has
+  # touched in a day goes.
+  services.capyWorkPrune.enable = true;
 
   networking.hostName = "nostromo";
 
