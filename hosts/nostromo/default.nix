@@ -133,10 +133,7 @@
   # CI runners are intentionally off on this host: CI jobs on a workstation
   # once drove its load to 307 and hung it for six hours, and Will's
   # instruction is that nostromo takes no CI work. prometheus runs the pool.
-  #
-  # Nested virtualisation stays: crews run nested VMs here (crucible's node
-  # tests), and it used to come from crucible's desktop runner role.
-  boot.extraModprobeConfig = "options kvm_amd nested=1";
+  # crucible's desktop runner role is out of flake.nix with it.
 
   system.stateVersion = "25.05";
 }
