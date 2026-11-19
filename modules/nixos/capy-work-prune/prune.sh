@@ -200,7 +200,7 @@ busy_reason() {
   fi
   for key in "${!busy_paths[@]}"; do
     if [[ $key == "$candidate" || $key == "$candidate"/* ]]; then
-      printf '%s\n' "${busy_paths[key]}"
+      printf '%s\n' "${busy_paths[$key]}"
       return 0
     fi
   done
@@ -326,7 +326,7 @@ assert_target_path() {
 # back.
 prune_target() {
   local index=$1 rule=$2
-  local path=${target_dirs[$index]} size=${target_kibs[$index]} reason doomed
+  local path=${target_dirs[$index]} size=${target_kibs[$index]} reason doomed status=0
   if (( target_removed[index] || target_kept[index] )); then
     return 0
   fi
@@ -339,9 +339,17 @@ prune_target() {
     log "skipped (no cargo marks since the scan) $path"
     return 0
   fi
-  if reason=$(busy_reason "$path"); then
+  reason=$(busy_reason "$path") || status=$?
+  if (( status == 0 )); then
     target_kept[index]=1
     log "kept (in use) $path: $reason"
+    return 0
+  fi
+  if (( status != 1 )); then
+    # The check itself broke. Anything but a clean "nothing is using it" is
+    # treated as a reason to leave the directory alone.
+    target_kept[index]=1
+    log "kept (the in-use check failed, status ${status}) $path"
     return 0
   fi
   target_removed[index]=1
