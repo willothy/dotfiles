@@ -132,6 +132,8 @@
             ./modules/nixos/refind/default.nix
             ./hosts/nostromo
             inputs.lanzaboote.nixosModules.lanzaboote
+            # nostromo runs no CI, so ci-runner-desktop stays out: see
+            # hosts/nostromo/default.nix.
             home-manager.nixosModules.home-manager
             {
               home-manager = {
