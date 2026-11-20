@@ -82,6 +82,22 @@ hold_cwd() {
   done
 }
 
+# Starts a binary that lives under a directory, with its working directory
+# elsewhere, so the mapping of its executable is the only thing holding the
+# directory, and waits until /proc shows the mapping. The copy keeps sleep as its
+# argv[0] because coreutils may be one binary that dispatches on that name.
+hold_mapped() {
+  local binary=$1 cwd=$2 pid
+  cp -L -- "$(command -v sleep)" "$binary"
+  chmod u+x -- "$binary"
+  (cd -- "$cwd" && exec -a sleep "$binary" 600) &
+  pid=$!
+  holders+=("$pid")
+  until grep -qsF -- "$binary" "/proc/$pid/maps"; do
+    sleep 0.1
+  done
+}
+
 expect_status() {
   [[ $status == "$1" ]] || fail "exit status $status, expected $1; output:"$'\n'"$output"
 }
@@ -150,10 +166,24 @@ case_working_directory_kept() {
   finish
 }
 
+case_mapped_binary_kept() {
+  begin mapped-binary-kept
+  make_target "$work/crew/target"
+  mkdir -p -- "$root/$case_name/elsewhere"
+  hold_mapped "$work/crew/target/debug/deps/crate-test" "$root/$case_name/elsewhere"
+  age "$work/crew" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/crew/target/debug/deps/crate-test"
+  expect_log "has it mapped"
+  finish
+}
+
 case_idle_target_removed
 case_recent_target_kept
 case_unmarked_directory_kept
 case_working_directory_kept
+case_mapped_binary_kept
 
 if (( failures )); then
   printf '%s failed\n' "$failures"

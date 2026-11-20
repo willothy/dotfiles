@@ -164,6 +164,10 @@ declare -A busy_paths=()
 # this module's closure.
 collect_busy_paths() {
   local pid_dir pid link fd line
+  # "address perms offset dev inode", each followed by one space, then spaces
+  # that pad the path out to a fixed column, then the path, which may itself
+  # hold spaces.
+  local maps_line='^([^ ]+ ){5} *(/.*)$'
   for pid_dir in /proc/[0-9]*; do
     pid=${pid_dir#/proc/}
     [[ $pid == "$$" ]] && continue
@@ -182,9 +186,8 @@ collect_busy_paths() {
     done
     if [[ -r $pid_dir/maps ]] && grep -qsF -- "$work_dir/" "$pid_dir/maps"; then
       while IFS= read -r line; do
-        # "address perms offset dev inode path", and the path may hold spaces.
-        link=${line#* * * * * }
-        link=${link% (deleted)}
+        [[ $line =~ $maps_line ]] || continue
+        link=${BASH_REMATCH[2]% (deleted)}
         busy_paths["$link"]="pid $pid ($(proc_name "$pid")) has it mapped"
       done < <(grep -F -- "$work_dir/" "$pid_dir/maps")
     fi
