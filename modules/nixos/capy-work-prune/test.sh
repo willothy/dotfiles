@@ -316,6 +316,42 @@ case_direct_target_emptied_removed() {
   finish
 }
 
+case_direct_target_failed_delete_kept() {
+  local dir marker found=0
+  begin direct-target-failed-delete-kept
+  dir=$work/crew-target
+  make_target "$dir"
+  mkdir -p -- "$dir/debug/deps/locked"
+  printf 'owned\n' >"$dir/debug/deps/locked/file"
+  printf 'notes\n' >"$dir/NOTES.md"
+  make_target "$work/other/target"
+  age "$work" "$three_days_ago"
+  chmod a-w -- "$dir/debug/deps/locked"
+  run_prune --full
+  expect_status 0
+  expect_log "kept (the delete failed"
+  expect_absent "$work/other/target"
+  expect_present "$dir/NOTES.md"
+  for marker in "$work"/crew-target.pruning.*; do
+    [[ -e $marker ]] || continue
+    found=1
+    expect_present "$marker/debug/deps/locked/file"
+    grep -qzxF -- "$marker" "$state/staged" || fail "$marker is not recorded in $state/staged"
+  done
+  (( found )) || fail "no marked directory is left for the failed delete"
+  # Once the file can go, a later run finishes the delete from the record.
+  chmod -R u+w -- "$work"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_no_marker
+  expect_present "$dir/NOTES.md"
+  if [[ -s $state/staged ]]; then
+    fail "$state/staged still records a delete"
+  fi
+  finish
+}
+
 case_budget_skips_kept_directory() {
   local now
   begin budget-skips-kept-directory
@@ -402,6 +438,7 @@ case_symlinked_cargo_tag_kept
 case_direct_target_keeps_crew_files
 case_direct_target_emptied_removed
 case_direct_target_failed_move_kept
+case_direct_target_failed_delete_kept
 case_budget_skips_kept_directory
 case_marker_name_alone_kept
 case_interrupted_staging_removed
