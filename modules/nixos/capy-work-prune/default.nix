@@ -129,8 +129,13 @@ in
       defaultText = lib.literalExpression ''"''${config.users.users.''${config.services.capyWorkPrune.user}.home}/.capy/work"'';
       description = ''
         The directory whose target directories are pruned. Only its top-level
-        entries are considered: one that holds `debug/` or `release/` itself, or
-        one whose `target/` does.
+        entries are considered: a checkout whose `target/` carries cargo's
+        marks, which is removed whole, or an entry that carries them itself
+        because cargo was pointed at it directly, of which only cargo's output
+        (its profile directories, its tag and `.rustc_info.json`) is removed.
+        Cargo's marks are the `CACHEDIR.TAG` cargo writes, `.rustc_info.json`,
+        or a `debug/` or `release/` holding both `deps/` and `.fingerprint/`;
+        a directory's name counts for nothing.
       '';
     };
 
@@ -150,9 +155,9 @@ in
       type = types.ints.positive;
       default = 24;
       description = ''
-        How long neither `debug/` nor `release/` must have been written for a
-        target directory to count as idle. An idle directory is removed whatever
-        its crew's budget.
+        How long nothing anywhere under a target directory may have been
+        written for it to count as idle. An idle directory is removed whatever
+        its crew's budget, unless something is using it.
       '';
     };
 
