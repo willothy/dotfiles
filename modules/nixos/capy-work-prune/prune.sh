@@ -349,13 +349,20 @@ stage_cargo_output() {
 # is a crew's, and takes the same rules as any other entry.
 declare -A staged_markers=()
 
-# Reads the record of deletes in progress, if there is a state directory.
+# Reads the record of deletes in progress, if there is a state directory. A
+# record that does not have exactly the shape of a marker this script creates
+# under this work directory is ignored, and dropped the next time the record is
+# written: a damaged record must never name a checkout or a target/ itself.
 load_staged_markers() {
   local marker
   local -a markers
   [[ -n $state_dir && -r $state_dir/staged ]] || return 0
   mapfile -d '' markers <"$state_dir/staged"
   for marker in "${markers[@]}"; do
+    if ! is_marker_path "$marker"; then
+      log "ignored (not a marker this script creates under $work_dir) recorded $marker"
+      continue
+    fi
     staged_markers["$marker"]=1
   done
 }
@@ -445,7 +452,9 @@ scan_targets() {
       (( dry_run )) || forget_staged_marker "$leftover"
       continue
     fi
-    if [[ ! -d $leftover || -L $leftover ]] || ! is_target_path "$leftover"; then
+    if [[ ! -d $leftover || -L $leftover ]]; then
+      log "ignored (not a directory) recorded $leftover"
+      (( dry_run )) || forget_staged_marker "$leftover"
       continue
     fi
     base=${leftover#"$work_dir"/}
@@ -476,12 +485,20 @@ crew_kib() {
 }
 
 # Whether a path is one this script may remove: a top-level entry of the work
-# directory, or a checkout's target/ under it, with any number of markers from an
-# interrupted delete after it.
+# directory, or a checkout's target/ under it, or a marker this script made of
+# either.
 is_target_path() {
-  local path=$1 relative
+  local path=$1 relative entry
   relative=${path#"$work_dir"/}
-  [[ $relative != "$path" && $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9.]+)*$ ]]
+  entry=${relative%%/*}
+  [[ $relative != "$path" && $entry != . && $entry != .. &&
+    $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9]+\.[0-9]+)?$ ]]
+}
+
+# Whether a path has exactly the shape of a marked directory this script
+# creates: a target path with the one marker of epoch and pid it appends.
+is_marker_path() {
+  is_target_path "$1" && [[ $1 =~ \.pruning\.[0-9]+\.[0-9]+$ ]]
 }
 
 # Removes one target directory under the given rule, after checking again that

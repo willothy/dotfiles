@@ -415,6 +415,44 @@ case_interrupted_staging_removed() {
   finish
 }
 
+case_damaged_record_ignored() {
+  begin damaged-record-ignored
+  mkdir -p -- "$work/crew/src" "$state"
+  printf 'fn main() {}\n' >"$work/crew/src/main.rs"
+  make_target "$work/crew/target"
+  printf 'keep\n' >"$work/crew/target/keep.txt"
+  rm -f -- "$work/crew/target/CACHEDIR.TAG"
+  rm -rf -- "$work/crew/target/debug"
+  # What a damaged or hand-edited record could name: a checkout, its target/,
+  # and the work directory's parent.
+  printf '%s\0' "$work/crew" "$work/crew/target" "$work/.." >"$state/staged"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/crew/src/main.rs"
+  expect_present "$work/crew/target/keep.txt"
+  expect_log "ignored (not a marker this script creates"
+  expect_log "found 0 target directories"
+  finish
+}
+
+case_record_without_marker_dropped() {
+  local marker
+  begin record-without-marker-dropped
+  # A run cut short between recording a marker and creating it.
+  make_target "$work/crew/target"
+  marker=$work/crew/target.pruning.1700000000.42
+  mkdir -p -- "$state"
+  printf '%s\0' "$marker" >"$state/staged"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/crew/target/debug/deps/libcrate.rlib"
+  if [[ -s $state/staged ]]; then
+    fail "$state/staged still records $marker"
+  fi
+  finish
+}
+
 case_deleting_needs_state_dir() {
   begin deleting-needs-state-dir
   make_target "$work/crew/target"
@@ -443,6 +481,8 @@ case_budget_skips_kept_directory
 case_marker_name_alone_kept
 case_interrupted_staging_removed
 case_deleting_needs_state_dir
+case_damaged_record_ignored
+case_record_without_marker_dropped
 
 if (( failures )); then
   printf '%s failed\n' "$failures"
