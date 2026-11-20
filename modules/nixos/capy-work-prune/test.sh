@@ -248,6 +248,20 @@ case_foreign_cache_tag_kept() {
   finish
 }
 
+case_symlinked_cargo_tag_kept() {
+  begin symlinked-cargo-tag-kept
+  mkdir -p -- "$root/$case_name/elsewhere" "$work/crew/target"
+  printf '%s\n' "$cargo_tag" >"$root/$case_name/elsewhere/CACHEDIR.TAG"
+  ln -s -- "$root/$case_name/elsewhere/CACHEDIR.TAG" "$work/crew/target/CACHEDIR.TAG"
+  printf 'keep\n' >"$work/crew/target/keep.txt"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/crew/target/keep.txt"
+  expect_log "found 0 target directories"
+  finish
+}
+
 case_direct_target_keeps_crew_files() {
   local dir
   begin direct-target-keeps-crew-files
@@ -332,6 +346,7 @@ case_mapped_binary_kept
 case_failed_delete_skipped
 case_failed_rename_skipped
 case_foreign_cache_tag_kept
+case_symlinked_cargo_tag_kept
 case_direct_target_keeps_crew_files
 case_direct_target_emptied_removed
 case_direct_target_failed_move_kept

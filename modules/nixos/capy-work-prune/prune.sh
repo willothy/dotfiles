@@ -247,9 +247,10 @@ is_target_dir() {
 
 # Whether a file is the cache directory tag cargo writes. The tag's signature
 # line is the convention's and every tool's, so the line naming cargo is what
-# tells cargo's apart from a virtualenv's or a test cache's.
+# tells cargo's apart from a virtualenv's or a test cache's. Cargo writes the
+# tag as a file, so a symlink is never one, wherever it points.
 is_cargo_tag() {
-  [[ -f $1 ]] && grep -qxF -- '# This file is a cache directory tag created by cargo.' "$1"
+  [[ -f $1 && ! -L $1 ]] && grep -qxF -- '# This file is a cache directory tag created by cargo.' "$1"
 }
 
 # Whether a directory is one cargo builds a profile into, whatever the profile
