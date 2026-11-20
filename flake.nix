@@ -196,5 +196,10 @@
           }
         ];
       };
+
+      checks.${system}.capy-work-prune = import ./modules/nixos/capy-work-prune/test.nix {
+        inherit pkgs;
+        inherit (self.nixosConfigurations.nostromo.config.services.capyWorkPrune) package;
+      };
     };
 }

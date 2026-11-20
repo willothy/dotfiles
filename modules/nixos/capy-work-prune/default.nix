@@ -4,10 +4,11 @@
 # target directories from finished crews.
 #
 # A target directory counts whether it is a checkout's target/ or a top-level
-# directory that is one itself, and it is recognised by cargo's own marks
-# (CACHEDIR.TAG, .rustc_info.json, or deps/ beside .fingerprint/ in a profile
-# directory), never by its name: a checkout that ships a release/ directory of
-# packaging scripts is source. Nothing is removed while a process has it as its
+# directory that is one itself, and it is recognised by cargo's own marks (the
+# CACHEDIR.TAG cargo writes, .rustc_info.json, or deps/ beside .fingerprint/ in
+# a profile directory), never by its name: a checkout that ships a release/
+# directory of packaging scripts is source. Of a top-level directory only
+# cargo's output is removed, never what else a crew put in it. Nothing is removed while a process has it as its
 # working directory, holds a file in it open, has one of its files mapped, or
 # while cargo holds its build locks in it, and nothing is removed until the
 # newest write anywhere under it is older than the idle window. On top of that each crew is capped by name (`CRU-334` and
@@ -18,7 +19,10 @@
 # To see what it would do without touching anything, run it by hand as the user
 # the service runs as; the hourly timer is what normally starts it:
 #
-#   capy-work-prune --dry-run
+#   capy-work-prune --dry-run --state-dir /var/lib/capy-work-prune
+#
+# The state directory holds the record of deletes in progress, without which a
+# leftover from an interrupted delete looks like any other entry.
 #
 # Every option below is passed explicitly by the service, so this is the same
 # command with the configuration this module holds. The script's own defaults
@@ -128,8 +132,13 @@ in
       defaultText = lib.literalExpression ''"''${config.users.users.''${config.services.capyWorkPrune.user}.home}/.capy/work"'';
       description = ''
         The directory whose target directories are pruned. Only its top-level
-        entries are considered: one that holds `debug/` or `release/` itself, or
-        one whose `target/` does.
+        entries are considered: a checkout whose `target/` carries cargo's
+        marks, which is removed whole, or an entry that carries them itself
+        because cargo was pointed at it directly, of which only cargo's output
+        (its profile directories, its tag and `.rustc_info.json`) is removed.
+        Cargo's marks are the `CACHEDIR.TAG` cargo writes, `.rustc_info.json`,
+        or a `debug/` or `release/` holding both `deps/` and `.fingerprint/`;
+        a directory's name counts for nothing.
       '';
     };
 
@@ -149,9 +158,9 @@ in
       type = types.ints.positive;
       default = 24;
       description = ''
-        How long neither `debug/` nor `release/` must have been written for a
-        target directory to count as idle. An idle directory is removed whatever
-        its crew's budget.
+        How long nothing anywhere under a target directory may have been
+        written for it to count as idle. An idle directory is removed whatever
+        its crew's budget, unless something is using it.
       '';
     };
 
