@@ -490,13 +490,15 @@ crew_kib() {
 
 # Whether a path is one this script may remove: a top-level entry of the work
 # directory, or a checkout's target/ under it, or a marker this script made of
-# either.
+# either. The top-level entry has to be a real directory, so a path through a
+# symlinked entry can never lead out of the work directory.
 is_target_path() {
   local path=$1 relative entry
   relative=${path#"$work_dir"/}
   entry=${relative%%/*}
   [[ $relative != "$path" && $entry != . && $entry != .. &&
-    $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9]+\.[0-9]+)?$ ]]
+    $relative =~ ^[^/]+(/target)?(\.pruning\.[0-9]+\.[0-9]+)?$ &&
+    -d $work_dir/$entry && ! -L $work_dir/$entry ]]
 }
 
 # Whether a path has exactly the shape of a marked directory this script

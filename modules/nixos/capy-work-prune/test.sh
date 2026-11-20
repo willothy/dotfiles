@@ -428,14 +428,27 @@ case_damaged_record_ignored() {
   printf 'keep\n' >"$work/crew/target/keep.txt"
   rm -f -- "$work/crew/target/CACHEDIR.TAG"
   rm -rf -- "$work/crew/target/debug"
+  # Marker-shaped directories outside the work directory, reachable through
+  # its parent and through a symlinked entry.
+  mkdir -p -- "$root/$case_name/target.pruning.1700000000.42" \
+    "$root/$case_name/outside/target.pruning.1700000000.42"
+  printf 'keep\n' >"$root/$case_name/target.pruning.1700000000.42/keep.txt"
+  printf 'keep\n' >"$root/$case_name/outside/target.pruning.1700000000.42/keep.txt"
+  ln -s -- "$root/$case_name/outside" "$work/link"
   # What a damaged or hand-edited record could name: a checkout, its target/,
-  # and the work directory's parent.
-  printf '%s\0' "$work/crew" "$work/crew/target" "$work/.." >"$state/staged"
+  # the work directory's parent, and markers outside the work directory.
+  printf '%s\0' "$work/crew" "$work/crew/target" "$work/.." \
+    "$work/../target.pruning.1700000000.42" \
+    "$work/link/target.pruning.1700000000.42" >"$state/staged"
   age "$work" "$three_days_ago"
+  age "$root/$case_name/target.pruning.1700000000.42" "$three_days_ago"
+  age "$root/$case_name/outside" "$three_days_ago"
   run_prune --full
   expect_status 0
   expect_present "$work/crew/src/main.rs"
   expect_present "$work/crew/target/keep.txt"
+  expect_present "$root/$case_name/target.pruning.1700000000.42/keep.txt"
+  expect_present "$root/$case_name/outside/target.pruning.1700000000.42/keep.txt"
   expect_log "ignored (not a marker this script creates"
   expect_log "found 0 target directories"
   finish
@@ -452,6 +465,24 @@ case_record_without_marker_dropped() {
   run_prune --full
   expect_status 0
   expect_present "$work/crew/target/debug/deps/libcrate.rlib"
+  if [[ -s $state/staged ]]; then
+    fail "$state/staged still records $marker"
+  fi
+  finish
+}
+
+case_record_of_file_dropped() {
+  local marker
+  begin record-of-file-dropped
+  mkdir -p -- "$work/crew" "$state"
+  marker=$work/crew/target.pruning.1700000000.42
+  printf 'not a directory\n' >"$marker"
+  printf '%s\0' "$marker" >"$state/staged"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$marker"
+  expect_log "ignored (not a directory) recorded $marker"
   if [[ -s $state/staged ]]; then
     fail "$state/staged still records $marker"
   fi
@@ -488,6 +519,7 @@ case_interrupted_staging_removed
 case_deleting_needs_state_dir
 case_damaged_record_ignored
 case_record_without_marker_dropped
+case_record_of_file_dropped
 
 if (( failures )); then
   printf '%s failed\n' "$failures"
