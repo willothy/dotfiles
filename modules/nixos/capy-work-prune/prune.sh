@@ -317,16 +317,15 @@ target_kib() {
   printf '%s\n' "$used"
 }
 
-# Moves cargo's output out of a directory cargo was pointed at directly into a
-# new marked directory beside it, each item keeping its place relative to the
-# directory, and removes the directories that this leaves empty. Fails when
-# anything could not be moved; what was moved is in the marked directory either
-# way, and is cargo's alone.
+# Moves cargo's output out of a directory cargo was pointed at directly into
+# the marked directory beside it, which the caller has just created, each item
+# keeping its place relative to the directory, and removes the directories that
+# this leaves empty. Fails when anything could not be moved; what was moved is
+# in the marked directory either way, and is cargo's alone.
 stage_cargo_output() {
   local dir=$1 doomed=$2 item parent status=0
   local -a items
   mapfile -d '' items < <(cargo_output "$dir")
-  mkdir -- "$doomed" || return 1
   for item in "${items[@]}"; do
     parent=$(dirname -- "$item")
     if ! mkdir -p -- "$doomed/$parent" || ! mv -T -- "$dir/$item" "$doomed/$item"; then
@@ -570,6 +569,14 @@ prune_target() {
         return 0
       fi
       if is_direct_target "$path"; then
+        # A marked directory that already exists is not this delete's, so it is
+        # neither filled, deleted, nor left in the record.
+        if ! mkdir -- "$doomed"; then
+          forget_staged_marker "$doomed"
+          target_kept[index]=1
+          log "kept (creating $doomed for the delete failed) $path"
+          return 0
+        fi
         stage_cargo_output "$path" "$doomed" || staged=0
       elif ! mv -T -- "$path" "$doomed"; then
         forget_staged_marker "$doomed"
