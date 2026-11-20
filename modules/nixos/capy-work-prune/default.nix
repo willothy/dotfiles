@@ -19,7 +19,10 @@
 # To see what it would do without touching anything, run it by hand as the user
 # the service runs as; the hourly timer is what normally starts it:
 #
-#   capy-work-prune --dry-run
+#   capy-work-prune --dry-run --state-dir /var/lib/capy-work-prune
+#
+# The state directory holds the record of deletes in progress, without which a
+# leftover from an interrupted delete looks like any other entry.
 #
 # Every option below is passed explicitly by the service, so this is the same
 # command with the configuration this module holds. The script's own defaults

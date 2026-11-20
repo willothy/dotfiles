@@ -42,11 +42,13 @@ fail() {
   failures=$((failures + 1))
 }
 
-# Starts a case: a fresh work directory, named for the case, in $work.
+# Starts a case: a fresh work directory, named for the case, in $work, and a
+# state directory for it in $state.
 begin() {
   case_name=$1
   failures_before=$failures
   work=$root/$case_name/work
+  state=$root/$case_name/state
   mkdir -p -- "$work"
 }
 
@@ -63,11 +65,11 @@ age() {
   find "$1" -exec touch -h -d "@$2" {} +
 }
 
-# Runs the prune against $work with a floor nothing here goes below, and keeps
-# its output in $output and its exit status in $status.
+# Runs the prune against $work and $state with a floor nothing here goes below,
+# and keeps its output in $output and its exit status in $status.
 run_prune() {
   status=0
-  output=$("$prune" --work-dir "$work" --free-floor-gib 1 "$@" 2>&1) || status=$?
+  output=$("$prune" --work-dir "$work" --state-dir "$state" --free-floor-gib 1 "$@" 2>&1) || status=$?
 }
 
 # Starts a process with the given working directory that runs until the tests
@@ -189,7 +191,7 @@ case_mapped_binary_kept() {
 }
 
 case_failed_delete_skipped() {
-  local state=$root/failed-delete-skipped/state leftover
+  local leftover
   begin failed-delete-skipped
   make_target "$work/stuck/target"
   mkdir -p -- "$work/stuck/target/debug/deps/locked"
@@ -197,7 +199,7 @@ case_failed_delete_skipped() {
   make_target "$work/other/target"
   age "$work" "$three_days_ago"
   chmod a-w -- "$work/stuck/target/debug/deps/locked"
-  run_prune --full --state-dir "$state"
+  run_prune --full
   expect_status 0
   expect_log "kept (the delete failed"
   expect_log "finished: 1 target directories"
@@ -210,7 +212,7 @@ case_failed_delete_skipped() {
   # idle as long, fails on it the same way, and still gets to the end.
   age "$work" "$three_days_ago"
   rm -f -- "$state/scan"
-  run_prune --full --state-dir "$state"
+  run_prune --full
   expect_status 0
   expect_log "kept (the delete failed"
   expect_log "finished: 0 target directories"
@@ -338,6 +340,56 @@ case_budget_skips_kept_directory() {
   finish
 }
 
+case_marker_name_alone_kept() {
+  local dir
+  begin marker-name-alone-kept
+  mkdir -p -- "$work/notes.pruning.2026.11"
+  printf 'plan\n' >"$work/notes.pruning.2026.11/plan.md"
+  dir=$work/crew.pruning.1700000000.42
+  make_target "$dir"
+  printf 'notes\n' >"$dir/NOTES.md"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/notes.pruning.2026.11/plan.md"
+  expect_absent "$dir/debug"
+  expect_present "$dir/NOTES.md"
+  finish
+}
+
+case_interrupted_staging_removed() {
+  local marker
+  begin interrupted-staging-removed
+  make_target "$work/crew-target"
+  printf 'notes\n' >"$work/crew-target/NOTES.md"
+  rm -rf -- "$work/crew-target/debug"
+  # What a run cut short partway through staging leaves: a recorded marked
+  # directory holding a profile, with the tag still behind in the entry.
+  marker=$work/crew-target.pruning.1700000000.42
+  mkdir -p -- "$marker/ci/deps" "$marker/ci/.fingerprint" "$state"
+  printf '%s\0' "$marker" >"$state/staged"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_absent "$marker"
+  expect_present "$work/crew-target/NOTES.md"
+  if grep -qzxF -- "$marker" "$state/staged"; then
+    fail "$marker is still recorded in $state/staged"
+  fi
+  finish
+}
+
+case_deleting_needs_state_dir() {
+  begin deleting-needs-state-dir
+  make_target "$work/crew/target"
+  age "$work" "$three_days_ago"
+  status=0
+  output=$("$prune" --work-dir "$work" --free-floor-gib 1 --full 2>&1) || status=$?
+  expect_status 2
+  expect_present "$work/crew/target/debug/deps/libcrate.rlib"
+  finish
+}
+
 case_idle_target_removed
 case_recent_target_kept
 case_unmarked_directory_kept
@@ -351,6 +403,9 @@ case_direct_target_keeps_crew_files
 case_direct_target_emptied_removed
 case_direct_target_failed_move_kept
 case_budget_skips_kept_directory
+case_marker_name_alone_kept
+case_interrupted_staging_removed
+case_deleting_needs_state_dir
 
 if (( failures )); then
   printf '%s failed\n' "$failures"

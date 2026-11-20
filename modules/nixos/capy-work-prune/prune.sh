@@ -39,9 +39,11 @@ usage: capy-work-prune [options]
   --free-floor-gib N       free space on the work directory's filesystem below
                            which every idle target directory is pruned
                            (default: 200)
-  --state-dir DIR          where the scan cache and the lock live; without one
-                           every run scans and no run caches (the service sets
-                           this)
+  --state-dir DIR          where the scan cache, the lock and the record of
+                           deletes in progress live (the service sets this); a
+                           run that deletes needs one, and a dry run without
+                           one scans every time and cannot tell what an
+                           interrupted delete left behind
   --dry-run                print what would be removed and change nothing
   --full                   scan even when the cheap checks found nothing to do
   -h, --help               print this text
@@ -104,6 +106,8 @@ check_arguments() {
   done
   (( pressure_idle_hours <= idle_hours )) ||
     die "--pressure-idle-hours ($pressure_idle_hours) must not exceed --idle-hours ($idle_hours)"
+  (( dry_run )) || [[ -n $state_dir ]] ||
+    die "a run that deletes needs --state-dir, to record the deletes it starts"
 }
 
 # KiB free on the filesystem that holds a path, as the filesystem itself counts
@@ -260,10 +264,11 @@ is_profile_dir() {
 }
 
 # Whether a path is a top-level entry of the work directory that cargo was
-# pointed at directly, as opposed to a checkout's target/ or a marked delete.
+# pointed at directly, as opposed to a checkout's target/ or a delete this
+# script started.
 is_direct_target() {
   local relative=${1#"$work_dir"/}
-  [[ $relative != */* && ! $relative =~ \.pruning\.[0-9.]+$ ]]
+  [[ $relative != */* && -z ${staged_markers[$1]:-} ]]
 }
 
 # The parts of a directory cargo was pointed at directly that are cargo's own,
@@ -338,6 +343,51 @@ stage_cargo_output() {
   return "$status"
 }
 
+# Every marked directory a delete of this script's has created and not yet
+# finished, recorded in the state directory before the directory is created.
+# Only these are deleted as they stand: a name that merely looks like a marker
+# is a crew's, and takes the same rules as any other entry.
+declare -A staged_markers=()
+
+# Reads the record of deletes in progress, if there is a state directory.
+load_staged_markers() {
+  local marker
+  local -a markers
+  [[ -n $state_dir && -r $state_dir/staged ]] || return 0
+  mapfile -d '' markers <"$state_dir/staged"
+  for marker in "${markers[@]}"; do
+    staged_markers["$marker"]=1
+  done
+}
+
+# Replaces the record of deletes in progress with staged_markers, NUL-separated
+# because a path may hold a newline.
+save_staged_markers() {
+  local marker tmp=$state_dir/staged.tmp
+  for marker in "${!staged_markers[@]}"; do
+    printf '%s\0' "$marker"
+  done >"$tmp" && mv -- "$tmp" "$state_dir/staged"
+}
+
+# Records a marked directory before it is created, so a run that is cut short
+# after creating it leaves one the next run knows to be its own.
+record_staged_marker() {
+  staged_markers["$1"]=1
+  if ! save_staged_markers; then
+    unset 'staged_markers[$1]'
+    return 1
+  fi
+}
+
+# Drops a marked directory that no longer exists from the record. A record that
+# cannot be updated keeps naming a path that is gone, which the next run drops.
+forget_staged_marker() {
+  unset 'staged_markers[$1]'
+  if ! save_staged_markers; then
+    log "could not update $state_dir/staged after $1 went"
+  fi
+}
+
 # The crew a work directory entry belongs to: its name, lowercased, without the
 # mark of an interrupted delete and without a trailing -target, so CRU-334,
 # CRU-334/target and CRU-334-target all count against one crew's budget.
@@ -385,18 +435,21 @@ scan_targets() {
       add_target "$entry" "$(crew_of "$base")"
     fi
   done
-  # A delete that was interrupted leaves a .pruning marker: beside a checkout's
-  # target, or on a top-level target directory. Either way it is our own
-  # unfinished work and takes the same rules, and the entry loop may already have
-  # collected it.
-  for leftover in "$work_dir"/*/target.pruning.* "$work_dir"/*.pruning.*; do
-    [[ -d $leftover && ! -L $leftover ]] || continue
-    if [[ $(dirname -- "$leftover") == "$work_dir" ]]; then
-      base=$(basename -- "$leftover")
-    else
-      base=$(basename -- "$(dirname -- "$leftover")")
+  # A delete that was interrupted leaves a marked directory, beside a
+  # checkout's target or beside a top-level target directory, that the state
+  # directory recorded before creating it. It is this script's own unfinished
+  # work and takes the same rules; the entry loop may already have collected
+  # it. One that is gone is dropped from the record.
+  for leftover in "${!staged_markers[@]}"; do
+    if [[ ! -e $leftover && ! -L $leftover ]]; then
+      (( dry_run )) || forget_staged_marker "$leftover"
+      continue
     fi
-    add_target "$leftover" "$(crew_of "$base")"
+    if [[ ! -d $leftover || -L $leftover ]] || ! is_target_path "$leftover"; then
+      continue
+    fi
+    base=${leftover#"$work_dir"/}
+    add_target "$leftover" "$(crew_of "${base%%/*}")"
   done
   held=$(total_kib)
   log "found ${#target_dirs[@]} target directories holding $(size_text "$held")"
@@ -453,10 +506,10 @@ prune_target() {
     log "skipped (gone since the scan) $path"
     return 0
   fi
-  # A marked path is one this script renamed itself, and a delete it did not
-  # finish may have taken the cargo marks with it, so only unmarked paths have to
-  # still look like build output.
-  if [[ ! $path =~ \.pruning\.[0-9.]+$ ]] && ! is_target_dir "$path"; then
+  # A recorded marker is one this script created itself, and a delete it did
+  # not finish may have taken the cargo marks with it, so every other path has
+  # to still look like build output.
+  if [[ -z ${staged_markers[$path]:-} ]] && ! is_target_dir "$path"; then
     target_kept[index]=1
     log "skipped (no cargo marks since the scan) $path"
     return 0
@@ -484,20 +537,25 @@ prune_target() {
     # finds a missing directory instead of losing files one at a time. The
     # rename cannot cross a filesystem, and --one-file-system keeps the delete
     # off other devices; a bind mount of the same filesystem is the one case it
-    # cannot see. A path that already carries a marker was left by an
-    # interrupted delete, so it is deleted as it stands instead of collecting
-    # another one. A directory cargo was pointed at directly keeps its place
-    # and everything that is not cargo's: only cargo's output moves to the
-    # marked directory. Any step failing is this entry's problem and not the
+    # cannot see. Each marked directory is recorded in the state directory
+    # before it is created. A recorded one was left by an interrupted delete,
+    # so it is deleted as it stands instead of collecting another marker. A
+    # directory cargo was pointed at directly keeps its place and everything
+    # that is not cargo's: only cargo's output moves to the marked directory. Any step failing is this entry's problem and not the
     # run's: it is kept, and a delete that fails partway leaves its marker for
     # the next run to finish.
     doomed=$path
-    if is_direct_target "$path"; then
+    if [[ -z ${staged_markers[$path]:-} ]]; then
       doomed="${path}.pruning.$(date +%s).$$"
-      stage_cargo_output "$path" "$doomed" || staged=0
-    elif [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
-      doomed="${path}.pruning.$(date +%s).$$"
-      if ! mv -T -- "$path" "$doomed"; then
+      if ! record_staged_marker "$doomed"; then
+        target_kept[index]=1
+        log "kept (recording the delete in $state_dir failed) $path"
+        return 0
+      fi
+      if is_direct_target "$path"; then
+        stage_cargo_output "$path" "$doomed" || staged=0
+      elif ! mv -T -- "$path" "$doomed"; then
+        forget_staged_marker "$doomed"
         target_kept[index]=1
         log "kept (renaming it for the delete failed) $path"
         return 0
@@ -505,6 +563,9 @@ prune_target() {
     fi
     if [[ -e $doomed ]] && ! rm -rf --one-file-system --preserve-root -- "$doomed"; then
       deleted=0
+    fi
+    if [[ ! -e $doomed ]]; then
+      forget_staged_marker "$doomed"
     fi
     if (( ! staged || ! deleted )); then
       # Whatever did go is gone, so the budget counts what is left rather than
@@ -677,6 +738,7 @@ main() {
       exit 0
     fi
   fi
+  load_staged_markers
 
   free_kib=$(available_kib "$work_dir")
   if (( ! full )) && scan_would_be_pointless; then
