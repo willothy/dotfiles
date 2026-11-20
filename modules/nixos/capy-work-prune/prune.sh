@@ -367,12 +367,17 @@ load_staged_markers() {
 }
 
 # Replaces the record of deletes in progress with staged_markers, NUL-separated
-# because a path may hold a newline.
+# because a path may hold a newline. The new record and the rename that puts it
+# in place both reach the disk before this returns, so a marker created after a
+# power loss can never outlive its record.
 save_staged_markers() {
   local marker tmp=$state_dir/staged.tmp
   for marker in "${!staged_markers[@]}"; do
     printf '%s\0' "$marker"
-  done >"$tmp" && mv -- "$tmp" "$state_dir/staged"
+  done >"$tmp" &&
+    sync -- "$tmp" &&
+    mv -- "$tmp" "$state_dir/staged" &&
+    sync -- "$state_dir"
 }
 
 # Records a marked directory before it is created, so a run that is cut short
