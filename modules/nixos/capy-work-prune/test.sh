@@ -179,11 +179,57 @@ case_mapped_binary_kept() {
   finish
 }
 
+case_failed_delete_skipped() {
+  local state=$root/failed-delete-skipped/state leftover
+  begin failed-delete-skipped
+  make_target "$work/stuck/target"
+  mkdir -p -- "$work/stuck/target/debug/deps/locked"
+  printf 'owned\n' >"$work/stuck/target/debug/deps/locked/file"
+  make_target "$work/other/target"
+  age "$work" "$three_days_ago"
+  chmod a-w -- "$work/stuck/target/debug/deps/locked"
+  run_prune --full --state-dir "$state"
+  expect_status 0
+  expect_log "kept (the delete failed"
+  expect_log "finished: 1 target directories"
+  expect_absent "$work/other/target"
+  expect_present "$state/scan"
+  for leftover in "$work"/stuck/target.pruning.*; do
+    expect_present "$leftover/debug/deps/locked/file"
+  done
+  # A later run finds the marker the failed delete left, once that has been
+  # idle as long, fails on it the same way, and still gets to the end.
+  age "$work" "$three_days_ago"
+  rm -f -- "$state/scan"
+  run_prune --full --state-dir "$state"
+  expect_status 0
+  expect_log "kept (the delete failed"
+  expect_log "finished: 0 target directories"
+  expect_present "$state/scan"
+  finish
+}
+
+case_failed_rename_skipped() {
+  begin failed-rename-skipped
+  make_target "$work/crew/target"
+  make_target "$work/other/target"
+  age "$work" "$three_days_ago"
+  chmod a-w -- "$work/crew"
+  run_prune --full
+  expect_status 0
+  expect_log "kept (renaming it for the delete failed)"
+  expect_present "$work/crew/target/debug/deps/libcrate.rlib"
+  expect_absent "$work/other/target"
+  finish
+}
+
 case_idle_target_removed
 case_recent_target_kept
 case_unmarked_directory_kept
 case_working_directory_kept
 case_mapped_binary_kept
+case_failed_delete_skipped
+case_failed_rename_skipped
 
 if (( failures )); then
   printf '%s failed\n' "$failures"

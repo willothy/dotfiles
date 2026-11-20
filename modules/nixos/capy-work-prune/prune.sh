@@ -373,26 +373,42 @@ prune_target() {
     log "kept (the in-use check failed, status ${status}) $path"
     return 0
   fi
+  if (( dry_run )); then
+    log "would remove (rule ${rule}, $(size_text "$size")) $path"
+  else
+    # Renamed before it is deleted, so a build that starts during the delete
+    # finds a missing directory instead of losing files one at a time. The
+    # rename cannot cross a filesystem, and --one-file-system keeps the delete
+    # off other devices; a bind mount of the same filesystem is the one case it
+    # cannot see. A path that already carries a marker was left by an
+    # interrupted delete, so it is deleted as it stands instead of collecting
+    # another one. Either step failing is this entry's problem and not the
+    # run's: it is kept, and a delete that fails partway leaves its marker for
+    # the next run to finish.
+    doomed=$path
+    if [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
+      doomed="${path}.pruning.$(date +%s).$$"
+      if ! mv -T -- "$path" "$doomed"; then
+        target_kept[index]=1
+        log "kept (renaming it for the delete failed) $path"
+        return 0
+      fi
+    fi
+    if ! rm -rf --one-file-system --preserve-root -- "$doomed"; then
+      # Whatever the delete did remove is gone, so the budget counts what is
+      # left rather than what was there.
+      target_kept[index]=1
+      if size=$(disk_kib "$doomed"); then
+        target_kibs[index]=$size
+      fi
+      log "kept (the delete failed, $(size_text "${target_kibs[index]}") left in $doomed) $path"
+      return 0
+    fi
+    log "removed (rule ${rule}, $(size_text "$size")) $path"
+  fi
   target_removed[index]=1
   removed_count=$((removed_count + 1))
   removed_kib=$((removed_kib + size))
-  if (( dry_run )); then
-    log "would remove (rule ${rule}, $(size_text "$size")) $path"
-    return 0
-  fi
-  # Renamed before it is deleted, so a build that starts during the delete finds
-  # a missing directory instead of losing files one at a time. The rename cannot
-  # cross a filesystem, and --one-file-system keeps the delete off other
-  # devices; a bind mount of the same filesystem is the one case it cannot see.
-  # A path that already carries a marker was left by an interrupted delete, so
-  # it is deleted as it stands instead of collecting another one.
-  doomed=$path
-  if [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
-    doomed="${path}.pruning.$(date +%s).$$"
-    mv -T -- "$path" "$doomed"
-  fi
-  rm -rf --one-file-system --preserve-root -- "$doomed"
-  log "removed (rule ${rule}, $(size_text "$size")) $path"
 }
 
 enforce_free_floor() {
