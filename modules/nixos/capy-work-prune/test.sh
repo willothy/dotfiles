@@ -300,6 +300,30 @@ case_direct_target_emptied_removed() {
   finish
 }
 
+case_budget_skips_kept_directory() {
+  local now
+  begin budget-skips-kept-directory
+  now=$(date +%s)
+  make_target "$work/crew/target"
+  make_target "$work/crew-target"
+  make_target "$work/CREW/target"
+  fallocate -l 400MiB -- "$work/crew/target/debug/deps/libbig.rlib"
+  fallocate -l 400MiB -- "$work/crew-target/debug/deps/libbig.rlib"
+  fallocate -l 400MiB -- "$work/CREW/target/debug/deps/libbig.rlib"
+  age "$work/crew" $((now - 3 * 86400))
+  age "$work/crew-target" $((now - 2 * 86400))
+  age "$work/CREW" $((now - 86400))
+  hold_cwd "$work/crew/target/debug"
+  run_prune --full --crew-budget-gib 1 --idle-hours 1000
+  expect_status 0
+  expect_log "kept (in use) $work/crew/target"
+  expect_log "removed (rule budget"
+  expect_present "$work/crew/target/debug/deps/libbig.rlib"
+  expect_absent "$work/crew-target"
+  expect_present "$work/CREW/target/debug/deps/libbig.rlib"
+  finish
+}
+
 case_idle_target_removed
 case_recent_target_kept
 case_unmarked_directory_kept
@@ -311,6 +335,7 @@ case_foreign_cache_tag_kept
 case_direct_target_keeps_crew_files
 case_direct_target_emptied_removed
 case_direct_target_failed_move_kept
+case_budget_skips_kept_directory
 
 if (( failures )); then
   printf '%s failed\n' "$failures"

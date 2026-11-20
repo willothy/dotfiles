@@ -433,7 +433,8 @@ is_target_path() {
 # Removes one target directory under the given rule, after checking again that
 # nothing is using it, and logs what went and why. A directory it kept stays in
 # target_dirs, which is how a caller counting freed space sees that nothing came
-# back.
+# back. Every call settles its directory for the rest of the run, as removed or
+# as kept, so a caller looping until a budget holds always moves on.
 prune_target() {
   local index=$1 rule=$2
   local path=${target_dirs[$index]} size=${target_kibs[$index]} reason doomed status=0
@@ -442,10 +443,12 @@ prune_target() {
     return 0
   fi
   if ! is_target_path "$path"; then
+    target_kept[index]=1
     log "skipped (not a target directory of the work directory) $path"
     return 0
   fi
   if [[ ! -d $path ]] || [[ -L $path ]]; then
+    target_kept[index]=1
     log "skipped (gone since the scan) $path"
     return 0
   fi
@@ -453,6 +456,7 @@ prune_target() {
   # finish may have taken the cargo marks with it, so only unmarked paths have to
   # still look like build output.
   if [[ ! $path =~ \.pruning\.[0-9.]+$ ]] && ! is_target_dir "$path"; then
+    target_kept[index]=1
     log "skipped (no cargo marks since the scan) $path"
     return 0
   fi
@@ -559,7 +563,7 @@ enforce_idle_window() {
 }
 
 enforce_crew_budgets() {
-  local crew index oldest before total crew_indices
+  local crew index oldest total crew_indices
   local -a crews
   ((${#target_crews[@]})) || return 0
   while read -r crew; do
@@ -577,18 +581,19 @@ enforce_crew_budgets() {
     while (( total > crew_budget_kib )); do
       oldest=-1
       for index in "${crew_indices[@]}"; do
-        (( target_removed[index] )) && continue
+        (( target_removed[index] || target_kept[index] )) && continue
         if (( oldest < 0 || target_ages[index] > target_ages[oldest] )); then
           oldest=$index
         fi
       done
+      # Every directory left in this crew has been kept, because it is in use
+      # or could not be removed, and space is not what a budget dispute with a
+      # running build is worth.
       (( oldest >= 0 )) || break
-      before=$total
+      # A kept directory is not tried again, so the next pass picks the
+      # next-oldest one.
       prune_target "$oldest" "budget"
       total=$(crew_kib "$crew")
-      # Everything left in this crew is in use, and space is not what a budget
-      # dispute with a running build is worth.
-      (( total < before )) || break
     done
   done
   return 0
