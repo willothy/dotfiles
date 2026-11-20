@@ -114,6 +114,15 @@ expect_log() {
   grep -qF -- "$1" <<<"$output" || fail "no log line containing '$1'; output:"$'\n'"$output"
 }
 
+expect_no_marker() {
+  local marker
+  for marker in "$work"/*.pruning.*; do
+    if [[ -e $marker ]]; then
+      fail "$marker is left behind"
+    fi
+  done
+}
+
 finish() {
   if (( failures == failures_before )); then
     printf 'ok   %s\n' "$case_name"
@@ -223,6 +232,74 @@ case_failed_rename_skipped() {
   finish
 }
 
+case_foreign_cache_tag_kept() {
+  begin foreign-cache-tag-kept
+  mkdir -p -- "$work/venv/lib/python3.13/site-packages"
+  printf 'Signature: 8a477f597d28d172789f06886806bc55\n# This file is a cache directory tag created by uv.\n' >"$work/venv/CACHEDIR.TAG"
+  printf 'home = /usr/bin\n' >"$work/venv/pyvenv.cfg"
+  mkdir -p -- "$work/crew/target/v"
+  printf 'Signature: 8a477f597d28d172789f06886806bc55\n# This file is a cache directory tag created by pytest.\n' >"$work/crew/target/CACHEDIR.TAG"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/venv/pyvenv.cfg"
+  expect_present "$work/crew/target/CACHEDIR.TAG"
+  expect_log "found 0 target directories"
+  finish
+}
+
+case_direct_target_keeps_crew_files() {
+  local dir
+  begin direct-target-keeps-crew-files
+  dir=$work/crew-target
+  make_target "$dir"
+  printf '{}\n' >"$dir/.rustc_info.json"
+  mkdir -p -- "$dir/ci/deps" "$dir/ci/.fingerprint" \
+    "$dir/x86_64-unknown-linux-gnu/release/deps" "$dir/x86_64-unknown-linux-gnu/release/.fingerprint" \
+    "$dir/tmp" "$dir/scripts/deps"
+  printf 'notes\n' >"$dir/NOTES.md"
+  printf 'run\n' >"$dir/scripts/deps/run.sh"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_log "removed (rule idle"
+  expect_absent "$dir/debug"
+  expect_absent "$dir/ci"
+  expect_absent "$dir/x86_64-unknown-linux-gnu"
+  expect_absent "$dir/.rustc_info.json"
+  expect_absent "$dir/CACHEDIR.TAG"
+  expect_present "$dir/NOTES.md"
+  expect_present "$dir/scripts/deps/run.sh"
+  expect_present "$dir/tmp"
+  expect_no_marker
+  finish
+}
+
+case_direct_target_failed_move_kept() {
+  begin direct-target-failed-move-kept
+  make_target "$work/crew-target"
+  make_target "$work/other/target"
+  age "$work" "$three_days_ago"
+  chmod a-w -- "$work/crew-target"
+  run_prune --full
+  expect_status 0
+  expect_log "kept (moving cargo's output out for the delete failed"
+  expect_present "$work/crew-target/debug/deps/libcrate.rlib"
+  expect_absent "$work/other/target"
+  expect_no_marker
+  finish
+}
+
+case_direct_target_emptied_removed() {
+  begin direct-target-emptied-removed
+  make_target "$work/crew-target"
+  age "$work" "$three_days_ago"
+  run_prune --full
+  expect_status 0
+  expect_absent "$work/crew-target"
+  finish
+}
+
 case_idle_target_removed
 case_recent_target_kept
 case_unmarked_directory_kept
@@ -230,6 +307,10 @@ case_working_directory_kept
 case_mapped_binary_kept
 case_failed_delete_skipped
 case_failed_rename_skipped
+case_foreign_cache_tag_kept
+case_direct_target_keeps_crew_files
+case_direct_target_emptied_removed
+case_direct_target_failed_move_kept
 
 if (( failures )); then
   printf '%s failed\n' "$failures"

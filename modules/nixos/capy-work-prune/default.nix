@@ -4,10 +4,11 @@
 # target directories from finished crews.
 #
 # A target directory counts whether it is a checkout's target/ or a top-level
-# directory that is one itself, and it is recognised by cargo's own marks
-# (CACHEDIR.TAG, .rustc_info.json, or deps/ beside .fingerprint/ in a profile
-# directory), never by its name: a checkout that ships a release/ directory of
-# packaging scripts is source. Nothing is removed while a process has it as its
+# directory that is one itself, and it is recognised by cargo's own marks (the
+# CACHEDIR.TAG cargo writes, .rustc_info.json, or deps/ beside .fingerprint/ in
+# a profile directory), never by its name: a checkout that ships a release/
+# directory of packaging scripts is source. Of a top-level directory only
+# cargo's output is removed, never what else a crew put in it. Nothing is removed while a process has it as its
 # working directory, holds a file in it open, has one of its files mapped, or
 # while cargo holds its build locks in it, and nothing is removed until the
 # newest write anywhere under it is older than the idle window. On top of that each crew is capped by name (`CRU-334` and

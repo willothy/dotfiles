@@ -3,11 +3,14 @@
 # Cargo leaves evidence of its own in a target directory, and this goes by that
 # evidence rather than by names, which lie: a checkout that ships a release/
 # directory of packaging scripts is source, not build output. A directory is a
-# target directory when it holds CACHEDIR.TAG or .rustc_info.json, or when a
-# profile directory inside it holds both deps/ and .fingerprint/, and only then
-# is the directory itself the thing that gets removed. Both shapes count: a
-# checkout's target/ and a top-level directory that is a target directory
-# itself.
+# target directory when it holds the CACHEDIR.TAG cargo writes (other tools
+# write that file too, so its text has to name cargo) or .rustc_info.json, or
+# when a profile directory inside it holds both deps/ and .fingerprint/. Both
+# shapes count: a checkout's target/, which is cargo's alone and is removed
+# whole, and a top-level directory that cargo was pointed at directly. That one
+# may also hold things a crew put there, so only cargo's output in it is
+# removed: its profile directories, the ones a build for an explicit --target
+# puts one level down, and the tag and .rustc_info.json.
 #
 # Two things must hold before one is removed. Nothing may be using it: no
 # process may have a path under it as its working directory, open, or mapped,
@@ -231,15 +234,107 @@ activity_age() {
 # called.
 is_target_dir() {
   local dir=$1 profile
-  if [[ -f $dir/CACHEDIR.TAG || -f $dir/.rustc_info.json ]]; then
+  if is_cargo_tag "$dir/CACHEDIR.TAG" || [[ -f $dir/.rustc_info.json ]]; then
     return 0
   fi
   for profile in debug release; do
-    if [[ -d $dir/$profile/deps && -d $dir/$profile/.fingerprint ]]; then
+    if is_profile_dir "$dir/$profile"; then
       return 0
     fi
   done
   return 1
+}
+
+# Whether a file is the cache directory tag cargo writes. The tag's signature
+# line is the convention's and every tool's, so the line naming cargo is what
+# tells cargo's apart from a virtualenv's or a test cache's.
+is_cargo_tag() {
+  [[ -f $1 ]] && grep -qxF -- '# This file is a cache directory tag created by cargo.' "$1"
+}
+
+# Whether a directory is one cargo builds a profile into, whatever the profile
+# is called.
+is_profile_dir() {
+  [[ -d $1/deps && -d $1/.fingerprint && ! -L $1 ]]
+}
+
+# Whether a path is a top-level entry of the work directory that cargo was
+# pointed at directly, as opposed to a checkout's target/ or a marked delete.
+is_direct_target() {
+  local relative=${1#"$work_dir"/}
+  [[ $relative != */* && ! $relative =~ \.pruning\.[0-9.]+$ ]]
+}
+
+# The parts of a directory cargo was pointed at directly that are cargo's own,
+# relative to it and NUL-terminated: each profile directory, each one a level
+# down where a build for an explicit --target puts it, then .rustc_info.json
+# and cargo's tag last, so a delete interrupted partway leaves the marks on
+# whatever is still there. Anything else in the directory is not listed.
+cargo_output() {
+  local dir=$1 child grandchild
+  for child in "$dir"/*; do
+    [[ -d $child && ! -L $child ]] || continue
+    if is_profile_dir "$child"; then
+      printf '%s\0' "${child##*/}"
+      continue
+    fi
+    for grandchild in "$child"/*; do
+      if is_profile_dir "$grandchild"; then
+        printf '%s\0' "${child##*/}/${grandchild##*/}"
+      fi
+    done
+  done
+  if [[ -f $dir/.rustc_info.json && ! -L $dir/.rustc_info.json ]]; then
+    printf '%s\0' .rustc_info.json
+  fi
+  if is_cargo_tag "$dir/CACHEDIR.TAG" && [[ ! -L $dir/CACHEDIR.TAG ]]; then
+    printf '%s\0' CACHEDIR.TAG
+  fi
+}
+
+# KiB that removing a target directory gives back: all of it, or for one cargo
+# was pointed at directly, only cargo's output in it.
+target_kib() {
+  local path=$1 used
+  local -a items
+  if ! is_direct_target "$path"; then
+    disk_kib "$path"
+    return
+  fi
+  mapfile -d '' items < <(cargo_output "$path")
+  if (( ${#items[@]} == 0 )); then
+    printf '0\n'
+    return 0
+  fi
+  read -r used _ < <(du -skc -- "${items[@]/#/$path/}" | tail -n 1)
+  [[ $used =~ ^[0-9]+$ ]] || return 1
+  printf '%s\n' "$used"
+}
+
+# Moves cargo's output out of a directory cargo was pointed at directly into a
+# new marked directory beside it, each item keeping its place relative to the
+# directory, and removes the directories that this leaves empty. Fails when
+# anything could not be moved; what was moved is in the marked directory either
+# way, and is cargo's alone.
+stage_cargo_output() {
+  local dir=$1 doomed=$2 item parent status=0
+  local -a items
+  mapfile -d '' items < <(cargo_output "$dir")
+  mkdir -- "$doomed" || return 1
+  for item in "${items[@]}"; do
+    parent=$(dirname -- "$item")
+    if ! mkdir -p -- "$doomed/$parent" || ! mv -T -- "$dir/$item" "$doomed/$item"; then
+      status=1
+      continue
+    fi
+    # Only a --target directory whose last profile just left is empty here, and
+    # one that could not be removed costs nothing.
+    if [[ $parent != . ]]; then
+      rmdir --ignore-fail-on-non-empty -- "$dir/$parent" || true
+    fi
+  done
+  rmdir --ignore-fail-on-non-empty -- "$dir" || true
+  return "$status"
 }
 
 # The crew a work directory entry belongs to: its name, lowercased, without the
@@ -266,7 +361,7 @@ add_target() {
   [[ -n ${seen_paths[$path]:-} ]] && return 0
   seen_paths["$path"]=1
   age=$(activity_age "$path") || return 0
-  size=$(disk_kib "$path") || {
+  size=$(target_kib "$path") || {
     log "skipped (cannot measure) $path"
     return 0
   }
@@ -342,6 +437,7 @@ is_target_path() {
 prune_target() {
   local index=$1 rule=$2
   local path=${target_dirs[$index]} size=${target_kibs[$index]} reason doomed status=0
+  local staged=1 deleted=1 left kib measured what=$path
   if (( target_removed[index] || target_kept[index] )); then
     return 0
   fi
@@ -373,8 +469,11 @@ prune_target() {
     log "kept (the in-use check failed, status ${status}) $path"
     return 0
   fi
+  if is_direct_target "$path"; then
+    what="cargo's output in $path"
+  fi
   if (( dry_run )); then
-    log "would remove (rule ${rule}, $(size_text "$size")) $path"
+    log "would remove (rule ${rule}, $(size_text "$size")) $what"
   else
     # Renamed before it is deleted, so a build that starts during the delete
     # finds a missing directory instead of losing files one at a time. The
@@ -382,11 +481,16 @@ prune_target() {
     # off other devices; a bind mount of the same filesystem is the one case it
     # cannot see. A path that already carries a marker was left by an
     # interrupted delete, so it is deleted as it stands instead of collecting
-    # another one. Either step failing is this entry's problem and not the
+    # another one. A directory cargo was pointed at directly keeps its place
+    # and everything that is not cargo's: only cargo's output moves to the
+    # marked directory. Any step failing is this entry's problem and not the
     # run's: it is kept, and a delete that fails partway leaves its marker for
     # the next run to finish.
     doomed=$path
-    if [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
+    if is_direct_target "$path"; then
+      doomed="${path}.pruning.$(date +%s).$$"
+      stage_cargo_output "$path" "$doomed" || staged=0
+    elif [[ ! $path =~ \.pruning\.[0-9.]+$ ]]; then
       doomed="${path}.pruning.$(date +%s).$$"
       if ! mv -T -- "$path" "$doomed"; then
         target_kept[index]=1
@@ -394,17 +498,40 @@ prune_target() {
         return 0
       fi
     fi
-    if ! rm -rf --one-file-system --preserve-root -- "$doomed"; then
-      # Whatever the delete did remove is gone, so the budget counts what is
-      # left rather than what was there.
+    if [[ -e $doomed ]] && ! rm -rf --one-file-system --preserve-root -- "$doomed"; then
+      deleted=0
+    fi
+    if (( ! staged || ! deleted )); then
+      # Whatever did go is gone, so the budget counts what is left rather than
+      # what was there, unless what is left cannot be measured.
       target_kept[index]=1
-      if size=$(disk_kib "$doomed"); then
-        target_kibs[index]=$size
+      left=0
+      measured=1
+      if [[ -e $doomed ]]; then
+        if kib=$(disk_kib "$doomed"); then
+          left=$((left + kib))
+        else
+          measured=0
+        fi
       fi
-      log "kept (the delete failed, $(size_text "${target_kibs[index]}") left in $doomed) $path"
+      if [[ $doomed != "$path" && -d $path ]] && is_direct_target "$path"; then
+        if kib=$(target_kib "$path"); then
+          left=$((left + kib))
+        else
+          measured=0
+        fi
+      fi
+      if (( measured )); then
+        target_kibs[index]=$left
+      fi
+      if (( ! staged )); then
+        log "kept (moving cargo's output out for the delete failed, $(size_text "${target_kibs[index]}") left) $path"
+      else
+        log "kept (the delete failed, $(size_text "${target_kibs[index]}") left in $doomed) $path"
+      fi
       return 0
     fi
-    log "removed (rule ${rule}, $(size_text "$size")) $path"
+    log "removed (rule ${rule}, $(size_text "$size")) $what"
   fi
   target_removed[index]=1
   removed_count=$((removed_count + 1))
