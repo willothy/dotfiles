@@ -238,7 +238,7 @@ activity_age() {
 # called.
 is_target_dir() {
   local dir=$1 profile
-  if is_cargo_tag "$dir/CACHEDIR.TAG" || [[ -f $dir/.rustc_info.json ]]; then
+  if is_cargo_tag "$dir/CACHEDIR.TAG" || [[ -f $dir/.rustc_info.json && ! -L $dir/.rustc_info.json ]]; then
     return 0
   fi
   for profile in debug release; do

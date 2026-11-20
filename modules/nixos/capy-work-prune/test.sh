@@ -256,10 +256,15 @@ case_symlinked_cargo_tag_kept() {
   printf '%s\n' "$cargo_tag" >"$root/$case_name/elsewhere/CACHEDIR.TAG"
   ln -s -- "$root/$case_name/elsewhere/CACHEDIR.TAG" "$work/crew/target/CACHEDIR.TAG"
   printf 'keep\n' >"$work/crew/target/keep.txt"
+  printf '{}\n' >"$root/$case_name/elsewhere/rustc_info.json"
+  mkdir -p -- "$work/other/target"
+  ln -s -- "$root/$case_name/elsewhere/rustc_info.json" "$work/other/target/.rustc_info.json"
+  printf 'keep\n' >"$work/other/target/keep.txt"
   age "$work" "$three_days_ago"
   run_prune --full
   expect_status 0
   expect_present "$work/crew/target/keep.txt"
+  expect_present "$work/other/target/keep.txt"
   expect_log "found 0 target directories"
   finish
 }
