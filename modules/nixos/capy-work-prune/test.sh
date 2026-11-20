@@ -471,6 +471,27 @@ case_record_without_marker_dropped() {
   finish
 }
 
+case_top_level_record_without_marker_dropped() {
+  local marker
+  begin top-level-record-without-marker-dropped
+  # A run cut short between recording the marker for a top-level entry and
+  # creating it.
+  make_target "$work/crew-target"
+  marker=$work/crew-target.pruning.1700000000.42
+  mkdir -p -- "$state"
+  printf '%s\0' "$marker" >"$state/staged"
+  run_prune --full
+  expect_status 0
+  expect_present "$work/crew-target/debug/deps/libcrate.rlib"
+  if grep -qF -- "ignored (not a marker" <<<"$output"; then
+    fail "the record of $marker was taken for a damaged one; output:"$'\n'"$output"
+  fi
+  if [[ -s $state/staged ]]; then
+    fail "$state/staged still records $marker"
+  fi
+  finish
+}
+
 case_record_of_file_dropped() {
   local marker
   begin record-of-file-dropped
@@ -520,6 +541,7 @@ case_deleting_needs_state_dir
 case_damaged_record_ignored
 case_record_without_marker_dropped
 case_record_of_file_dropped
+case_top_level_record_without_marker_dropped
 
 if (( failures )); then
   printf '%s failed\n' "$failures"
