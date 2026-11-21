@@ -42,7 +42,8 @@ in
     # cloud-hypervisor's build peaked 349 MiB short of 8 GiB in a VM of
     # 8 vCPUs (crucible CRU-118); 11 GiB left 3.7 GiB free at 6 vCPUs.
     count = 3;
-    reservedForMain = 1;
+    # Every VM is branch capacity: main's jobs run on ci-1 alone.
+    reservedForMain = 0;
     url = "https://github.com/willothy/crucible";
     kvmModule = "kvm-amd";
     tokenFile = config.sops.secrets.crucible-runner-token.path;
@@ -68,9 +69,14 @@ in
     network = {
       address = "10.77.0.0";
       # Public resolvers: the LAN's own resolver is out of the VMs' reach.
+      # Three providers, as on crucible's CI boxes, so one that stops
+      # answering is not every lookup; Quad9's unfiltered address, so every
+      # server gives the same answers.
       nameservers = [
         "1.1.1.1"
         "8.8.8.8"
+        "9.9.9.10"
+        "1.0.0.1"
       ];
       # No job a branch triggers reaches the LAN, the tailnet, or this host.
       isolate = true;
