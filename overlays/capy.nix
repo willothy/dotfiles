@@ -5,7 +5,7 @@ final: prev: {
 
       src = prev.fetchurl {
         url = "https://capy.ai/download/linux/x64/appimage";
-        hash = "sha256-/qKrQXNQZ+WVRDQToyBdDsj4ma3gNh1vV2KPguzUsck=";
+        hash = "sha256-ZF5GynY+IqNVe9Yy3le7PrPQiCvtT2i3BXgq0aY+ceI=";
       };
 
       appimageContents = prev.appimageTools.extractType2 {
