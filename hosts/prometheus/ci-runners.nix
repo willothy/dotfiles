@@ -42,7 +42,8 @@ in
     # cloud-hypervisor's build peaked 349 MiB short of 8 GiB in a VM of
     # 8 vCPUs (crucible CRU-118); 11 GiB left 3.7 GiB free at 6 vCPUs.
     count = 3;
-    reservedForMain = 1;
+    # Every VM is branch capacity: main's jobs run on ci-1 alone.
+    reservedForMain = 0;
     url = "https://github.com/willothy/crucible";
     kvmModule = "kvm-amd";
     tokenFile = config.sops.secrets.crucible-runner-token.path;
