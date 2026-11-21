@@ -69,9 +69,14 @@ in
     network = {
       address = "10.77.0.0";
       # Public resolvers: the LAN's own resolver is out of the VMs' reach.
+      # Three providers, as on crucible's CI boxes, so one that stops
+      # answering is not every lookup; Quad9's unfiltered address, so every
+      # server gives the same answers.
       nameservers = [
         "1.1.1.1"
         "8.8.8.8"
+        "9.9.9.10"
+        "1.0.0.1"
       ];
       # No job a branch triggers reaches the LAN, the tailnet, or this host.
       isolate = true;
