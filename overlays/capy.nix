@@ -1,7 +1,7 @@
 final: prev: {
   capy =
     let
-      version = "0.8.0";
+      version = "0.9.2";
 
       src = prev.fetchurl {
         url = "https://capy.ai/download/linux/x64/appimage";
