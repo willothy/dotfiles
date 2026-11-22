@@ -63,8 +63,13 @@ in
       cacheTrimPercent = 80;
       scratchSize = 16384;
     };
-    # Google's mirror of Docker Hub, which serves the tests' images without
-    # Docker Hub's limit on anonymous pulls from this one home address.
+    # The tests' Docker Hub images from a cache on this host first, which
+    # fetches outside the VMs' NAT and keeps serving the images it holds
+    # while the home connection or Docker Hub is out: 10 GiB at most, under
+    # /var/lib/crucible-ci-docker-hub-cache. Then Google's mirror of Docker
+    # Hub, which serves them without Docker Hub's limit on anonymous pulls
+    # from this one home address.
+    dockerHubCache.enable = true;
     dockerHubMirrors = [ "mirror.gcr.io" ];
     network = {
       address = "10.77.0.0";
