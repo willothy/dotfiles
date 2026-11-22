@@ -76,11 +76,11 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1795345192,
-        "narHash": "sha256-hJoQ2bwoi7FYefFz8vrph0kD+3NnnQF8O6KhbMsHSSY=",
+        "lastModified": 1795365994,
+        "narHash": "sha256-Hb3apgToxyo3bPMvxJfhp0Fs4x8qEK0ku3rilIjN5YY=",
         "ref": "refs/heads/main",
-        "rev": "06d5469362ee2bbbd94c17d3d050f20eaa9ce239",
-        "revCount": 2083,
+        "rev": "7228fd9ed0cfa7a0977da5ab797f8db0826fd82e",
+        "revCount": 2111,
         "type": "git",
         "url": "ssh://git@github.com/willothy/crucible"
       },
