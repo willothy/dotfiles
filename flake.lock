@@ -20,16 +20,16 @@
     "cloud-hypervisor": {
       "flake": false,
       "locked": {
-        "lastModified": 1795259287,
-        "narHash": "sha256-ymn0/z+8QRXjZsGkTN+i7iAcIa5GywWOky24nTXiIRI=",
+        "lastModified": 1795383315,
+        "narHash": "sha256-RjtRfL4Am8N/4yO0o/I788E2NFmCj0b6zJkr3Lf8kQA=",
         "owner": "willothy",
         "repo": "cloud-hypervisor",
-        "rev": "8b22f71a87302fa3798f07d8eee8ac2888a1c81c",
+        "rev": "24f29cb789640428a39aa3aa76035b58c9d46bbe",
         "type": "github"
       },
       "original": {
         "owner": "willothy",
-        "ref": "8b22f71a8",
+        "ref": "24f29cb78",
         "repo": "cloud-hypervisor",
         "type": "github"
       }
@@ -76,11 +76,11 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1795365994,
-        "narHash": "sha256-Hb3apgToxyo3bPMvxJfhp0Fs4x8qEK0ku3rilIjN5YY=",
+        "lastModified": 1795428896,
+        "narHash": "sha256-gPmMyaQH5YVaItmxxpZyn2jNY1OED9c0gsfSQI0xTs0=",
         "ref": "refs/heads/main",
-        "rev": "7228fd9ed0cfa7a0977da5ab797f8db0826fd82e",
-        "revCount": 2111,
+        "rev": "d03ca49cb78621d199a632724acebcd8d385601e",
+        "revCount": 2152,
         "type": "git",
         "url": "ssh://git@github.com/willothy/crucible"
       },
