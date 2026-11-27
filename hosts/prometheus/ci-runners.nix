@@ -36,12 +36,12 @@ in
   };
 
   services.crucible-ci-runner-vms = {
-    # Three VMs of 5 vCPUs and 11 GiB: 15 vCPUs of the 16 threads, and 33
-    # GiB of memory, under the slice's cap with cloud-hypervisor's and
-    # virtiofsd's own. A guest's own Nix runs a compiler per vCPU, and
-    # cloud-hypervisor's build peaked 349 MiB short of 8 GiB in a VM of
-    # 8 vCPUs (crucible CRU-118); 11 GiB left 3.7 GiB free at 6 vCPUs.
-    count = 3;
+    # Four VMs of 4 vCPUs and 8 GiB, the shape of crucible's CI boxes' VMs:
+    # 16 vCPUs of the 16 threads, and 32 GiB of memory, under the slice's
+    # cap with QEMU's and virtiofsd's own. A guest's own Nix runs a compiler
+    # per vCPU; at 4 vCPUs and 8 GiB, a job on crucible's CI boxes has
+    # peaked at 6.1 GiB.
+    count = 4;
     # Every VM is branch capacity: main's jobs run on ci-1 alone.
     reservedForMain = 0;
     url = "https://github.com/willothy/crucible";
@@ -53,10 +53,10 @@ in
       # and memory, on a store volume of its own; this host's store reaches
       # it read-only, as its first substituter.
       nix = "guest";
-      vcpu = 5;
-      memory = 11264;
-      # Three cache volumes of 32 GiB, three store volumes of 32 GiB, and
-      # three scratch volumes of 16 GiB: 240 GiB at most, in sparse images,
+      vcpu = 4;
+      memory = 8192;
+      # Four cache volumes of 32 GiB, four store volumes of 32 GiB, and
+      # four scratch volumes of 16 GiB: 320 GiB at most, in sparse images,
       # on the disk this host's own files share.
       cacheSize = 32768;
       nixStoreSize = 32768;
